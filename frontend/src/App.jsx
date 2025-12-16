@@ -1,39 +1,64 @@
-// frontend/src/App.jsx (Final Update for Auth)
-
-import React from 'react'; 
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import TourList from './components/TourList';
-import Protected from './components/Protected'; // <-- NEW IMPORT
-import './App.css'; 
 
-// Import all pages
-import AdminDashboard from './pages/AdminDashboard'; // <-- UNCOMMENTED THIS
-import LoginPage from './pages/LoginPage'; 
-// import RegisterPage from './pages/RegisterPage'; 
+// Layout Components
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
+
+// Public Pages
+import Home from './pages/Home';
+import LoginPage from './pages/LoginPage';
+import DestinationsPage from './pages/DestinationsPage';
+import Gallery from './pages/Gallery';
+import Contact from './pages/Contact';
+
+// User Portal Pages
+import MyBookings from './pages/MyBookings';
+
+// Admin Pages
+import AdminDashboard from './pages/AdminDashboard';
+import Protected from './components/Protected';
+
+// Styling
+import './App.css';
 
 function App() {
   return (
     <Router>
-        <div className="App">
-            <Routes>
-                {/* Public Route: The main tour list */}
-                <Route path="/" element={<TourList />} /> 
+      <Routes>
+        {/* Main layout routes */}
+        <Route path="/*" element={
+          <div className="main-wrapper">
+            <Navbar />
+            <div className="content-area">
+              <Routes>
+                {/* --- Public Routes --- */}
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/destinations" element={<DestinationsPage />} />
+                <Route path="/gallery" element={<Gallery />} />
+                <Route path="/contact" element={<Contact />} />
                 
-                {/* Public Route for Authentication */}
-                <Route path="/login" element={<LoginPage />} /> 
-                {/* <Route path="/register" element={<RegisterPage />} /> */}
-
-                {/* PROTECTED ROUTE */}
-                <Route 
-                    path="/admin" 
-                    element={
-                        <Protected> {/* <-- WRAP THE COMPONENT */}
-                            <AdminDashboard />
-                        </Protected>
-                    } 
-                />
-            </Routes>
-        </div>
+                {/* --- User Portal Routes --- */}
+                <Route path="/my-bookings" element={<MyBookings />} />
+              </Routes>
+            </div>
+            <Footer />
+          </div>
+        } />
+        
+        {/* Admin Route - Full Screen Layout */}
+        <Route
+          path="/admin/*"
+          element={
+            <Protected>
+              <div className="admin-layout-wrapper">
+                <AdminDashboard />
+              </div>
+            </Protected>
+          }
+        />
+      </Routes>
     </Router>
   );
 }

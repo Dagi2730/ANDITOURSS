@@ -1,15 +1,27 @@
-// backend/routes/tourRoutes.js (Full Content)
+// backend/routes/tourRoutes.js (FULL CRUD ROUTING)
 
 import express from 'express';
 const router = express.Router();
-import { protect } from '../middleware/authMiddleware.js'; 
-import { getTours, createTour } from '../controllers/tourController.js'; 
+import { 
+    getTours, 
+    getTourById,
+    createTour,
+    updateTour,
+    deleteTour 
+} from '../controllers/tourController.js';
+import { protect } from '../middleware/authMiddleware.js';
 
-// Route for /api/tours 
+
+// Route for GET all tours (Public) and POST a new tour (Private)
 router.route('/')
-    .get(getTours)                  // GET /api/tours (Public)
-    .post(protect, createTour);    // POST /api/tours (Admin/Private)
+    .get(getTours)
+    .post(protect, createTour); // Requires login (protect)
 
-// We will skip the :id routes for now.
+// Routes for single tour operations: GET by ID, PUT/UPDATE, DELETE
+router.route('/:id')
+    .get(getTourById) // Public access to view a single tour
+    .put(protect, updateTour) // Requires login (protect)
+    .delete(protect, deleteTour); // Requires login (protect)
+
 
 export default router;

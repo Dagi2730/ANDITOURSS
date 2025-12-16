@@ -1,33 +1,589 @@
-/* frontend/src/App.css */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700;800&display=swap');
 
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* 1. COMPLETE RESET - Remove ALL margins and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* Add some basic styles for the tours we created in TourList.jsx */
-.tour-list h1 {
-    margin-bottom: 2rem;
-    color: #4CAF50; /* A nice green */
+html, body, #root {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-color: #000;
+    font-family: 'Raleway', sans-serif;
 }
 
-.tours-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+/* 2. MAIN WRAPPER - Full screen background */
+.main-wrapper {
+    position: relative;
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    /* Make background cover everything including navbar and footer area */
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        url('./assets/images/lalibela.jpg') no-repeat center center fixed;
+    background-size: cover;
+    background-attachment: fixed;
 }
 
-.tour-card {
-    border: 1px solid #ddd;
+/* 3. NAVBAR - Transparent with glass effect */
+.navbar-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    padding: 1.5rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 2000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slideDown 0.8s ease-out;
+}
+
+.logo-text {
+    font-family: 'Raleway', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: white;
+    text-decoration: none;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+}
+
+.logo-text:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 15px;
+}
+
+.nav-item {
+    background-color: #556B2F;
+    color: white !important;
+    padding: 10px 22px;
     border-radius: 8px;
-    padding: 15px;
-    text-align: left;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    font-weight: 600;
+    font-family: 'Raleway', sans-serif;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    animation: fadeInUp 0.8s ease-out backwards;
 }
 
-.tour-card img {
+.nav-item:hover {
+    background-color: #6B8E23;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Set animation delays for nav items */
+.nav-links li:nth-child(1) .nav-item { animation-delay: 0.1s; }
+.nav-links li:nth-child(2) .nav-item { animation-delay: 0.2s; }
+.nav-links li:nth-child(3) .nav-item { animation-delay: 0.3s; }
+.nav-links li:nth-child(4) .nav-item { animation-delay: 0.4s; }
+.nav-links li:nth-child(5) .nav-item { animation-delay: 0.5s; }
+
+/* 4. HERO SECTION - CENTERED with clean animations */
+.home-hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    min-height: 100vh;
+    padding: 0 5%;
+    text-align: center;
+    width: 100%;
+    position: relative;
+}
+
+/* Main title with line break */
+.home-hero h1 {
+    font-family: 'Raleway', sans-serif;
+    font-size: clamp(3rem, 9vw, 5rem);
+    font-weight: 800;
+    margin-bottom: 30px;
+    line-height: 1.1;
+    text-shadow: 2px 2px 15px rgba(0,0,0,0.7);
+    color: white;
+    width: 100%;
+    max-width: 900px;
+    animation: fadeInScale 1s ease-out 0.3s backwards;
+}
+
+/* Ethiopia text styling - SIMPLE VERSION */
+.home-hero h1 span {
+    display: inline-block;
+    margin-top: 10px;
+    color: #fff;
+    text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
+    /* Removed gradient text effect */
+}
+
+/* Subtitle with line break */
+.hero-subtitle {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    margin-bottom: 50px;
+    max-width: 700px;
+    line-height: 1.7;
+    text-shadow: 1px 1px 8px rgba(0,0,0,0.6);
+    opacity: 0;
+    animation: fadeInUp 1s ease-out 0.8s forwards;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+}
+
+/* Hero button with clean animation */
+.hero-btn {
+    background: linear-gradient(145deg, #556B2F, #6B8E23);
+    color: white;
+    padding: 20px 60px;
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    transition: all 0.4s ease;
+    font-family: 'Raleway', sans-serif;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeInUp 1s ease-out 1.2s forwards;
+    transform: translateY(20px);
+}
+
+/* Button hover effects - NO BOUNCING */
+.hero-btn:hover {
+    background: linear-gradient(145deg, #6B8E23, #556B2F);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(107, 142, 35, 0.4);
+    letter-spacing: 1.5px;
+}
+
+.hero-btn:active {
+    transform: translateY(-2px);
+}
+
+/* 5. GLASS EFFECT FOOTER - Same style as navbar */
+.footer {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 3rem 10% 2rem 10%;
+    width: 100vw;
+    color: white;
+    margin-top: auto;
+    font-family: 'Raleway', sans-serif;
+    position: relative;
+    z-index: 100;
+    animation: fadeIn 1s ease-out 1.5s backwards;
+}
+
+.footer .box-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 60px;
+    max-width: 1200px;
+    margin: 0 auto 2.5rem auto;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer .box {
+    flex: 1;
+    min-width: 250px;
+    animation: fadeInLeft 0.8s ease-out backwards;
+}
+
+.footer .box:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.footer .box h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+    font-family: 'Raleway', sans-serif;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.footer .box p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    font-weight: 400;
+}
+
+.footer .box a {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    line-height: 1.6;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    font-weight: 400;
+    position: relative;
+    padding-left: 0;
+}
+
+.footer .box a:hover {
+    color: #6B8E23;
+    padding-left: 10px;
+}
+
+.footer .credit {
+    text-align: center;
+    padding-top: 1.5rem;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+    animation: fadeIn 1s ease-out 0.5s backwards;
+}
+
+.footer .credit span {
+    color: #6B8E23;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    position: relative;
+}
+
+.footer .credit span::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: #6B8E23;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+}
+
+.footer .credit span:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* 6. CLEAN ANIMATIONS (removed glow and ripple) */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Removed glow, ripple, and float animations */
+
+/* 7. RESPONSIVE DESIGN */
+@media (max-width: 992px) {
+    .navbar-custom {
+        padding: 1.2rem 5%;
+    }
+    
+    .logo-text {
+        font-size: 1.8rem;
+    }
+    
+    .nav-links {
+        gap: 10px;
+    }
+    
+    .nav-item {
+        padding: 8px 18px;
+        font-size: 0.9rem;
+    }
+    
+    .home-hero h1 {
+        font-size: clamp(2.5rem, 7vw, 4rem);
+    }
+    
+    .hero-subtitle {
+        font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+        margin-bottom: 40px;
+    }
+    
+    .hero-btn {
+        padding: 18px 50px;
+        font-size: 1.2rem;
+    }
+    
+    .footer {
+        padding: 2.5rem 5% 1.5rem 5%;
+    }
+    
+    .footer .box-container {
+        gap: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-custom {
+        flex-direction: column;
+        gap: 15px;
+        padding: 1rem 5%;
+    }
+    
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .nav-item {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+
+    /* Specific styling for the Book Now CTA */
+.book-now-btn {
+    background-color: #6B8E23 !important; /* Slightly lighter olive to pop */
+    border: 2px solid white !important;
+    font-weight: 800 !important;
+}
+
+.book-now-btn:hover {
+    background-color: white !important;
+    color: #556B2F !important;
+}
+
+/* dropdown styling for My Account and Destinations */
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    z-index: 1;
+    list-style: none;
+    padding: 10px 0;
     border-radius: 4px;
-    margin-bottom: 10px;
+}
+
+.nav-dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu a, .logout-btn-dropdown {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 0.9rem;
+}
+
+.logout-btn-dropdown {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Raleway', sans-serif;
+}
+
+.dropdown-menu a:hover, .logout-btn-dropdown:hover {
+    background-color: #556B2F;
+}
+    
+    .home-hero h1 {
+        font-size: clamp(2rem, 6vw, 3rem);
+        margin-bottom: 20px;
+    }
+    
+    .hero-subtitle {
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        margin-bottom: 30px;
+        padding: 0 10px;
+    }
+    
+    .hero-btn {
+        padding: 15px 40px;
+        font-size: 1.1rem;
+    }
+    
+    .footer .box-container {
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .footer .box {
+        min-width: 100%;
+        text-align: center;
+    }
+    
+    .footer .box a:hover {
+        padding-left: 0;
+        transform: scale(1.05);
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-text {
+        font-size: 1.6rem;
+        letter-spacing: 1px;
+    }
+    
+    .home-hero h1 {
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+    
+    .hero-btn {
+        padding: 12px 35px;
+        font-size: 1rem;
+    }
+    
+    .footer {
+        padding: 2rem 5% 1rem 5%;
+    }
+    
+    .footer .box h3 {
+        font-size: 1.2rem;
+    }
+    
+    .footer .box p,
+    .footer .box a {
+        font-size: 0.9rem;
+    }
+}
+
+/* 8. SCROLLBAR STYLING */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #556B2F, #6B8E23);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #6B8E23, #556B2F);
+}
+
+/* 9. FIX WHITE SPACES */
+body {
+    overflow-x: hidden;
+    width: 100vw;
+}
+
+/* Ensure all sections take full width */
+section, div, footer, header, nav {
+    max-width: 100vw !important;
+}
+
+/* Remove any potential horizontal scroll */
+* {
+    max-width: 100vw;
+}
+
+html {
+    overflow-x: hidden;
+}
+
+/* 10. FOCUS STATES */
+.nav-item:focus,
+.hero-btn:focus,
+.logo-text:focus,
+.footer a:focus {
+    outline: 2px solid #6B8E23;
+    outline-offset: 3px;
+    box-shadow: 0 0 15px rgba(107, 142, 35, 0.5);
 }
