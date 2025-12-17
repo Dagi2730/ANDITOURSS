@@ -174,7 +174,7 @@ function AdminOrders() {
               
               <div className="card-actions">
                 <button className="btn-print" onClick={() => window.print()}>Print Invoice</button>
-                <button className="btn-close" onClick={() => setSelectedOrder(null)}></button>
+                <button className="btn-close" onClick={() => setSelectedOrder(null)}>Close</button>
               </div>
             </div>
           </div>

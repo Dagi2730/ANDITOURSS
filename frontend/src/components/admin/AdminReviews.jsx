@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 function AdminReviews() {
   const [reviews, setReviews] = useState([
@@ -67,7 +67,22 @@ function AdminReviews() {
   const [showDetailsCard, setShowDetailsCard] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(null);
   const [replyText, setReplyText] = useState('');
-  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const dropdownRefs = useRef({});
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (activeDropdown !== null) {
+        const ref = dropdownRefs.current[activeDropdown];
+        if (ref && !ref.contains(event.target)) {
+          setActiveDropdown(null);
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeDropdown]);
 
   const handleView = (review) => {
     setSelectedReview(review);
@@ -76,16 +91,18 @@ function AdminReviews() {
 
   const handleDelete = (reviewId, userName) => {
     if (window.confirm(`Are you sure you want to delete review from ${userName}?`)) {
-      setReviews(reviews.filter(review => review.id !== reviewId));
+      setReviews(prevReviews => prevReviews.filter(review => review.id !== reviewId));
       alert(`Review deleted successfully!`);
     }
   };
 
   const handleStatusChange = (reviewId, newStatus) => {
-    setReviews(reviews.map(review => 
-      review.id === reviewId ? { ...review, status: newStatus } : review
-    ));
-    setDropdownOpen(null);
+    setReviews(prevReviews => 
+      prevReviews.map(review => 
+        review.id === reviewId ? { ...review, status: newStatus } : review
+      )
+    );
+    setActiveDropdown(null);
   };
 
   const handleReply = (reviewId, userName) => {
@@ -95,16 +112,14 @@ function AdminReviews() {
 
   const submitReply = (reviewId) => {
     if (replyText.trim()) {
-      setReviews(reviews.map(review => 
-        review.id === reviewId ? { ...review, reply: replyText, status: 'approved' } : review
-      ));
+      setReviews(prevReviews => 
+        prevReviews.map(review => 
+          review.id === reviewId ? { ...review, reply: replyText, status: 'approved' } : review
+        )
+      );
       setShowReplyForm(null);
       setReplyText('');
     }
-  };
-
-  const toggleDropdown = (reviewId) => {
-    setDropdownOpen(dropdownOpen === reviewId ? null : reviewId);
   };
 
   const getRatingStars = (rating) => {
@@ -354,43 +369,31 @@ function AdminReviews() {
                     )}
                   </td>
                   <td>{review.date}</td>
-                  <td>
-                    <div className="status-container">
-                      {getStatusBadge(review.status)}
-                      <div className="dropdown-container">
-                        <button 
-                          className="dropdown-toggle"
-                          onClick={() => toggleDropdown(review.id)}
-                          title="Change Status"
-                        >
-                          ▼
-                        </button>
-                        {dropdownOpen === review.id && (
-                          <div className="dropdown-menu">
-                            <button 
-                              className="dropdown-item"
-                              onClick={() => handleStatusChange(review.id, 'pending')}
-                            >
-                              <span className="status-indicator pending"></span>
-                              Mark as Pending
-                            </button>
-                            <button 
-                              className="dropdown-item"
-                              onClick={() => handleStatusChange(review.id, 'approved')}
-                            >
-                              <span className="status-indicator approved"></span>
-                              Approve Review
-                            </button>
-                            <button 
-                              className="dropdown-item"
-                              onClick={() => handleStatusChange(review.id, 'rejected')}
-                            >
-                              <span className="status-indicator rejected"></span>
-                              Reject Review
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                  <td style={{ overflow: 'visible' }}>
+                    <div className="status-dropdown-container" ref={el => dropdownRefs.current[review.id] = el}>
+                      <button 
+                        className="status-trigger"
+                        onClick={() => setActiveDropdown(activeDropdown === review.id ? null : review.id)}
+                      >
+                        {getStatusBadge(review.status)} <small>▼</small>
+                      </button>
+                      
+                      {activeDropdown === review.id && (
+                        <div className="status-menu">
+                          <button onClick={() => handleStatusChange(review.id, 'pending')}>
+                            <span className="status-indicator pending"></span>
+                            Mark as Pending
+                          </button>
+                          <button onClick={() => handleStatusChange(review.id, 'approved')}>
+                            <span className="status-indicator approved"></span>
+                            Approve Review
+                          </button>
+                          <button onClick={() => handleStatusChange(review.id, 'rejected')}>
+                            <span className="status-indicator rejected"></span>
+                            Reject Review
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td>
@@ -542,11 +545,49 @@ function AdminReviews() {
           color: #4a90e2;
         }
         
-        .status-container {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
+        .status-dropdown-container {
+          display: inline-block;
           position: relative;
+        }
+        
+        .status-trigger {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          background: none;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          padding: 4px 8px;
+          cursor: pointer;
+          font-size: 0.85rem;
+        }
+        
+        .status-menu {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          z-index: 1000;
+          min-width: 150px;
+          margin-top: 5px;
+        }
+        
+        .status-menu button {
+          display: block;
+          width: 100%;
+          padding: 8px 12px;
+          text-align: left;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 0.85rem;
+        }
+        
+        .status-menu button:hover {
+          background: #f5f5f5;
         }
         
         .action-btns {
@@ -713,6 +754,19 @@ function AdminReviews() {
           
           .reviews-table {
             min-width: 600px;
+          }
+          
+          .status-dropdown-container {
+            position: static;
+          }
+          
+          .status-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 300px;
           }
         }
       `}</style>
