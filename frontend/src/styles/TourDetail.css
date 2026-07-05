@@ -1,0 +1,391 @@
+.tour-detail-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.tour-detail-hero {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+}
+
+.tour-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tour-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+  display: flex;
+  align-items: flex-end;
+}
+
+.tour-hero-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  color: white;
+}
+
+.tour-hero-title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.tour-hero-meta {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.tour-price-large {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.tour-duration-large {
+  font-size: 1.2rem;
+}
+
+.tour-detail-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 40px;
+}
+
+.tour-detail-main {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tour-tabs {
+  display: flex;
+  gap: 10px;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 30px;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  color: #556B2F;
+}
+
+.tab-button.active {
+  color: #556B2F;
+  border-bottom-color: #556B2F;
+}
+
+.tab-content {
+  min-height: 300px;
+}
+
+.tab-panel h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.highlights-content,
+.travel-details-content {
+  line-height: 1.8;
+  font-size: 1.1rem;
+  color: #555;
+  background: #faf8f4;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #556B2F;
+}
+
+.itinerary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.itinerary-day-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  border-left: 4px solid #556B2F;
+}
+
+.itinerary-day-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.day-badge {
+  background: #556B2F;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 70px;
+  text-align: center;
+}
+
+.day-title {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.day-description {
+  margin: 0;
+  line-height: 1.7;
+  color: #555;
+  padding-left: 95px;
+}
+
+.no-content {
+  color: #999;
+  font-style: italic;
+  padding: 40px;
+  text-align: center;
+}
+
+.tour-description-section {
+  margin-top: 40px;
+  padding-top: 40px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.tour-description-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.tour-description-section p {
+  line-height: 1.8;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.tour-booking-sidebar {
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+}
+
+.booking-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.booking-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.booking-summary {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.booking-summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+.booking-summary-item span {
+  color: #666;
+}
+
+.booking-summary-item strong {
+  color: #556B2F;
+  font-size: 1.1rem;
+}
+
+.btn-book-now {
+  width: 100%;
+  padding: 15px;
+  background: #556B2F;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-book-now:hover {
+  background: #455a2a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(85, 107, 47, 0.3);
+}
+
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.booking-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.booking-form label {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.booking-form input,
+.booking-form textarea {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+
+.booking-form input:focus,
+.booking-form textarea:focus {
+  outline: none;
+  border-color: #556B2F;
+}
+
+.booking-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-cancel,
+.btn-submit {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.btn-cancel:hover {
+  background: #e0e0e0;
+}
+
+.btn-submit {
+  background: #556B2F;
+  color: white;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #455a2a;
+  transform: translateY(-2px);
+}
+
+.btn-submit:disabled,
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading-container,
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+@media (max-width: 968px) {
+  .tour-detail-content {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-booking-sidebar {
+    position: static;
+  }
+
+  .tour-hero-title {
+    font-size: 2rem;
+  }
+
+  .tour-price-large {
+    font-size: 1.5rem;
+  }
+
+  .day-description {
+    padding-left: 0;
+    margin-top: 10px;
+  }
+
+  .itinerary-day-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .tour-detail-hero {
+    height: 300px;
+  }
+
+  .tour-hero-title {
+    font-size: 1.5rem;
+  }
+
+  .tour-tabs {
+    flex-wrap: wrap;
+  }
+
+  .tab-button {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+

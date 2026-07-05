@@ -1,87 +1,47 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { deleteTour, updateTour } from '../features/tour/tourSlice.js';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-function TourItem({ tour, showActions }) {
-    const dispatch = useDispatch();
+const TourItem = ({ tour }) => {
+  // Define the backend base URL for images
+  const API_URL = import.meta.env.VITE_API_URL || '';
+  const PF = API_URL || "http://localhost:8000";
 
-    // Local state for editing mode
-    const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({
-        title: tour.title,
-        description: tour.description,
-        price: tour.price,
-        duration: tour.duration,
-    });
+  // Hide if inactive
+  if (tour.status === 'inactive' || tour.status === 'Inactive') {
+    return null;
+  }
 
-    const { title, description, price, duration } = formData;
-
-    const onChange = (e) => {
-        setFormData((prevState) => ({
-            ...prevState,
-            [e.target.name]: e.target.value,
-        }));
-    };
-
-    const onDelete = () => {
-        if (window.confirm('Are you sure you want to delete this tour?')) {
-            dispatch(deleteTour(tour._id));
-        }
-    };
-
-    const onUpdateSubmit = (e) => {
-        e.preventDefault();
-        dispatch(updateTour({ id: tour._id, tourData: formData }));
-        setIsEditing(false);
-    };
-
-    // --- EDIT MODE UI ---
-    if (isEditing) {
-        return (
-            <div className='tour-card' style={{ border: '2px solid orange', padding: '15px', margin: '10px' }}>
-                <form onSubmit={onUpdateSubmit}>
-                    <input type="text" name="title" value={title} onChange={onChange} style={{ display: 'block', width: '100%' }} />
-                    <textarea name="description" value={description} onChange={onChange} style={{ display: 'block', width: '100%', margin: '10px 0' }} />
-                    <input type="number" name="price" value={price} onChange={onChange} />
-                    <input type="number" name="duration" value={duration} onChange={onChange} />
-                    
-                    <div style={{ marginTop: '10px' }}>
-                        <button type="submit" className='btn btn-success'>Save Changes</button>
-                        <button type="button" onClick={() => setIsEditing(false)} className='btn'>Cancel</button>
-                    </div>
-                </form>
-            </div>
-        );
-    }
-
-    // --- VIEW MODE UI ---
-    return (
-        <div className='tour-card' style={{ border: '1px solid #ddd', padding: '15px', margin: '10px', borderRadius: '8px' }}>
-            <h3>{tour.title}</h3>
-            <p>{tour.description}</p>
-            <p><strong>Price:</strong> ${tour.price} | <strong>Duration:</strong> {tour.duration} Days</p>
-            
-            {/* If showActions is passed as true from AdminDashboard, buttons WILL show */}
-            {showActions && (
-                <div className='tour-actions' style={{ marginTop: '10px' }}>
-                    <button 
-                        onClick={() => setIsEditing(true)} 
-                        className='btn btn-secondary' 
-                        style={{ marginRight: '10px', backgroundColor: '#6c757d', color: 'white' }}
-                    >
-                        Edit
-                    </button>
-                    <button 
-                        onClick={onDelete} 
-                        className='btn btn-danger' 
-                        style={{ backgroundColor: '#dc3545', color: 'white' }}
-                    >
-                        Delete
-                    </button>
-                </div>
-            )}
+  return (
+    <div className="tour-card">
+      <div className="tour-image">
+        {/* Check if the image is a full URL (like from Unsplash) 
+            or a local path (from your /uploads folder)
+        */}
+        <img 
+          src={
+            tour.imageUrl 
+              ? (tour.imageUrl.startsWith('http') ? tour.imageUrl : PF + tour.imageUrl) 
+              : 'https://via.placeholder.com/400x250?text=Adventure+Awaits'
+          } 
+          alt={tour.name || 'Tour Image'} 
+        />
+        <div className="tour-price">${tour.price}</div>
+      </div>
+      
+      <div className="tour-info">
+        <h3>{tour.name}</h3>
+        <p className="description">
+          {tour.description ? tour.description.substring(0, 100) + '...' : 'No description provided.'}
+        </p>
+        <div className="tour-footer">
+          <span className="duration">⏱ {tour.duration}</span>
+          <Link to={`/tour/${tour._id}`} className="details-btn">
+            View Details
+          </Link>
         </div>
-    );
-}
+      </div>
+    </div>
+  );
+};
 
 export default TourItem;

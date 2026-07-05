@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../features/auth/authSlice';
 
 function Navbar() {
-  // We'll simulate a logged-in user for now. 
-  // Change null to { name: "Dagmawit" } to test the 'My Account' look
-  const [user, setUser] = useState(null); 
+  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    setUser(null);
+  const handleLogout = async () => {
+    await dispatch(logout());
+    setMenuOpen(false);
     navigate('/');
+  };
+
+  const handleAccountClick = () => {
+    setMenuOpen((open) => !open);
   };
 
   return (
@@ -26,13 +33,20 @@ function Navbar() {
           <li><Link to="/login" className="nav-item">Login</Link></li>
         ) : (
           <li className="nav-dropdown">
-            <span className="nav-item account-trigger">
+            <button type="button" className="nav-item account-trigger" onClick={handleAccountClick}>
               My Account ({user.name})
-            </span>
-            <ul className="dropdown-menu">
-              <li><Link to="/my-bookings">My Bookings</Link></li>
-              <li><button onClick={handleLogout} className="logout-btn-dropdown">Logout</button></li>
-            </ul>
+            </button>
+            {menuOpen && (
+              <ul className="dropdown-menu">
+                <li><Link to="/my-bookings" onClick={() => setMenuOpen(false)}>My Bookings</Link></li>
+                {user.role?.toString().toUpperCase() === 'ADMIN' && (
+                  <li><Link to="/admin" onClick={() => setMenuOpen(false)}>Admin Dashboard</Link></li>
+                )}
+                <li>
+                  <button onClick={handleLogout} className="logout-btn-dropdown">Logout</button>
+                </li>
+              </ul>
+            )}
           </li>
         )}
       </ul>

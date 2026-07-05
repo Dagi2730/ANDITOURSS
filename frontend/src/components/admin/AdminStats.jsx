@@ -293,7 +293,7 @@ function AdminStats() {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .admin-stats-wrapper {
           padding: 20px;
         }

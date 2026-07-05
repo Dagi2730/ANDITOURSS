@@ -3,11 +3,9 @@
 import jwt from 'jsonwebtoken';
 
 const generateToken = (id) => {
-    // The id is the user's MongoDB ID
-    // process.env.JWT_SECRET is the key we added to your .env file
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '30d', // Token is valid for 30 days
-    });
+  return jwt.sign({ id }, process.env.JWT_SECRET || 'anditours-local-secret', {
+    expiresIn: '30d',
+  });
 };
 
 export default generateToken;

@@ -1,42 +1,48 @@
-// backend/server.js
-
-// 1. Import necessary modules
 import express from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors'; 
-import connectDB from './config/db.js'; 
+import cors from 'cors';
+import path from 'path';
+import tourRoutes from './routes/tourRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
+import blogRoutes from './routes/blogRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+import errorHandler from './middleware/errorMiddleware.js';
+import connectDB from './config/db.js';
 
-// Import all route files
-import tourRoutes from './routes/tourRoutes.js'; 
-import userRoutes from './routes/userRoutes.js'; // <-- NEW IMPORT
-
-// Load environment variables from .env file
 dotenv.config();
 
-// 2. Initialize the Express app
 const app = express();
-// Ensure you call the connectDB function here, if it wasn't called already
-connectDB(); // Moved here for clarity
-
 const PORT = process.env.PORT || 8000;
 
-// 3. Middlewares
-app.use(cors());
-app.use(express.json()); // Allows server to accept JSON data in the body
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// 4. Basic Route (Test)
+const __dirname = path.resolve();
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+
 app.get('/', (req, res) => {
-    res.send('ANDI TOURS API is running...');
+  res.send('ANDI TOURS API is running...');
 });
 
-// 5. Mount the Route Handlers
-// Tour Routes
 app.use('/api/tours', tourRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/blog', blogRoutes);
+app.use('/api/reviews', reviewRoutes);
 
-// User/Auth Routes
-app.use('/api/users', userRoutes); // <-- NEW LINE TO ACTIVATE USER ROUTES
+app.use(errorHandler);
 
-// 6. Start the server
+connectDB().catch((error) => {
+  console.error('Failed to initialize database connection:', error);
+});
+
 app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });

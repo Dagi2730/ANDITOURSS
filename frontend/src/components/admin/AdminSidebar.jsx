@@ -1,21 +1,28 @@
 import React from 'react';
-import { FaTachometerAlt, FaBox, FaShoppingCart, FaUsers, FaStar, FaSignOutAlt } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
+import { FaTachometerAlt, FaBox, FaShoppingCart, FaUsers, FaStar, FaSignOutAlt, FaImages } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../../features/auth/authSlice';
 
 function AdminSidebar({ activeTab, setActiveTab }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <FaTachometerAlt /> },
     { id: 'packages', label: 'Packages', icon: <FaBox /> },
     { id: 'orders', label: 'Orders', icon: <FaShoppingCart /> },
     { id: 'users', label: 'Users', icon: <FaUsers /> },
+    { id: 'blog', label: 'Stories & Gallery', icon: <FaImages /> },
     { id: 'reviews', label: 'Reviews', icon: <FaStar /> },
   ];
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       // Clear any admin authentication tokens from localStorage/sessionStorage
+      dispatch(logout());
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminUser');
       sessionStorage.removeItem('adminToken');
@@ -65,7 +72,7 @@ function AdminSidebar({ activeTab, setActiveTab }) {
         </button>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .admin-sidebar {
           width: 250px;
           background: white;

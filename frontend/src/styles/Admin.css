@@ -322,12 +322,114 @@
   font-family: inherit;
   background-color: white;
   transition: border-color 0.3s ease;
+  color: #000000 !important; /* Added: Force black text */
 }
 
 .admin-form-control:focus {
   outline: none;
   border-color: var(--admin-olive);
   box-shadow: 0 0 0 3px rgba(85, 107, 47, 0.1);
+}
+
+/* --- Form Modal Styles with Black Text Fix --- */
+.form-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--admin-modal-z);
+  padding: 20px;
+}
+
+.form-modal {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-modal-header {
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--admin-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #faf8f4;
+  border-radius: 12px 12px 0 0;
+}
+
+.form-modal-header h3 {
+  margin: 0;
+  color: var(--admin-brown-dark);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--admin-text);
+  opacity: 0.6;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.close-btn:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.form-modal form {
+  padding: 25px;
+}
+
+/* FIX: Make sure all form inputs in modal have black text */
+.form-modal input,
+.form-modal textarea,
+.form-modal select {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+.form-modal input::placeholder,
+.form-modal textarea::placeholder {
+  color: #666666 !important;
+  opacity: 0.8;
+}
+
+/* Form actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid var(--admin-border);
 }
 
 /* --- Responsive Adjustments --- */
@@ -445,94 +547,6 @@
 
 .admin-main-content::-webkit-scrollbar-thumb:hover {
   background: #c5c5c5;
-}
-
-/* Add these to your existing Admin.css file */
-
-/* Form Modal Styles */
-.form-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: var(--admin-modal-z);
-  padding: 20px;
-}
-
-.form-modal {
-  background: white;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  animation: modalSlideIn 0.3s ease;
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.form-modal-header {
-  padding: 20px 25px;
-  border-bottom: 1px solid var(--admin-border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #faf8f4;
-  border-radius: 12px 12px 0 0;
-}
-
-.form-modal-header h3 {
-  margin: 0;
-  color: var(--admin-brown-dark);
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--admin-text);
-  opacity: 0.6;
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-}
-
-.close-btn:hover {
-  opacity: 1;
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.form-modal form {
-  padding: 25px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 25px;
-  padding-top: 20px;
-  border-top: 1px solid var(--admin-border);
 }
 
 /* Filter Controls */
@@ -1572,4 +1586,33 @@ textarea.admin-form-control {
 .info-group:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* FIX: Ensure all form inputs have black text */
+input, textarea, select {
+  color: #000000 !important;
+}
+
+/* Specifically target form modals */
+.form-modal input,
+.form-modal textarea,
+.form-modal select,
+.package-form-modal input,
+.package-form-modal textarea,
+.package-form-modal select {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Make sure placeholders are visible too */
+::placeholder {
+  color: #666666 !important;
+  opacity: 0.7 !important;
+}
+
+/* Ensure all admin form controls have proper text color */
+.admin-form-control,
+.admin-form-control:focus,
+.admin-form-control:hover {
+  color: #000000 !important;
 }

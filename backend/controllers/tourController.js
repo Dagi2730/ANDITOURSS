@@ -1,102 +1,120 @@
-// backend/controllers/tourController.js (FULL CRUD IMPLEMENTATION)
+import asyncHandler from 'express-async-handler';
+import prisma from '../lib/prisma.js';
 
-import asyncHandler from 'express-async-handler'; 
-import Tour from '../models/tourModel.js'; 
-
-// --- READ OPERATIONS ---
-
-// @desc    Get all tours
-// @route   GET /api/tours
-// @access  Public
 const getTours = asyncHandler(async (req, res) => {
-    const tours = await Tour.find({}); 
-    res.status(200).json(tours);
+  const tours = await prisma.tour.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+  res.json(tours);
 });
 
-// @desc    Get single tour by ID
-// @route   GET /api/tours/:id
-// @access  Public
 const getTourById = asyncHandler(async (req, res) => {
-    const tour = await Tour.findById(req.params.id);
+  const tour = await prisma.tour.findUnique({
+    where: { id: req.params.id },
+  });
 
-    if (tour) {
-        res.json(tour);
-    } else {
-        res.status(404);
-        throw new Error('Tour not found');
-    }
+  if (!tour) {
+    res.status(404);
+    throw new Error('Tour not found');
+  }
+
+  res.json(tour);
 });
 
-
-// --- WRITE OPERATIONS ---
-
-// @desc    Create a new tour
-// @route   POST /api/tours
-// @access  Private (Admin only)
 const createTour = asyncHandler(async (req, res) => {
-    const { title, description, price, duration, image } = req.body; 
+  const {
+    title,
+    name,
+    price,
+    duration,
+    location,
+    description,
+    highlights,
+    travelDetails,
+    itinerary,
+    imageUrl,
+  } = req.body;
 
-    if (!title || !description || !price || !duration) {
-        res.status(400);
-        throw new Error('Please include all required fields');
-    }
-    
-    const tour = await Tour.create({
-        // user: req.user.id, // (Temporarily omitted to avoid 500 error due to schema)
-        title, 
-        description,
-        price,
-        duration,
-        image,
-    });
-    
-    res.status(201).json(tour); 
+  const tourTitle = title || name;
+
+  if (!tourTitle || !price || !duration || !description) {
+    res.status(400);
+    throw new Error('Please fill in all required fields');
+  }
+
+  const tour = await prisma.tour.create({
+    data: {
+      title: tourTitle,
+      price: Number(price),
+      duration,
+      location: location || 'Ethiopia',
+      description,
+      highlights: highlights || '',
+      travelDetails: travelDetails || '',
+      itinerary: itinerary || [],
+      imageUrl:
+        imageUrl ||
+        'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+    },
+  });
+
+  res.status(201).json(tour);
 });
 
-// @desc    Update a tour
-// @route   PUT /api/tours/:id
-// @access  Private (Admin only)
 const updateTour = asyncHandler(async (req, res) => {
-    const { title, description, price, duration, image } = req.body; 
+  const tour = await prisma.tour.findUnique({
+    where: { id: req.params.id },
+  });
 
-    // Find the tour by ID
-    const tour = await Tour.findById(req.params.id);
+  if (!tour) {
+    res.status(404);
+    throw new Error('Tour not found');
+  }
 
-    if (tour) {
-        // Update the fields, defaulting to existing data if new data is not provided
-        tour.title = title || tour.title;
-        tour.description = description || tour.description;
-        tour.price = price || tour.price;
-        tour.duration = duration || tour.duration;
-        tour.image = image || tour.image;
-        
-        const updatedTour = await tour.save();
-        res.json(updatedTour);
-    } else {
-        res.status(404);
-        throw new Error('Tour not found');
-    }
+  const {
+    title,
+    name,
+    price,
+    duration,
+    location,
+    description,
+    highlights,
+    travelDetails,
+    itinerary,
+    imageUrl,
+  } = req.body;
+
+  const updated = await prisma.tour.update({
+    where: { id: req.params.id },
+    data: {
+      title: title || name || tour.title,
+      price: price !== undefined ? Number(price) : tour.price,
+      duration: duration || tour.duration,
+      location: location || tour.location,
+      description: description || tour.description,
+      highlights: highlights !== undefined ? highlights : tour.highlights,
+      travelDetails:
+        travelDetails !== undefined ? travelDetails : tour.travelDetails,
+      itinerary: itinerary || tour.itinerary,
+      imageUrl: imageUrl || tour.imageUrl,
+    },
+  });
+
+  res.json(updated);
 });
 
-// @desc    Delete a tour
-// @route   DELETE /api/tours/:id
-// @access  Private (Admin only)
 const deleteTour = asyncHandler(async (req, res) => {
-    const tour = await Tour.findById(req.params.id);
+  const tour = await prisma.tour.findUnique({
+    where: { id: req.params.id },
+  });
 
-    if (tour) {
-        await Tour.deleteOne({ _id: req.params.id }); // Mongoose recommends deleteOne/deleteMany over remove()
-        res.json({ message: 'Tour removed' });
-    } else {
-        res.status(404);
-        throw new Error('Tour not found');
-    }
+  if (!tour) {
+    res.status(404);
+    throw new Error('Tour not found');
+  }
+
+  await prisma.tour.delete({ where: { id: req.params.id } });
+  res.json({ message: 'Tour removed' });
 });
 
-export { 
-    getTours, 
-    getTourById, // New export
-    createTour, 
-    updateTour, // New export
-    deleteTour  // New export
-};
+export { getTours, getTourById, createTour, updateTour, deleteTour };

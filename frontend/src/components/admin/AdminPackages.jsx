@@ -1,69 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function AdminPackages() {
-  const [packages, setPackages] = useState([
-    { 
-      id: 1, 
-      name: 'Simien Mountains Trek', 
-      price: '$1,250', 
-      duration: '7 days',
-      highlights: 'Breathtaking mountain views, wildlife spotting, traditional villages',
-      description: 'Explore the stunning Simien Mountains with experienced guides',
-      travelDetails: 'Accommodation in mountain lodges, all meals included, transportation',
-      imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      status: 'active' 
-    },
-    { 
-      id: 2, 
-      name: 'Danakil Depression Adventure', 
-      price: '$1,800', 
-      duration: '4 days',
-      highlights: 'Active volcanoes, salt lakes, colorful mineral deposits',
-      description: 'Visit one of the hottest places on earth with unique geological formations',
-      travelDetails: 'Camping accommodation, 4x4 transportation, experienced local guides',
-      imageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-1.2.1&auto=format&fit=crop&w-800&q=80',
-      status: 'active' 
-    },
-    { 
-      id: 3, 
-      name: 'Lalibela Historical Tour', 
-      price: '$950', 
-      duration: '3 days',
-      highlights: 'Rock-hewn churches, UNESCO World Heritage site, religious ceremonies',
-      description: 'Discover the ancient rock-hewn churches of Lalibela',
-      travelDetails: 'Hotel accommodation, local guide, entrance fees included',
-      imageUrl: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-1.2.1&auto=format&fit=crop&w-800&q=80',
-      status: 'active' 
-    },
-    { 
-      id: 4, 
-      name: 'Omo Valley Cultural Experience', 
-      price: '$1,500', 
-      duration: '5 days',
-      highlights: 'Tribal communities, traditional ceremonies, local markets',
-      description: 'Immerse yourself in the rich cultural heritage of Omo Valley tribes',
-      travelDetails: 'Lodge accommodation, cultural permits, local translator',
-      imageUrl: 'https://images.unsplash.com/photo-1508921912186-1d1a45ebb3c1?ixlib=rb-1.2.1&auto=format&fit=crop&w-800&q=80',
-      status: 'active' 
-    },
-    { 
-      id: 5, 
-      name: 'Bale Mountains National Park', 
-      price: '$1,100', 
-      duration: '6 days',
-      highlights: 'Endemic wildlife, Afro-alpine vegetation, scenic hiking trails',
-      description: 'Explore the diverse ecosystems of Bale Mountains National Park',
-      travelDetails: 'Lodge stays, park fees, professional hiking guide included',
-      imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-1.2.1&auto=format&fit=crop&w-800&q=80',
-      status: 'active' 
-    },
-  ]);
-
+  const [packages, setPackages] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingPackage, setEditingPackage] = useState(null);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [showDetailsCard, setShowDetailsCard] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -71,10 +17,28 @@ function AdminPackages() {
     highlights: '',
     description: '',
     travelDetails: '',
+    itinerary: [{ day: 1, title: '', description: '' }],
     imageUrl: '',
     status: 'active'
   });
 
+  // --- API FETCH ---
+  useEffect(() => {
+    fetchPackages();
+  }, []);
+
+  const fetchPackages = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/tours');
+      setPackages(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setLoading(false);
+    }
+  };
+
+  // --- HANDLERS ---
   const handleView = (pkg) => {
     setSelectedPackage(pkg);
     setShowDetailsCard(true);
@@ -83,413 +47,230 @@ function AdminPackages() {
   const handleEdit = (pkg) => {
     setEditingPackage(pkg);
     setFormData({
-      name: pkg.name,
-      price: pkg.price.replace('$', ''),
-      duration: pkg.duration,
-      highlights: pkg.highlights || '',
-      description: pkg.description || '',
-      travelDetails: pkg.travelDetails || '',
-      imageUrl: pkg.imageUrl || '',
-      status: pkg.status
+      ...pkg,
+      price: pkg.price?.toString().replace('$', '') || ''
     });
     setImagePreview(pkg.imageUrl || null);
     setShowForm(true);
   };
 
-  const handleDelete = (pkgId, pkgName) => {
-    if (window.confirm(`Are you sure you want to delete package "${pkgName}"?`)) {
-      setPackages(packages.filter(pkg => pkg.id !== pkgId));
-      alert(`Package "${pkgName}" deleted successfully!`);
+  const handleDelete = async (pkgId, pkgName) => {
+    if (window.confirm(`Delete "${pkgName}"?`)) {
+      try {
+        await axios.delete(`http://localhost:8000/api/tours/${pkgId}`);
+        setPackages(packages.filter(p => p._id !== pkgId));
+      } catch (err) { alert("Delete failed"); }
     }
   };
 
   const handleAddNew = () => {
     setEditingPackage(null);
     setFormData({
-      name: '',
-      price: '',
-      duration: '',
-      highlights: '',
-      description: '',
-      travelDetails: '',
-      imageUrl: '',
-      status: 'active'
+      name: '', price: '', duration: '', highlights: '', description: '',
+      travelDetails: '', itinerary: [{ day: 1, title: '', description: '' }],
+      imageUrl: '', status: 'active'
     });
     setImagePreview(null);
     setShowForm(true);
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleItineraryChange = (index, field, value) => {
+    const updated = [...formData.itinerary];
+    updated[index][field] = value;
+    setFormData(prev => ({ ...prev, itinerary: updated }));
+  };
+
+  const addItineraryDay = () => {
+    setFormData(prev => ({ 
+      ...prev, 
+      itinerary: [...prev.itinerary, { day: prev.itinerary.length + 1, title: '', description: '' }] 
+    }));
+  };
+
+  const removeItineraryDay = (index) => {
+    const filtered = formData.itinerary.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, itinerary: filtered.map((d, i) => ({ ...d, day: i + 1 })) }));
+  };
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // In a real app, you would upload this to a server
-      // For demo purposes, we'll create a local URL
-      const imageUrl = URL.createObjectURL(file);
-      setFormData(prev => ({ ...prev, imageUrl }));
-      setImagePreview(imageUrl);
+      const url = URL.createObjectURL(file);
+      setFormData(prev => ({ ...prev, imageUrl: url }));
+      setImagePreview(url);
     }
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.price || !formData.duration || !formData.description) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    const newPackage = {
-      id: editingPackage ? editingPackage.id : Date.now(),
-      name: formData.name,
-      price: `$${formData.price}`,
-      duration: formData.duration,
-      highlights: formData.highlights,
-      description: formData.description,
-      travelDetails: formData.travelDetails,
-      imageUrl: formData.imageUrl || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Default image
-      status: formData.status
+    const submissionData = {
+      ...formData,
+      price: formData.price.toString().startsWith('$') ? formData.price : `$${formData.price}`
     };
 
-    if (editingPackage) {
-      // Update existing package
-      setPackages(packages.map(pkg => 
-        pkg.id === editingPackage.id ? newPackage : pkg
-      ));
-      alert(`Package "${formData.name}" updated successfully!`);
-    } else {
-      // Add new package
-      setPackages([...packages, newPackage]);
-      alert(`Package "${formData.name}" added successfully!`);
+    try {
+      if (editingPackage) {
+        const res = await axios.put(`http://localhost:8000/api/tours/${editingPackage._id}`, submissionData);
+        setPackages(packages.map(p => p._id === editingPackage._id ? res.data : p));
+      } else {
+        const res = await axios.post('http://localhost:8000/api/tours', submissionData);
+        setPackages([...packages, res.data]);
+      }
+      setShowForm(false);
+    } catch (err) {
+      alert("Error saving data to database. Ensure backend is running.");
     }
-
-    setShowForm(false);
-    setFormData({
-      name: '',
-      price: '',
-      duration: '',
-      highlights: '',
-      description: '',
-      travelDetails: '',
-      imageUrl: '',
-      status: 'active'
-    });
-    setImagePreview(null);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
   };
 
   return (
     <div className="admin-packages-wrapper">
-      <div className="admin-section-header">
+      <div className="itinerary-header-section">
         <h2>Travel Packages</h2>
-        <div>
-          <button 
-            className="admin-btn admin-btn-secondary admin-btn-sm"
-            onClick={() => alert('Exporting packages data...')}
-          >
-            Export Data
-          </button>
-          <button 
-            className="admin-btn admin-btn-primary admin-btn-sm" 
-            style={{ marginLeft: '10px' }}
-            onClick={handleAddNew}
-          >
-            + Add New Package
-          </button>
-        </div>
+        <button className="add-itinerary-btn" onClick={handleAddNew}>+ Add New Package</button>
       </div>
 
-      {/* Package Details Modal */}
+      {/* --- ORIGINAL STYLE DETAIL CARD --- */}
       {showDetailsCard && selectedPackage && (
-        <div className="admin-modal-overlay" onClick={() => setShowDetailsCard(false)}>
+        <div className="admin-modal-overlay" style={{position:'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.5)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:1000}} onClick={() => setShowDetailsCard(false)}>
           <div className="package-detail-card" onClick={e => e.stopPropagation()}>
-            <div className="card-top-accent"></div>
-            <div className="card-content">
-              <div className="card-header">
-                <h3>Package Details</h3>
-                <span className="package-tag">{selectedPackage.name}</span>
+            <div style={{padding: '20px'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <h3>{selectedPackage.name}</h3>
+                <span className="package-tag">{selectedPackage.duration}</span>
               </div>
 
               {selectedPackage.imageUrl && (
                 <div className="package-image-container">
-                  <img 
-                    src={selectedPackage.imageUrl} 
-                    alt={selectedPackage.name}
-                    className="package-image"
-                  />
+                  <img src={selectedPackage.imageUrl} alt={selectedPackage.name} className="package-image" />
                 </div>
               )}
 
-              <div className="detail-grid">
-                <div className="info-group">
-                  <label>Package Name</label>
-                  <p className="highlight-text">{selectedPackage.name}</p>
-                </div>
-                <div className="info-group">
-                  <label>Price</label>
-                  <p className="highlight-text">{selectedPackage.price}</p>
-                </div>
-                <div className="info-group">
-                  <label>Duration</label>
-                  <p>{selectedPackage.duration}</p>
-                </div>
-                <div className="info-group full">
-                  <label>Description</label>
-                  <div className="description-display">
-                    {selectedPackage.description}
-                  </div>
-                </div>
-                <div className="info-group full">
-                  <label>Highlights</label>
-                  <div className="highlights-display">
-                    {selectedPackage.highlights}
-                  </div>
-                </div>
-                <div className="info-group full">
-                  <label>Travel Details</label>
-                  <div className="travel-details-display">
-                    {selectedPackage.travelDetails}
-                  </div>
-                </div>
+              <div className="itinerary-indicator">
+                <strong>Price:</strong> {selectedPackage.price}
+              </div>
+
+              <div className="description-display">
+                <strong>Description:</strong><br/>{selectedPackage.description}
+              </div>
+
+              <div className="highlights-display">
+                <strong>Highlights:</strong><br/>{selectedPackage.highlights}
+              </div>
+
+              <div className="travel-details-display">
+                <strong>Travel Details:</strong><br/>{selectedPackage.travelDetails}
               </div>
               
-              <div className="card-actions">
-                <button className="btn-close" onClick={() => setShowDetailsCard(false)}>Close</button>
+              {selectedPackage.itinerary?.length > 0 && (
+                <div className="itinerary-display">
+                  <h4>Full Itinerary</h4>
+                  {selectedPackage.itinerary.map((item, index) => (
+                    <div key={index} className="itinerary-item">
+                      <div className="itinerary-header">
+                        <span className="itinerary-day">Day {item.day}</span>
+                        <h4 className="itinerary-title">{item.title}</h4>
+                      </div>
+                      <p className="itinerary-description">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div style={{marginTop: '20px'}}>
+                <button className="remove-image-btn" onClick={() => setShowDetailsCard(false)}>Close Details</button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Add/Edit Package Form Modal */}
+      {/* --- FORM MODAL --- */}
       {showForm && (
-        <div className="form-modal-overlay">
-          <div className="form-modal package-form-modal">
-            <div className="form-modal-header">
+        <div className="form-modal-overlay" style={{position:'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.5)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:1000}}>
+          <div className="package-detail-card" style={{padding: '30px'}}>
+            <div className="itinerary-header-section">
               <h3>{editingPackage ? 'Edit Package' : 'Add New Package'}</h3>
-              <button 
-                className="close-btn" 
-                onClick={() => setShowForm(false)}
-              >
-                ✕
-              </button>
+              <button className="remove-itinerary-btn" onClick={() => setShowForm(false)}>✕</button>
             </div>
-            <form onSubmit={handleFormSubmit}>
-              {/* Image Upload Section */}
-              <div className="admin-form-group">
-                <label className="admin-form-label">Package Image</label>
-                <div className="image-upload-container">
-                  {imagePreview ? (
-                    <div className="image-preview">
-                      <img src={imagePreview} alt="Preview" className="preview-image" />
-                      <button 
-                        type="button" 
-                        className="remove-image-btn"
-                        onClick={() => {
-                          setImagePreview(null);
-                          setFormData(prev => ({ ...prev, imageUrl: '' }));
-                        }}
-                      >
-                        Remove Image
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="upload-area">
-                      <label htmlFor="image-upload" className="upload-label">
-                        <div className="upload-icon">📷</div>
-                        <div>Click to upload image</div>
-                        <div className="upload-hint">JPG, PNG or WebP (Max 5MB)</div>
-                      </label>
-                      <input
-                        id="image-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="file-input"
-                      />
-                    </div>
-                  )}
-                </div>
+            <form onSubmit={handleFormSubmit} style={{display: 'flex', flexDirection:'column', gap:'10px'}}>
+              <div className="image-upload-container">
+                 <input type="file" onChange={handleImageUpload} className="file-input" id="fileInput" />
+                 <label htmlFor="fileInput" className="upload-label">
+                    <span className="upload-icon">📷</span>
+                    <span>Click to Upload Image</span>
+                 </label>
+                 {imagePreview && <img src={imagePreview} className="package-thumbnail" style={{width: '100px', marginTop: '10px'}} alt="preview" />}
               </div>
 
-              <div className="admin-form-group">
-                <label className="admin-form-label">Package Name *</label>
-                <input
-                  type="text"
-                  className="admin-form-control"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Simien Mountains Trek"
-                  required
-                />
+              <input type="text" name="name" placeholder="Package Name" className="itinerary-item-form" style={{width:'100%'}} value={formData.name} onChange={handleInputChange} required />
+              <input type="text" name="price" placeholder="Price (e.g. 1200)" className="itinerary-item-form" style={{width:'100%'}} value={formData.price} onChange={handleInputChange} required />
+              <input type="text" name="duration" placeholder="Duration (e.g. 5 Days / 4 Nights)" className="itinerary-item-form" style={{width:'100%'}} value={formData.duration} onChange={handleInputChange} required />
+              <textarea name="description" placeholder="Description" className="description-display" style={{width:'100%'}} value={formData.description} onChange={handleInputChange} required />
+              <textarea name="highlights" placeholder="Highlights" className="highlights-display" style={{width:'100%'}} value={formData.highlights} onChange={handleInputChange} />
+              <textarea name="travelDetails" placeholder="Travel Details" className="travel-details-display" style={{width:'100%'}} value={formData.travelDetails} onChange={handleInputChange} />
+              
+              <div className="itinerary-form-section">
+                <div className="itinerary-header-section">
+                  <h4>Itinerary Days</h4>
+                  <button type="button" className="add-itinerary-btn" onClick={addItineraryDay}>+ Add Day</button>
+                </div>
+                {formData.itinerary.map((item, index) => (
+                  <div key={index} className="itinerary-item-form">
+                    <div className="itinerary-item-header">
+                       <h5>Day {item.day}</h5>
+                       <button type="button" className="remove-itinerary-btn" onClick={() => removeItineraryDay(index)}>Remove</button>
+                    </div>
+                    <div className="itinerary-fields">
+                       <input type="text" value={item.title} onChange={(e) => handleItineraryChange(index, 'title', e.target.value)} placeholder="Title" />
+                       <textarea value={item.description} onChange={(e) => handleItineraryChange(index, 'description', e.target.value)} placeholder="What happens on this day?" />
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="admin-form-group">
-                <label className="admin-form-label">Price ($) *</label>
-                <input
-                  type="number"
-                  className="admin-form-control"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 1250"
-                  required
-                />
-              </div>
-              <div className="admin-form-group">
-                <label className="admin-form-label">Duration *</label>
-                <input
-                  type="text"
-                  className="admin-form-control"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 7 days"
-                  required
-                />
-              </div>
-              <div className="admin-form-group">
-                <label className="admin-form-label">Description *</label>
-                <textarea
-                  className="admin-form-control"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows="3"
-                  placeholder="Brief description of the package..."
-                  required
-                />
-              </div>
-              <div className="admin-form-group">
-                <label className="admin-form-label">Highlights</label>
-                <textarea
-                  className="admin-form-control"
-                  name="highlights"
-                  value={formData.highlights}
-                  onChange={handleInputChange}
-                  rows="3"
-                  placeholder="Key features and attractions separated by commas..."
-                />
-              </div>
-              <div className="admin-form-group">
-                <label className="admin-form-label">Travel Details</label>
-                <textarea
-                  className="admin-form-control"
-                  name="travelDetails"
-                  value={formData.travelDetails}
-                  onChange={handleInputChange}
-                  rows="3"
-                  placeholder="Accommodation, transportation, inclusions..."
-                />
-              </div>
-              <div className="admin-form-group">
-                <label className="admin-form-label">Status</label>
-                <select
-                  className="admin-form-control"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-              <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="admin-btn admin-btn-secondary"
-                  onClick={() => setShowForm(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="admin-btn admin-btn-primary"
-                >
-                  {editingPackage ? 'Update Package' : 'Add Package'}
-                </button>
-              </div>
+              <button type="submit" className="add-itinerary-btn" style={{padding:'15px', fontSize:'1rem'}}>Save Package to Database</button>
             </form>
           </div>
         </div>
       )}
 
-      <div className="admin-table-container">
-        <div style={{ overflowX: 'auto' }}>
-          <table className="admin-plain-table packages-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Image</th>
-                <th>Package Name</th>
-                <th>Price</th>
-                <th>Duration</th>
-                <th>Description</th>
-                <th>Actions</th>
+      {/* --- LIST TABLE --- */}
+      <div className="admin-table-container" style={{marginTop: '20px'}}>
+        <table style={{width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '8px', overflow: 'hidden'}}>
+          <thead style={{background: '#f8f9fa', borderBottom: '2px solid #eee'}}>
+            <tr>
+              <th style={{padding: '15px'}}>Image</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Duration</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {packages.map((pkg) => (
+              <tr key={pkg._id} style={{borderBottom: '1px solid #eee'}}>
+                <td className="package-table-image" style={{padding: '10px'}}>
+                   <img src={pkg.imageUrl} className="package-thumbnail" alt="" />
+                </td>
+                <td style={{padding: '10px'}}><strong>{pkg.name}</strong></td>
+                <td>{pkg.price}</td>
+                <td>{pkg.duration}</td>
+                <td className="action-btns">
+                  <button className="view-btn" onClick={() => handleView(pkg)}>View</button>
+                  <button className="add-itinerary-btn" style={{background:'#556B2F'}} onClick={() => handleEdit(pkg)}>Edit</button>
+                  <button className="remove-itinerary-btn" onClick={() => handleDelete(pkg._id, pkg.name)}>Delete</button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {packages.map((pkg) => (
-                <tr key={pkg.id}>
-                  <td>#{pkg.id}</td>
-                  <td>
-                    <div className="package-table-image">
-                      <img 
-                        src={pkg.imageUrl} 
-                        alt={pkg.name}
-                        className="package-thumbnail"
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <strong>{pkg.name}</strong>
-                  </td>
-                  <td>{pkg.price}</td>
-                  <td>{pkg.duration}</td>
-                  <td>
-                    <div className="text-muted" style={{ fontSize: '0.85rem' }}>
-                      {pkg.description.substring(0, 60)}...
-                    </div>
-                  </td>
-                  <td>
-                    <div className="action-btns">
-                      <button 
-                        className="view-btn"
-                        onClick={() => handleView(pkg)}
-                        title="View Details"
-                      >
-                        👁️ Details
-                      </button>
-                      <button 
-                        className="admin-btn admin-btn-primary admin-btn-sm admin-btn-icon"
-                        onClick={() => handleEdit(pkg)}
-                        title="Edit Package"
-                      >
-                        ✏️
-                      </button>
-                      <button 
-                        className="admin-btn admin-btn-danger admin-btn-sm admin-btn-icon"
-                        onClick={() => handleDelete(pkg.id, pkg.name)}
-                        title="Delete Package"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .admin-packages-wrapper {
           padding: 20px;
         }
@@ -525,7 +306,7 @@ function AdminPackages() {
           padding: 6px 12px;
           border-radius: 20px;
           font-size: 0.9rem;
-          color: var(--admin-text);
+          color: #333;
           font-weight: 500;
         }
         
@@ -533,12 +314,12 @@ function AdminPackages() {
         .highlights-display,
         .travel-details-display {
           background: white;
-          border: 1px solid var(--admin-border);
+          border: 1px solid #ddd;
           border-radius: 6px;
           padding: 15px;
           margin-top: 10px;
           line-height: 1.6;
-          color: var(--admin-text);
+          color: #333;
           font-style: italic;
           min-height: 80px;
           max-height: 200px;
@@ -554,22 +335,157 @@ function AdminPackages() {
           background-color: #e8f5e9;
         }
         
-        /* Form Image Upload Styles */
+        /* Itinerary Styles */
+        .itinerary-display {
+          background: #f8f9fa;
+          border: 1px solid #e9ecef;
+          border-radius: 8px;
+          padding: 20px;
+          margin-top: 10px;
+        }
+        
+        .itinerary-item {
+          margin-bottom: 20px;
+          padding-bottom: 20px;
+          border-bottom: 1px solid #e9ecef;
+        }
+        
+        .itinerary-item:last-child {
+          margin-bottom: 0;
+          padding-bottom: 0;
+          border-bottom: none;
+        }
+        
+        .itinerary-header {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          margin-bottom: 10px;
+        }
+        
+        .itinerary-day {
+          background: #556B2F;
+          color: white;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          min-width: 60px;
+          text-align: center;
+        }
+        
+        .itinerary-title {
+          margin: 0;
+          color: #333;
+          font-size: 1.1rem;
+        }
+        
+        .itinerary-description {
+          margin: 0;
+          color: #555;
+          line-height: 1.6;
+          padding-left: 75px;
+        }
+        
+        .itinerary-indicator {
+          font-size: 0.9rem;
+          color: #666;
+          margin: 20px 0 10px 0;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+        
+        /* Itinerary Form Styles */
+        .itinerary-form-section {
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 15px;
+          background: #f9f9f9;
+        }
+        
+        .itinerary-header-section {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+        }
+        
+        .itinerary-header-section h4 {
+          margin: 0;
+          color: #333;
+        }
+        
+        .add-itinerary-btn {
+          background: #4CAF50;
+          color: white;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.85rem;
+          transition: all 0.2s ease;
+        }
+        
+        .add-itinerary-btn:hover {
+          background: #f5f5f5;
+        }
+        
+        .itinerary-item-form {
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-radius: 6px;
+          padding: 15px;
+          margin-bottom: 10px;
+        }
+        
+        .itinerary-item-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+        }
+        
+        .itinerary-item-header h5 {
+          margin: 0;
+          color: #333;
+          font-size: 1rem;
+        }
+        
+        .remove-itinerary-btn {
+          background: #ffebee;
+          color: #c62828;
+          border: none;
+          padding: 4px 10px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.8rem;
+          transition: all 0.2s ease;
+        }
+        
+        .remove-itinerary-btn:hover {
+          background: #ffcdd2;
+        }
+        
+        .itinerary-fields {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        /* Image Upload Styles */
         .image-upload-container {
-          border: 2px dashed var(--admin-border);
+          border: 2px dashed #ddd;
           border-radius: 8px;
           padding: 20px;
           background: #fafafa;
           transition: all 0.3s ease;
+          text-align: center;
         }
         
         .image-upload-container:hover {
-          border-color: var(--admin-olive);
+          border-color: #556B2F;
           background: #f5f5f5;
-        }
-        
-        .image-preview {
-          text-align: center;
         }
         
         .preview-image {
@@ -591,15 +507,6 @@ function AdminPackages() {
           transition: all 0.2s ease;
         }
         
-        .remove-image-btn:hover {
-          background: #ffcdd2;
-        }
-        
-        .upload-area {
-          text-align: center;
-          cursor: pointer;
-        }
-        
         .upload-label {
           display: flex;
           flex-direction: column;
@@ -611,12 +518,6 @@ function AdminPackages() {
         .upload-icon {
           font-size: 2rem;
           opacity: 0.6;
-        }
-        
-        .upload-hint {
-          font-size: 0.85rem;
-          color: #666;
-          margin-top: 5px;
         }
         
         .file-input {
@@ -638,11 +539,6 @@ function AdminPackages() {
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
-        .packages-table th:nth-child(2),
-        .packages-table td:nth-child(2) {
-          width: 80px;
-        }
-        
         @keyframes slideIn {
           from {
             opacity: 0;
@@ -658,6 +554,7 @@ function AdminPackages() {
           display: flex;
           gap: 8px;
           align-items: center;
+          padding: 10px;
         }
         
         .view-btn {
@@ -681,34 +578,11 @@ function AdminPackages() {
             width: 95%;
             max-height: 95vh;
           }
-          
-          .card-content {
-            padding: 20px;
+          .itinerary-description {
+            padding-left: 0;
           }
-          
-          .card-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-          }
-          
-          .detail-grid {
-            grid-template-columns: 1fr;
-            gap: 15px;
-          }
-          
           .action-btns {
             flex-direction: column;
-            align-items: stretch;
-          }
-          
-          .action-btns button {
-            width: 100%;
-            margin-bottom: 5px;
-          }
-          
-          .package-form-modal {
-            max-width: 95%;
           }
         }
       `}</style>

@@ -1,39 +1,49 @@
-// backend/middleware/authMiddleware.js
-
 import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
-import User from '../models/userModel.js'; // <-- Assuming this is the correct path
+import prisma from '../lib/prisma.js';
 
-const protect = asyncHandler(async (req, res, next) => {
-    let token;
+const requireAuth = asyncHandler(async (req, res, next) => {
+  let token;
 
-    // Check for authorization header and confirm it starts with 'Bearer'
-    if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
-    ) {
-        try {
-            // Get token from header (split "Bearer <token>")
-            token = req.headers.authorization.split(' ')[1];
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
 
-            // Verify token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (!token) {
+    res.status(401);
+    throw new Error('Not authorized, no token');
+  }
 
-            // Get user from the token payload (excluding the password field)
-            req.user = await User.findById(decoded.id).select('-password');
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'anditours-local-secret');
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
 
-            next(); // Proceed to the next middleware/controller
-        } catch (error) {
-            console.error(error);
-            res.status(401);
-            throw new Error('Not authorized, token failed');
-        }
+    if (!user) {
+      res.status(401);
+      throw new Error('Not authorized, user not found');
     }
 
-    if (!token) {
-        res.status(401);
-        throw new Error('Not authorized, no token');
-    }
+    req.user = user;
+    req.token = token;
+    next();
+  } catch (error) {
+    res.status(401);
+    throw new Error('Not authorized, token failed');
+  }
 });
 
-export { protect };
+const requireAdmin = asyncHandler(async (req, res, next) => {
+  if (req.user && req.user.role === 'ADMIN') {
+    next();
+  } else {
+    res.status(403);
+    throw new Error('Not authorized as admin');
+  }
+});
+
+export { requireAuth, requireAdmin };

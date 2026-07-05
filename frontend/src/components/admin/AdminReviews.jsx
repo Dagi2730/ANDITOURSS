@@ -428,7 +428,7 @@ function AdminReviews() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .admin-reviews-wrapper {
           padding: 20px;
         }

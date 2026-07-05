@@ -84,7 +84,7 @@ function AdminUsers() {
         </div>
         <div className="stat-card">
           <div className="stat-title">👑 Admin Users</div>
-          <div className="stat-number">{users.filter(u => u.role === 'admin').length}</div>
+          <div className="stat-number">{users.filter(u => u.role?.toString().toUpperCase() === 'ADMIN').length}</div>
           <div className="stat-change positive">+2 from last month</div>
         </div>
         <div className="stat-card">
@@ -121,7 +121,7 @@ function AdminUsers() {
                 <div className="info-group">
                   <label>Account Type</label>
                   <p className={`role-badge ${selectedUser.role}`}>
-                    {selectedUser.role === 'admin' ? '👑 Admin' : '👤 Customer'}
+                    {selectedUser.role?.toString().toUpperCase() === 'ADMIN' ? '👑 Admin' : '👤 Customer'}
                   </p>
                 </div>
                 <div className="info-group">
@@ -197,10 +197,10 @@ function AdminUsers() {
                     <strong>{user.name}</strong>
                     <div className="user-role-indicator" style={{ 
                       fontSize: '0.8rem', 
-                      color: user.role === 'admin' ? '#4a148c' : '#0277bd',
+                      color: user.role?.toString().toUpperCase() === 'ADMIN' ? '#4a148c' : '#0277bd',
                       marginTop: '4px'
                     }}>
-                      {user.role === 'admin' ? '👑 Admin' : '👤 Customer'}
+                      {user.role?.toString().toUpperCase() === 'ADMIN' ? '👑 Admin' : '👤 Customer'}
                     </div>
                   </td>
                   <td>{user.email}</td>
@@ -234,7 +234,7 @@ function AdminUsers() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .admin-users-wrapper {
           padding: 20px;
         }
