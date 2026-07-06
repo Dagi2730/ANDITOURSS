@@ -42,7 +42,7 @@ function Gallery() {
         ) : (
           <div className="destinations-grid">
             {posts.map((post) => (
-              <article key={post._id} className="destination-card">
+              <article key={post.id} className="destination-card">
                 <div className="destination-image-wrapper">
                   <img
                     src={resolveImage(post.imageUrl)}
@@ -57,7 +57,7 @@ function Gallery() {
                   <h2 className="destination-title">{post.title}</h2>
                   {post.tour && (
                     <p className="destination-meta" style={{ fontWeight: 600 }}>
-                      Tour: {post.tour.name}
+                      Tour: {post.tour.title}
                     </p>
                   )}
                   {post.location && (

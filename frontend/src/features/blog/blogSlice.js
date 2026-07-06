@@ -12,18 +12,13 @@ const initialState = {
 const API_URL = import.meta.env.VITE_API_URL || '';
 const baseURL = API_URL || 'http://localhost:8000';
 
-const getConfig = (token, isFormData = false) => {
-  const headers = {
+const getConfig = (token, isMultipart = false) => ({
+  headers: {
     Authorization: `Bearer ${token}`,
-  };
-  // Don't set Content-Type for FormData - let browser set it with boundary
-  if (!isFormData) {
-    headers['Content-Type'] = 'application/json';
-  }
-  return { headers };
-};
+    ...(isMultipart ? { 'Content-Type': 'multipart/form-data' } : {}),
+  },
+});
 
-// Public: get all blog posts for gallery
 export const getBlogPosts = createAsyncThunk(
   'blog/getAll',
   async (_, thunkAPI) => {
@@ -31,54 +26,37 @@ export const getBlogPosts = createAsyncThunk(
       const response = await axios.get(`${baseURL}/api/blog`);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Failed to fetch blog posts'
-      );
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch stories');
     }
   }
 );
 
-// Admin: create new blog post (expects FormData with image + fields)
 export const createBlogPost = createAsyncThunk(
   'blog/create',
   async (formData, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.post(
-        `${baseURL}/api/blog`,
-        formData,
-        getConfig(token, true) // true = FormData
-      );
+      const response = await axios.post(`${baseURL}/api/blog`, formData, getConfig(token, true));
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Failed to create blog post'
-      );
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to create story');
     }
   }
 );
 
-// Admin: update blog post (FormData may or may not contain new image)
 export const updateBlogPost = createAsyncThunk(
   'blog/update',
   async ({ id, formData }, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.put(
-        `${baseURL}/api/blog/${id}`,
-        formData,
-        getConfig(token, true) // true = FormData
-      );
+      const response = await axios.put(`${baseURL}/api/blog/${id}`, formData, getConfig(token, true));
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Failed to update blog post'
-      );
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to update story');
     }
   }
 );
 
-// Admin: delete blog post
 export const deleteBlogPost = createAsyncThunk(
   'blog/delete',
   async (id, thunkAPI) => {
@@ -87,9 +65,7 @@ export const deleteBlogPost = createAsyncThunk(
       await axios.delete(`${baseURL}/api/blog/${id}`, getConfig(token));
       return id;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Failed to delete blog post'
-      );
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to delete story');
     }
   }
 );
@@ -107,12 +83,9 @@ export const blogSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(getBlogPosts.pending, (state) => {
-        state.isLoading = true;
-      })
+      .addCase(getBlogPosts.pending, (state) => { state.isLoading = true; })
       .addCase(getBlogPosts.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isSuccess = true;
         state.posts = action.payload;
       })
       .addCase(getBlogPosts.rejected, (state, action) => {
@@ -120,36 +93,17 @@ export const blogSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
       })
-      .addCase(createBlogPost.pending, (state) => {
-        state.isLoading = true;
-      })
       .addCase(createBlogPost.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
         state.posts.unshift(action.payload);
       })
-      .addCase(createBlogPost.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.message = action.payload;
-      })
       .addCase(updateBlogPost.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.posts = state.posts.map((post) =>
-          post._id === action.payload._id ? action.payload : post
-        );
+        state.posts = state.posts.map((p) => p.id === action.payload.id ? action.payload : p);
       })
       .addCase(deleteBlogPost.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.posts = state.posts.filter((post) => post._id !== action.payload);
+        state.posts = state.posts.filter((p) => p.id !== action.payload);
       });
   },
 });
 
 export const { reset } = blogSlice.actions;
 export default blogSlice.reducer;
-
-
-

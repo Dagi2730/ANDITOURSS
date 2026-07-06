@@ -56,7 +56,7 @@ function AdminBlog() {
   const handleEdit = (post) => {
     setEditingPost(post);
     setFormData({
-      tourId: post.tour?._id || '',
+      tourId: post.tour?.id || '',
       title: post.title || '',
       subtitle: post.subtitle || '',
       location: post.location || '',
@@ -100,7 +100,6 @@ function AdminBlog() {
     }
   };
 
-
   const removeMainImage = () => {
     setMainImage(null);
     setMainImageFile(null);
@@ -109,7 +108,6 @@ function AdminBlog() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (!formData.tourId) {
       alert('Please select which tour this gallery image belongs to');
       return;
@@ -133,8 +131,7 @@ function AdminBlog() {
     payload.append('story', formData.story);
     payload.append('tags', formData.tags);
     payload.append('featured', formData.featured ? 'true' : 'false');
-    
-    // Append main image if new
+
     if (mainImageFile) {
       payload.append('image', mainImageFile);
     }
@@ -142,7 +139,7 @@ function AdminBlog() {
     try {
       if (editingPost) {
         await dispatch(
-          updateBlogPost({ id: editingPost._id, formData: payload })
+          updateBlogPost({ id: editingPost.id, formData: payload })
         ).unwrap();
         alert('Story updated successfully!');
       } else {
@@ -158,7 +155,6 @@ function AdminBlog() {
     }
   };
 
-  // DEBUG: Add a temporary admin login button
   const isUserAdmin = () => {
     return user?.role?.toString().toUpperCase() === 'ADMIN';
   };
@@ -171,7 +167,7 @@ function AdminBlog() {
           You must be logged in as an administrator to manage stories.
         </p>
         <div style={{ marginTop: '30px' }}>
-          <button 
+          <button
             onClick={() => window.location.href = '/login'}
             style={{
               padding: '12px 24px',
@@ -186,15 +182,6 @@ function AdminBlog() {
           >
             Go to Login Page
           </button>
-        </div>
-        <div style={{ marginTop: '30px', padding: '20px', background: '#f8f9fa', borderRadius: '8px', textAlign: 'left' }}>
-          <h4>📋 Troubleshooting Tips:</h4>
-          <ul style={{ textAlign: 'left', maxWidth: '600px', margin: '0 auto' }}>
-            <li>Check if you're logged in with an admin account</li>
-            <li>Verify your Redux auth state is properly set</li>
-            <li>Make sure user object has <code>role: 'admin'</code></li>
-            <li>Check browser console for authentication errors</li>
-          </ul>
         </div>
       </div>
     );
@@ -216,10 +203,6 @@ function AdminBlog() {
           <p style={{ marginTop: '4px', color: '#666' }}>
             Curate your Andi Tours stories, experiences and gallery images. These appear on the public Gallery page.
           </p>
-          {/* Debug info - remove in production */}
-          <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '5px' }}>
-            Logged in as: {user?.name || 'Admin'} | Role: {user?.role || 'admin'}
-          </div>
         </div>
         <button
           className="admin-btn admin-btn-primary admin-btn-sm"
@@ -257,8 +240,8 @@ function AdminBlog() {
                 >
                   <option value="">Select a tour...</option>
                   {tours.map((tour) => (
-                    <option key={tour._id} value={tour._id}>
-                      {tour.name} ({tour.duration})
+                    <option key={tour.id} value={tour.id}>
+                      {tour.title} ({tour.duration})
                     </option>
                   ))}
                 </select>
@@ -406,20 +389,9 @@ function AdminBlog() {
         </div>
       )}
 
-      {/* Stories Grid - keep as is */}
       <div className="admin-table-container">
         {isLoading && posts.length === 0 ? (
           <div style={{ padding: '30px', textAlign: 'center' }}>
-            <div style={{
-              display: 'inline-block',
-              width: '40px',
-              height: '40px',
-              border: '3px solid #f3f3f3',
-              borderTop: '3px solid #556B2F',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              marginBottom: '15px'
-            }}></div>
             <p>Loading stories...</p>
           </div>
         ) : posts.length === 0 ? (
@@ -433,7 +405,7 @@ function AdminBlog() {
         ) : (
           <div className="admin-blog-grid">
             {posts.map((post) => (
-              <article key={post._id} className="admin-blog-card">
+              <article key={post.id} className="admin-blog-card">
                 <div className="admin-blog-image-wrapper">
                   <img
                     src={resolveImage(post.imageUrl)}
@@ -456,7 +428,7 @@ function AdminBlog() {
                   {post.tour && (
                     <p className="admin-blog-subtitle">
                       Tour:&nbsp;
-                      <strong>{post.tour.name}</strong>
+                      <strong>{post.tour.title}</strong>
                     </p>
                   )}
                   {post.subtitle && (
@@ -501,7 +473,7 @@ function AdminBlog() {
                     <button
                       className="admin-btn admin-btn-danger admin-btn-sm admin-btn-icon"
                       type="button"
-                      onClick={() => handleDelete(post._id)}
+                      onClick={() => handleDelete(post.id)}
                     >
                       🗑️ Delete
                     </button>
@@ -512,7 +484,6 @@ function AdminBlog() {
           </div>
         )}
       </div>
-
     </div>
   );
 }

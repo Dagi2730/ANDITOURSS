@@ -33,7 +33,7 @@ model User {
 }
 
 model Tour {
-  id            String    @id @default(uuid())
+  id            String     @id @default(uuid())
   title         String
   description   String
   price         Float
@@ -42,11 +42,12 @@ model Tour {
   imageUrl      String?
   highlights    String?
   travelDetails String?
-  itinerary     Json      @default("[]")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  itinerary     Json       @default("[]")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
   bookings      Booking[]
   reviews       Review[]
+  blogPosts     BlogPost[]
 }
 
 model Booking {
@@ -79,9 +80,15 @@ model Review {
 
 model BlogPost {
   id        String   @id @default(uuid())
+  tourId    String?
   title     String
-  content   String
+  subtitle  String?
+  location  String?
+  story     String
+  tags      String[] @default([])
+  featured  Boolean  @default(false)
   imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tour      Tour?    @relation(fields: [tourId], references: [id], onDelete: SetNull)
 }
