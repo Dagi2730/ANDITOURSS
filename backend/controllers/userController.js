@@ -4,6 +4,7 @@ import asyncHandler from 'express-async-handler';
 import prisma from '../lib/prisma.js';
 import generateToken from '../utils/generateToken.js';
 
+// @desc    Register a new user
 const register = asyncHandler(async (req, res) => {
   const { name, email, phone, password } = req.body;
 
@@ -18,7 +19,6 @@ const register = asyncHandler(async (req, res) => {
     throw new Error('User already exists');
   }
 
-  // Hash password with bcrypt
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -34,17 +34,12 @@ const register = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json({
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      role: user.role,
-    },
+    user: { id: user.id, email: user.email, name: user.name, phone: user.phone, role: user.role },
     token: generateToken(user.id),
   });
 });
 
+// @desc    Login user & get token
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -55,7 +50,6 @@ const login = asyncHandler(async (req, res) => {
 
   const user = await prisma.user.findUnique({ where: { email } });
 
-  // Compare entered password with bcrypt hash
   const isMatch = user && (await bcrypt.compare(password, user.password));
 
   if (!isMatch) {
@@ -64,17 +58,12 @@ const login = asyncHandler(async (req, res) => {
   }
 
   res.json({
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      role: user.role,
-    },
+    user: { id: user.id, email: user.email, name: user.name, phone: user.phone, role: user.role },
     token: generateToken(user.id),
   });
 });
 
+// @desc    Get current user profile
 const getMe = asyncHandler(async (req, res) => {
   res.json({
     id: req.user.id,
@@ -85,9 +74,9 @@ const getMe = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Update current user profile
 const updateMe = asyncHandler(async (req, res) => {
   const { name, phone } = req.body;
-
   const updated = await prisma.user.update({
     where: { id: req.user.id },
     data: {
@@ -96,21 +85,14 @@ const updateMe = asyncHandler(async (req, res) => {
     },
   });
 
-  res.json({
-    id: updated.id,
-    email: updated.email,
-    name: updated.name,
-    phone: updated.phone,
-    role: updated.role,
-  });
+  res.json({ id: updated.id, email: updated.email, name: updated.name, phone: updated.phone, role: updated.role });
 });
 
+// @desc    Get all users (Admin only)
 const getAllUsers = asyncHandler(async (req, res) => {
   const users = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
-    include: {
-      _count: { select: { bookings: true } },
-    },
+    include: { _count: { select: { bookings: true } } },
   });
 
   res.json(
@@ -126,6 +108,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
   );
 });
 
+// @desc    Update user role (Admin only)
 const updateUserRole = asyncHandler(async (req, res) => {
   const { role } = req.body;
 
@@ -134,10 +117,7 @@ const updateUserRole = asyncHandler(async (req, res) => {
     throw new Error('Role must be USER or ADMIN');
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: req.params.id },
-  });
-
+  const user = await prisma.user.findUnique({ where: { id: req.params.id } });
   if (!user) {
     res.status(404);
     throw new Error('User not found');
@@ -148,13 +128,21 @@ const updateUserRole = asyncHandler(async (req, res) => {
     data: { role },
   });
 
-  res.json({
-    id: updated.id,
-    email: updated.email,
-    name: updated.name,
-    phone: updated.phone,
-    role: updated.role,
-  });
+  res.json({ id: updated.id, email: updated.email, name: updated.name, phone: updated.phone, role: updated.role });
 });
 
-export { register, login, getMe, updateMe, getAllUsers, updateUserRole };
+// @desc    Delete a user (Admin only)
+const deleteUser = asyncHandler(async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.params.id } });
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  await prisma.user.delete({ where: { id: req.params.id } });
+
+  res.json({ message: 'User deleted successfully' });
+});
+
+// Corrected export statement
+export { register, login, getMe, updateMe, getAllUsers, updateUserRole, deleteUser };

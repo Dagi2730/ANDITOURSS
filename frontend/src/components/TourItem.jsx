@@ -23,19 +23,19 @@ const TourItem = ({ tour }) => {
               ? (tour.imageUrl.startsWith('http') ? tour.imageUrl : PF + tour.imageUrl) 
               : 'https://via.placeholder.com/400x250?text=Adventure+Awaits'
           } 
-          alt={tour.name || 'Tour Image'} 
+          alt={tour.title || tour.name || 'Tour Image'} 
         />
         <div className="tour-price">${tour.price}</div>
       </div>
       
       <div className="tour-info">
-        <h3>{tour.name}</h3>
+        <h3>{tour.title || tour.name}</h3>
         <p className="description">
           {tour.description ? tour.description.substring(0, 100) + '...' : 'No description provided.'}
         </p>
         <div className="tour-footer">
           <span className="duration">⏱ {tour.duration}</span>
-          <Link to={`/tour/${tour._id}`} className="details-btn">
+          <Link to={`/tour/${tour.id || tour._id}`} className="details-btn">
             View Details
           </Link>
         </div>

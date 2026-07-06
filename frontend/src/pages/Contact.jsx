@@ -113,7 +113,7 @@ const Contact = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 60px 20px;
+          padding: 140px 20px 60px;
           /* Background is inherited from your current setup */
         }
 

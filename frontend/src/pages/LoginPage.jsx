@@ -5,54 +5,29 @@ import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
     try {
-      const result = isLogin
-        ? await dispatch(
-            login({
-              email: formData.email,
-              password: formData.password,
-            })
-          ).unwrap()
-        : await dispatch(
-            register({
-              name: formData.name,
-              email: formData.email,
-              phone: formData.phone,
-              password: formData.password,
-            })
-          ).unwrap();
-
+      const result = await dispatch(isLogin ? login(formData) : register(formData)).unwrap();
       alert(isLogin ? 'Welcome back to Andi Tours!' : 'Account created successfully!');
-      const nextPath = result.role?.toString().toUpperCase() === 'ADMIN' ? '/admin' : '/';
-      navigate(nextPath);
+      navigate(result?.role?.toUpperCase() === 'ADMIN' ? '/admin' : '/');
     } catch (err) {
-      setError(err || 'Connection refused. Please check if the backend is running.');
+      setError(typeof err === 'string' ? err : err?.message || 'Connection refused. Please check the backend.');
     }
   };
 
   useEffect(() => {
     if (user) {
-      const redirectPath = user.role?.toString().toUpperCase() === 'ADMIN' ? '/admin' : '/';
-      navigate(redirectPath, { replace: true });
+      navigate(user.role?.toUpperCase() === 'ADMIN' ? '/admin' : '/', { replace: true });
     }
   }, [user, navigate]);
 
@@ -69,36 +44,12 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="auth-form">
           {!isLogin && (
             <>
-              <input 
-                type="text" 
-                name="name" 
-                placeholder="Full Name" 
-                onChange={handleChange} 
-                required 
-              />
-              <input 
-                type="text" 
-                name="phone" 
-                placeholder="Phone Number" 
-                onChange={handleChange} 
-                required 
-              />
+              <input type="text" name="name" placeholder="Full Name" onChange={handleChange} required />
+              <input type="text" name="phone" placeholder="Phone Number" onChange={handleChange} required />
             </>
           )}
-          <input 
-            type="email" 
-            name="email" 
-            placeholder="Email Address" 
-            onChange={handleChange} 
-            required 
-          />
-          <input 
-            type="password" 
-            name="password" 
-            placeholder="Password" 
-            onChange={handleChange} 
-            required 
-          />
+          <input type="email" name="email" placeholder="Email Address" onChange={handleChange} required />
+          <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
           
           <button type="submit" className="submit-btn">
             {isLogin ? 'Sign In' : 'Create Account'}
@@ -106,11 +57,10 @@ const Login = () => {
         </form>
 
         <div className="toggle-text">
-          {isLogin ? (
-            <p>Don't have an account? <span onClick={() => setIsLogin(false)}>Register</span></p>
-          ) : (
-            <p>Already have an account? <span onClick={() => setIsLogin(true)}>Login</span></p>
-          )}
+          <p>
+            {isLogin ? "Don't have an account?" : "Already have an account?"}
+            <span onClick={() => setIsLogin(!isLogin)}>{isLogin ? 'Register' : 'Login'}</span>
+          </p>
         </div>
       </div>
 
@@ -157,16 +107,15 @@ const Login = () => {
           width: 100%;
           padding: 14px;
           margin-bottom: 18px;
-          background: rgba(0, 0, 0, 0.2); /* Darker background for input contrast */
+          background: rgba(0, 0, 0, 0.2);
           border: 1px solid rgba(255, 255, 255, 0.4);
           border-radius: 10px;
-          color: #ffffff; /* Actual typed text color */
+          color: #ffffff;
           font-size: 1rem;
           outline: none;
           transition: all 0.3s ease;
         }
 
-        /* CRITICAL: Making placeholders visible */
         .auth-form input::placeholder {
           color: rgba(255, 255, 255, 0.9) !important;
           opacity: 1;
@@ -206,7 +155,6 @@ const Login = () => {
         }
 
         .toggle-text span {
-          text-decoration: none;
           cursor: pointer;
           font-weight: 700;
           color: #C0CA33;

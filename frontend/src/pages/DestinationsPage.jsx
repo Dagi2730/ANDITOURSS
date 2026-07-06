@@ -12,7 +12,7 @@ const DestinationsPage = () => {
     const fetchTours = async () => {
       try {
         const baseURL = 'http://localhost:8000';
-        const response = await axios.get(`${baseURL}/api/tours/active`);
+        const response = await axios.get(`${baseURL}/api/tours`);
         setTours(response.data);
       } catch (error) {
         console.error("Fetch Error:", error);
@@ -23,8 +23,9 @@ const DestinationsPage = () => {
     fetchTours();
   }, []);
 
-  const filteredTours = tours.filter(tour =>
-    tour.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredTours = tours.filter((tour) =>
+    tour.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    tour.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tour.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -49,9 +50,13 @@ const DestinationsPage = () => {
           <div className="loading-placeholder">
             <p>Connecting...</p>
           </div>
+        ) : filteredTours.length === 0 ? (
+          <div className="loading-placeholder">
+            <p>No tours found. Try another keyword.</p>
+          </div>
         ) : (
-          filteredTours.map(tour => (
-            <TourItem key={tour._id} tour={tour} />
+          filteredTours.map((tour) => (
+            <TourItem key={tour.id} tour={tour} />
           ))
         )}
       </div>

@@ -1,79 +1,54 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { API_URL } from '../../lib/api';
+import api from '../../lib/api';
 
+// 1. Helper to ensure Role is consistent
 const normalizeRole = (role) => role?.toString().toUpperCase() || 'USER';
 
-let storedUser = null;
-try {
-  storedUser = JSON.parse(localStorage.getItem('user'));
-  if (storedUser) {
-    storedUser = { ...storedUser, role: normalizeRole(storedUser.role) };
-  }
-} catch {
-  storedUser = null;
-}
-
+// 2. Initialize State
+const storedUser = JSON.parse(localStorage.getItem('user'));
 const initialState = {
-  user: storedUser || null,
+  user: storedUser ? { ...storedUser, role: normalizeRole(storedUser.role) } : null,
   isError: false,
   isSuccess: false,
   isLoading: false,
   message: '',
 };
 
-const fetchProfile = async (token) => {
-  const response = await axios.get(`${API_URL}/api/users/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-const buildUserState = (user, token) => ({
-  id: user?.id || user?.user?.id,
-  email: user?.email || user?.user?.email,
-  token,
-  name: user?.name || user?.user?.name || user?.email || 'User',
-  phone: user?.phone || user?.user?.phone || null,
-  role: normalizeRole(user?.role || user?.user?.role),
+// 3. User Helper: Standardizes the user object shape
+const buildUserState = (userData, token) => ({
+  id: userData?.id || userData?.user?.id,
+  email: userData?.email || userData?.user?.email,
+  token: token, // Ensure token is part of the user object
+  name: userData?.name || userData?.user?.name || 'User',
+  phone: userData?.phone || userData?.user?.phone || null,
+  role: normalizeRole(userData?.role || userData?.user?.role),
 });
 
+// 4. Async Thunks
 export const register = createAsyncThunk(
   'auth/register',
-  async ({ name, email, phone, password }, thunkAPI) => {
+  async (formData, thunkAPI) => {
     try {
-      const response = await axios.post(`${API_URL}/api/users/register`, {
-        name,
-        email,
-        phone,
-        password,
-      });
-
-      const user = buildUserState(response.data.user, response.data.token);
+      const response = await api.post('/users/register', formData);
+      const user = buildUserState(response.data, response.data.token);
       localStorage.setItem('user', JSON.stringify(user));
       return user;
     } catch (error) {
-      const message = error.response?.data?.message || error.message || 'Registration failed';
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }
 );
 
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ email, password }, thunkAPI) => {
+  async (formData, thunkAPI) => {
     try {
-      const response = await axios.post(`${API_URL}/api/users/login`, {
-        email,
-        password,
-      });
-
-      const user = buildUserState(response.data.user, response.data.token);
+      const response = await api.post('/users/login', formData);
+      const user = buildUserState(response.data, response.data.token);
       localStorage.setItem('user', JSON.stringify(user));
       return user;
     } catch (error) {
-      const message = error.response?.data?.message || error.message || 'Login failed';
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
 );
@@ -85,26 +60,23 @@ export const logout = createAsyncThunk('auth/logout', async () => {
 
 export const updateProfile = createAsyncThunk(
   'auth/updateProfile',
-  async ({ name, phone }, thunkAPI) => {
+  async (data, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.put(
-        `${API_URL}/api/users/me`,
-        { name, phone },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const current = thunkAPI.getState().auth.user;
-      const user = { ...current, ...response.data, token: current.token };
-      localStorage.setItem('user', JSON.stringify(user));
-      return user;
+      const { user } = thunkAPI.getState().auth;
+      const response = await api.put('/users/me', data, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      // Merge updated data with existing user state
+      const updatedUser = { ...user, ...response.data };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
     } catch (error) {
-      const message = error.response?.data?.message || error.message || 'Update failed';
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Update failed');
     }
   }
 );
 
+// 5. Slice
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -118,9 +90,7 @@ export const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(register.pending, (state) => {
-        state.isLoading = true;
-      })
+      .addCase(register.pending, (state) => { state.isLoading = true; })
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
@@ -132,9 +102,7 @@ export const authSlice = createSlice({
         state.message = action.payload;
         state.user = null;
       })
-      .addCase(login.pending, (state) => {
-        state.isLoading = true;
-      })
+      .addCase(login.pending, (state) => { state.isLoading = true; })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
@@ -146,13 +114,12 @@ export const authSlice = createSlice({
         state.message = action.payload;
         state.user = null;
       })
-      .addCase(logout.fulfilled, (state, action) => {
-        state.user = action.payload;
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
         state.isSuccess = true;
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.user = action.payload;
-        state.isSuccess = true;
       });
   },
 });

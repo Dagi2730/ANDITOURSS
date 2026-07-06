@@ -7,47 +7,53 @@ function Navbar() {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
     await dispatch(logout());
-    setMenuOpen(false);
+    setMobileOpen(false);
     navigate('/');
   };
 
-  const handleAccountClick = () => {
-    setMenuOpen((open) => !open);
+  const handleLinkClick = () => {
+    setMobileOpen(false);
   };
 
   return (
     <nav className="navbar-custom">
       <Link to="/" className="logo-text">ANDI TOURS</Link>
 
-      <ul className="nav-links">
-        <li><Link to="/" className="nav-item">Home</Link></li>
-        <li><Link to="/destinations" className="nav-item">Destinations</Link></li>
-        <li><Link to="/gallery" className="nav-item">Gallery</Link></li>
-        <li><Link to="/contact" className="nav-item">Contact</Link></li>
+      <button
+        type="button"
+        className={`nav-hamburger ${mobileOpen ? 'active' : ''}`}
+        aria-label="Toggle navigation"
+        onClick={() => setMobileOpen((open) => !open)}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      <ul className={`nav-links ${mobileOpen ? 'active' : ''}`}>
+        <li><Link to="/" className="nav-item" onClick={handleLinkClick}>Home</Link></li>
+        <li><Link to="/destinations" className="nav-item" onClick={handleLinkClick}>Destinations</Link></li>
+        <li><Link to="/gallery" className="nav-item" onClick={handleLinkClick}>Gallery</Link></li>
+        <li><Link to="/contact" className="nav-item" onClick={handleLinkClick}>Contact</Link></li>
 
         {!user ? (
-          <li><Link to="/login" className="nav-item">Login</Link></li>
+          <li><Link to="/login" className="nav-item" onClick={handleLinkClick}>Login</Link></li>
         ) : (
-          <li className="nav-dropdown">
-            <button type="button" className="nav-item account-trigger" onClick={handleAccountClick}>
-              My Account ({user.name})
-            </button>
-            {menuOpen && (
-              <ul className="dropdown-menu">
-                <li><Link to="/my-bookings" onClick={() => setMenuOpen(false)}>My Bookings</Link></li>
-                {user.role?.toString().toUpperCase() === 'ADMIN' && (
-                  <li><Link to="/admin" onClick={() => setMenuOpen(false)}>Admin Dashboard</Link></li>
-                )}
-                <li>
-                  <button onClick={handleLogout} className="logout-btn-dropdown">Logout</button>
-                </li>
-              </ul>
+          <>
+            <li><Link to="/my-bookings" className="nav-item" onClick={handleLinkClick}>My Bookings</Link></li>
+            {user.role?.toString().toUpperCase() === 'ADMIN' && (
+              <li><Link to="/admin" className="nav-item" onClick={handleLinkClick}>Admin Dashboard</Link></li>
             )}
-          </li>
+            <li>
+              <button type="button" onClick={handleLogout} className="nav-item logout-btn">
+                Logout
+              </button>
+            </li>
+          </>
         )}
       </ul>
     </nav>

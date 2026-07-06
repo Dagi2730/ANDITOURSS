@@ -1,19 +1,18 @@
 import axios from 'axios';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Add /api to the base URL so your frontend calls match server.js routes
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
-export const getAuthConfig = (token) => ({
-  headers: { Authorization: `Bearer ${token}` },
+const api = axios.create({
+  baseURL: API_URL,
 });
 
-export const resolveImageUrl = (imageUrl) => {
-  if (!imageUrl) return null;
-  if (imageUrl.startsWith('http')) return imageUrl;
-  return `${API_URL}${imageUrl}`;
-};
-
-export const api = axios.create({
-  baseURL: `${API_URL}/api`,
+api.interceptors.request.use((config) => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (user && user.token) {
+    config.headers.Authorization = `Bearer ${user.token}`;
+  }
+  return config;
 });
 
 export default api;

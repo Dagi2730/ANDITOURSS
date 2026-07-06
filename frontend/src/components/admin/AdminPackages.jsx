@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 
 function AdminPackages() {
   const [packages, setPackages] = useState([]);
@@ -11,15 +11,15 @@ function AdminPackages() {
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
-    name: '',
+    title: '',
     price: '',
     duration: '',
+    location: '',
     highlights: '',
     description: '',
     travelDetails: '',
     itinerary: [{ day: 1, title: '', description: '' }],
-    imageUrl: '',
-    status: 'active'
+    imageUrl: ''
   });
 
   // --- API FETCH ---
@@ -29,7 +29,7 @@ function AdminPackages() {
 
   const fetchPackages = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/tours');
+      const response = await api.get('/tours');
       setPackages(response.data);
       setLoading(false);
     } catch (error) {
@@ -47,18 +47,27 @@ function AdminPackages() {
   const handleEdit = (pkg) => {
     setEditingPackage(pkg);
     setFormData({
-      ...pkg,
-      price: pkg.price?.toString().replace('$', '') || ''
+      title: pkg.title || '',
+      price: pkg.price?.toString() || '',
+      duration: pkg.duration || '',
+      location: pkg.location || '',
+      highlights: pkg.highlights || '',
+      description: pkg.description || '',
+      travelDetails: pkg.travelDetails || '',
+      itinerary: Array.isArray(pkg.itinerary) && pkg.itinerary.length > 0
+        ? pkg.itinerary
+        : [{ day: 1, title: '', description: '' }],
+      imageUrl: pkg.imageUrl || ''
     });
     setImagePreview(pkg.imageUrl || null);
     setShowForm(true);
   };
 
-  const handleDelete = async (pkgId, pkgName) => {
-    if (window.confirm(`Delete "${pkgName}"?`)) {
+  const handleDelete = async (pkgId, pkgTitle) => {
+    if (window.confirm(`Delete "${pkgTitle}"?`)) {
       try {
-        await axios.delete(`http://localhost:8000/api/tours/${pkgId}`);
-        setPackages(packages.filter(p => p._id !== pkgId));
+        await api.delete(`/tours/${pkgId}`);
+        setPackages(packages.filter(p => p.id !== pkgId));
       } catch (err) { alert("Delete failed"); }
     }
   };
@@ -66,9 +75,9 @@ function AdminPackages() {
   const handleAddNew = () => {
     setEditingPackage(null);
     setFormData({
-      name: '', price: '', duration: '', highlights: '', description: '',
+      title: '', price: '', duration: '', location: '', highlights: '', description: '',
       travelDetails: '', itinerary: [{ day: 1, title: '', description: '' }],
-      imageUrl: '', status: 'active'
+      imageUrl: ''
     });
     setImagePreview(null);
     setShowForm(true);
@@ -108,21 +117,27 @@ function AdminPackages() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    // Strip any "$" and send price as a real number — Prisma schema requires Float
+    const cleanedPrice = Number(formData.price.toString().replace('$', '').trim());
+
     const submissionData = {
       ...formData,
-      price: formData.price.toString().startsWith('$') ? formData.price : `$${formData.price}`
+      price: cleanedPrice,
+      location: formData.location || 'Ethiopia'
     };
 
     try {
       if (editingPackage) {
-        const res = await axios.put(`http://localhost:8000/api/tours/${editingPackage._id}`, submissionData);
-        setPackages(packages.map(p => p._id === editingPackage._id ? res.data : p));
+        const res = await api.put(`/tours/${editingPackage.id}`, submissionData);
+        setPackages(packages.map(p => p.id === editingPackage.id ? res.data : p));
       } else {
-        const res = await axios.post('http://localhost:8000/api/tours', submissionData);
+        const res = await api.post('/tours', submissionData);
         setPackages([...packages, res.data]);
       }
       setShowForm(false);
     } catch (err) {
+      console.error("Save error:", err);
       alert("Error saving data to database. Ensure backend is running.");
     }
   };
@@ -140,18 +155,18 @@ function AdminPackages() {
           <div className="package-detail-card" onClick={e => e.stopPropagation()}>
             <div style={{padding: '20px'}}>
               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <h3>{selectedPackage.name}</h3>
+                <h3>{selectedPackage.title}</h3>
                 <span className="package-tag">{selectedPackage.duration}</span>
               </div>
 
               {selectedPackage.imageUrl && (
                 <div className="package-image-container">
-                  <img src={selectedPackage.imageUrl} alt={selectedPackage.name} className="package-image" />
+                  <img src={selectedPackage.imageUrl} alt={selectedPackage.title} className="package-image" />
                 </div>
               )}
 
               <div className="itinerary-indicator">
-                <strong>Price:</strong> {selectedPackage.price}
+                <strong>Price:</strong> ${selectedPackage.price}
               </div>
 
               <div className="description-display">
@@ -207,9 +222,10 @@ function AdminPackages() {
                  {imagePreview && <img src={imagePreview} className="package-thumbnail" style={{width: '100px', marginTop: '10px'}} alt="preview" />}
               </div>
 
-              <input type="text" name="name" placeholder="Package Name" className="itinerary-item-form" style={{width:'100%'}} value={formData.name} onChange={handleInputChange} required />
+              <input type="text" name="title" placeholder="Package Name" className="itinerary-item-form" style={{width:'100%'}} value={formData.title} onChange={handleInputChange} required />
               <input type="text" name="price" placeholder="Price (e.g. 1200)" className="itinerary-item-form" style={{width:'100%'}} value={formData.price} onChange={handleInputChange} required />
               <input type="text" name="duration" placeholder="Duration (e.g. 5 Days / 4 Nights)" className="itinerary-item-form" style={{width:'100%'}} value={formData.duration} onChange={handleInputChange} required />
+              <input type="text" name="location" placeholder="Location (e.g. Lalibela, Ethiopia)" className="itinerary-item-form" style={{width:'100%'}} value={formData.location} onChange={handleInputChange} />
               <textarea name="description" placeholder="Description" className="description-display" style={{width:'100%'}} value={formData.description} onChange={handleInputChange} required />
               <textarea name="highlights" placeholder="Highlights" className="highlights-display" style={{width:'100%'}} value={formData.highlights} onChange={handleInputChange} />
               <textarea name="travelDetails" placeholder="Travel Details" className="travel-details-display" style={{width:'100%'}} value={formData.travelDetails} onChange={handleInputChange} />
@@ -252,17 +268,17 @@ function AdminPackages() {
           </thead>
           <tbody>
             {packages.map((pkg) => (
-              <tr key={pkg._id} style={{borderBottom: '1px solid #eee'}}>
+              <tr key={pkg.id} style={{borderBottom: '1px solid #eee'}}>
                 <td className="package-table-image" style={{padding: '10px'}}>
                    <img src={pkg.imageUrl} className="package-thumbnail" alt="" />
                 </td>
-                <td style={{padding: '10px'}}><strong>{pkg.name}</strong></td>
-                <td>{pkg.price}</td>
+                <td style={{padding: '10px'}}><strong>{pkg.title}</strong></td>
+                <td>${pkg.price}</td>
                 <td>{pkg.duration}</td>
                 <td className="action-btns">
                   <button className="view-btn" onClick={() => handleView(pkg)}>View</button>
                   <button className="add-itinerary-btn" style={{background:'#556B2F'}} onClick={() => handleEdit(pkg)}>Edit</button>
-                  <button className="remove-itinerary-btn" onClick={() => handleDelete(pkg._id, pkg.name)}>Delete</button>
+                  <button className="remove-itinerary-btn" onClick={() => handleDelete(pkg.id, pkg.title)}>Delete</button>
                 </td>
               </tr>
             ))}

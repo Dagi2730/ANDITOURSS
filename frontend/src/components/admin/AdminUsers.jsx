@@ -1,63 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../lib/api';
 
 function AdminUsers() {
-  const [users, setUsers] = useState([
-    { 
-      id: 1, 
-      name: 'John Smith', 
-      email: 'john@example.com', 
-      phone: '+251 911 234567',
-      role: 'customer', 
-      status: 'active', 
-      joinDate: '2024-01-15',
-      lastLogin: '2024-03-15',
-      bookings: 3
-    },
-    { 
-      id: 2, 
-      name: 'Sarah Johnson', 
-      email: 'sarah@example.com', 
-      phone: '+251 922 345678',
-      role: 'customer', 
-      status: 'active', 
-      joinDate: '2024-02-10',
-      lastLogin: '2024-03-14',
-      bookings: 5
-    },
-    { 
-      id: 3, 
-      name: 'Michael Brown', 
-      email: 'michael@example.com', 
-      phone: '+251 933 456789',
-      role: 'admin', 
-      status: 'active', 
-      joinDate: '2024-01-05',
-      lastLogin: '2024-03-15',
-      bookings: 12
-    },
-    { 
-      id: 4, 
-      name: 'Emma Wilson', 
-      email: 'emma@example.com', 
-      phone: '+251 944 567890',
-      role: 'customer', 
-      status: 'inactive', 
-      joinDate: '2024-02-28',
-      lastLogin: '2024-03-01',
-      bookings: 1
-    },
-    { 
-      id: 5, 
-      name: 'David Lee', 
-      email: 'david@example.com', 
-      phone: '+251 955 678901',
-      role: 'customer', 
-      status: 'active', 
-      joinDate: '2024-03-01',
-      lastLogin: '2024-03-13',
-      bookings: 2
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDetailsCard, setShowDetailsCard] = useState(false);
@@ -67,10 +14,42 @@ function AdminUsers() {
     setShowDetailsCard(true);
   };
 
-  const handleDelete = (userId, userName) => {
-    if (window.confirm(`Are you sure you want to delete user "${userName}"?`)) {
-      setUsers(users.filter(user => user.id !== userId));
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.get('/users');
+      const mapped = res.data.map(u => ({
+        id: u.id,
+        name: u.name || '',
+        email: u.email,
+        phone: u.phone || '',
+        role: u.role,
+        status: 'active',
+        joinDate: u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '',
+        lastLogin: '',
+        bookings: u.bookingsCount || 0,
+      }));
+      setUsers(mapped);
+    } catch (err) {
+      setError('Failed to load users. Ensure backend is running.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleDelete = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to delete user "${userName}"?`)) return;
+    try {
+      await api.delete(`/users/${userId}`);
+      setUsers((prev) => prev.filter(u => u.id !== userId));
       alert(`User "${userName}" deleted successfully!`);
+    } catch (err) {
+      alert('Failed to delete user. Check backend logs.');
     }
   };
 
@@ -94,7 +73,6 @@ function AdminUsers() {
         </div>
       </div>
 
-      {/* User Details Modal */}
       {showDetailsCard && selectedUser && (
         <div className="admin-modal-overlay" onClick={() => setShowDetailsCard(false)}>
           <div className="user-detail-card" onClick={e => e.stopPropagation()}>
@@ -143,18 +121,12 @@ function AdminUsers() {
                   <p>🕒 {selectedUser.lastLogin}</p>
                 </div>
               </div>
-              
+
               <div className="card-actions">
-                <button 
-                  className="btn-print" 
-                  onClick={() => alert('Exporting user data...')}
-                >
+                <button className="btn-print" onClick={() => alert('Exporting user data...')}>
                   Export User Data
                 </button>
-                <button 
-                  className="btn-close" 
-                  onClick={() => setShowDetailsCard(false)}
-                >
+                <button className="btn-close" onClick={() => setShowDetailsCard(false)}>
                   Close
                 </button>
               </div>
@@ -167,7 +139,7 @@ function AdminUsers() {
         <div className="table-header">
           <h3>User Management</h3>
           <div>
-            <button 
+            <button
               className="admin-btn admin-btn-secondary admin-btn-sm"
               onClick={() => alert('Exporting users data...')}
             >
@@ -175,6 +147,9 @@ function AdminUsers() {
             </button>
           </div>
         </div>
+
+        {loading && <p style={{ padding: '20px' }}>Loading users...</p>}
+        {error && <p style={{ padding: '20px', color: '#c62828' }}>{error}</p>}
 
         <div style={{ overflowX: 'auto' }}>
           <table className="admin-plain-table users-table">
@@ -192,18 +167,21 @@ function AdminUsers() {
             <tbody>
               {users.map((user) => (
                 <tr key={user.id}>
-                  <td>#{user.id}</td>
-                  <td>
+                  <td className="id-cell">#{user.id.slice(0, 8)}</td>
+                  <td className="name-cell">
                     <strong>{user.name}</strong>
-                    <div className="user-role-indicator" style={{ 
-                      fontSize: '0.8rem', 
-                      color: user.role?.toString().toUpperCase() === 'ADMIN' ? '#4a148c' : '#0277bd',
-                      marginTop: '4px'
-                    }}>
+                    <div
+                      className="user-role-indicator"
+                      style={{
+                        fontSize: '0.8rem',
+                        color: user.role?.toString().toUpperCase() === 'ADMIN' ? '#4a148c' : '#0277bd',
+                        marginTop: '4px',
+                      }}
+                    >
                       {user.role?.toString().toUpperCase() === 'ADMIN' ? '👑 Admin' : '👤 Customer'}
                     </div>
                   </td>
-                  <td>{user.email}</td>
+                  <td className="email-cell">{user.email}</td>
                   <td>{user.phone}</td>
                   <td>
                     <span className="bookings-count">{user.bookings}</span>
@@ -211,14 +189,10 @@ function AdminUsers() {
                   <td>{user.joinDate}</td>
                   <td>
                     <div className="action-btns">
-                      <button 
-                        className="view-btn"
-                        onClick={() => handleView(user)}
-                        title="View Details"
-                      >
+                      <button className="view-btn" onClick={() => handleView(user)} title="View Details">
                         👁️ Details
                       </button>
-                      <button 
+                      <button
                         className="admin-btn admin-btn-danger admin-btn-sm admin-btn-icon"
                         onClick={() => handleDelete(user.id, user.name)}
                         title="Delete User"
@@ -238,7 +212,46 @@ function AdminUsers() {
         .admin-users-wrapper {
           padding: 20px;
         }
-        
+
+        .admin-plain-table.users-table {
+          width: 100%;
+          border-collapse: collapse;
+          table-layout: fixed;
+        }
+
+        .admin-plain-table.users-table th,
+        .admin-plain-table.users-table td {
+          padding: 14px 16px;
+          text-align: left;
+          vertical-align: middle;
+          border-bottom: 1px solid #eee;
+          white-space: normal;
+          word-break: break-word;
+        }
+
+        .admin-plain-table.users-table th {
+          font-weight: 600;
+          font-size: 0.85rem;
+          text-transform: uppercase;
+          letter-spacing: 0.02em;
+          color: #666;
+          background: #fafafa;
+        }
+
+        .admin-plain-table.users-table .id-cell {
+          font-family: monospace;
+          font-size: 0.85rem;
+          color: #888;
+        }
+
+        .admin-plain-table.users-table .name-cell strong {
+          display: block;
+        }
+
+        .admin-plain-table.users-table .email-cell {
+          word-break: break-all;
+        }
+
         .user-detail-card {
           background: white;
           border-radius: 12px;
@@ -250,7 +263,7 @@ function AdminUsers() {
           animation: slideIn 0.3s ease;
           position: relative;
         }
-        
+
         .user-tag {
           background: #f5f5f5;
           padding: 6px 12px;
@@ -259,7 +272,7 @@ function AdminUsers() {
           color: var(--admin-text);
           font-weight: 500;
         }
-        
+
         .role-badge {
           display: inline-block;
           padding: 4px 12px;
@@ -267,17 +280,17 @@ function AdminUsers() {
           font-size: 0.85rem;
           font-weight: 500;
         }
-        
+
         .role-badge.admin {
           background-color: #f3e5f5;
           color: #4a148c;
         }
-        
+
         .role-badge.customer {
           background-color: #e3f2fd;
           color: #0277bd;
         }
-        
+
         .status-badge {
           display: inline-block;
           padding: 4px 12px;
@@ -285,17 +298,17 @@ function AdminUsers() {
           font-size: 0.85rem;
           font-weight: 500;
         }
-        
+
         .status-badge.active {
           background-color: #e8f5e9;
           color: #2e7d32;
         }
-        
+
         .status-badge.inactive {
           background-color: #f5f5f5;
           color: #666;
         }
-        
+
         .bookings-count {
           display: inline-flex;
           align-items: center;
@@ -308,13 +321,13 @@ function AdminUsers() {
           font-weight: bold;
           font-size: 0.9rem;
         }
-        
+
         .user-role-indicator {
           display: inline-flex;
           align-items: center;
           gap: 4px;
         }
-        
+
         @keyframes slideIn {
           from {
             opacity: 0;
@@ -325,13 +338,13 @@ function AdminUsers() {
             transform: translateY(0);
           }
         }
-        
+
         .action-btns {
           display: flex;
           gap: 8px;
           align-items: center;
         }
-        
+
         .view-btn {
           padding: 6px 12px;
           border: none;
@@ -342,43 +355,43 @@ function AdminUsers() {
           background: #e3f2fd;
           color: #0277bd;
         }
-        
+
         .view-btn:hover {
           background: #bbdefb;
           transform: translateY(-1px);
         }
-        
+
         @media (max-width: 768px) {
           .user-detail-card {
             width: 95%;
             max-height: 95vh;
           }
-          
+
           .card-content {
             padding: 20px;
           }
-          
+
           .card-header {
             flex-direction: column;
             align-items: flex-start;
             gap: 10px;
           }
-          
+
           .detail-grid {
             grid-template-columns: 1fr;
             gap: 15px;
           }
-          
+
           .action-btns {
             flex-direction: column;
             align-items: stretch;
           }
-          
+
           .action-btns button {
             width: 100%;
             margin-bottom: 5px;
           }
-          
+
           .users-table {
             min-width: 600px;
           }

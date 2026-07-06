@@ -7,8 +7,7 @@ const initialState = {
     total: 0,
     pending: 0,
     confirmed: 0,
-    new: 0,
-    updated: 0
+    cancelled: 0,
   },
   isError: false,
   isSuccess: false,
@@ -122,22 +121,14 @@ export const adminBookingSlice = createSlice({
       })
       .addCase(updateBookingStatus.fulfilled, (state, action) => {
         state.bookings = state.bookings.map((booking) =>
-          booking._id === action.payload._id ? action.payload : booking
+          booking.id === action.payload.id ? action.payload : booking
         );
-        // Update stats
-        if (action.payload.status === 'confirmed') {
-          state.stats.confirmed += 1;
-          state.stats.pending -= 1;
-        }
       })
       .addCase(deleteBooking.fulfilled, (state, action) => {
-        state.bookings = state.bookings.filter((booking) => booking._id !== action.payload);
-        state.stats.total -= 1;
+        state.bookings = state.bookings.filter((booking) => booking.id !== action.payload);
       });
   },
 });
 
 export const { reset } = adminBookingSlice.actions;
 export default adminBookingSlice.reducer;
-
-

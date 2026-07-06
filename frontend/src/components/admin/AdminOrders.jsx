@@ -15,7 +15,6 @@ function AdminOrders() {
     dispatch(getBookings());
     dispatch(getBookingStats());
     
-    // Refresh bookings and stats every 30 seconds to catch new/updated bookings
     const interval = setInterval(() => {
       dispatch(getBookings());
       dispatch(getBookingStats());
@@ -24,7 +23,6 @@ function AdminOrders() {
     return () => clearInterval(interval);
   }, [dispatch]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (activeDropdown !== null) {
@@ -41,7 +39,7 @@ function AdminOrders() {
   const handleStatusChange = async (id, newStatus) => {
     try {
       await dispatch(updateBookingStatus({ id, status: newStatus })).unwrap();
-      dispatch(getBookingStats()); // Refresh stats
+      dispatch(getBookingStats());
       setActiveDropdown(null);
     } catch (error) {
       alert('Failed to update booking status');
@@ -52,7 +50,7 @@ function AdminOrders() {
     if (window.confirm('Delete this booking?')) {
       try {
         await dispatch(deleteBooking(id)).unwrap();
-        dispatch(getBookingStats()); // Refresh stats
+        dispatch(getBookingStats());
       } catch (error) {
         alert('Failed to delete booking');
       }
@@ -61,16 +59,16 @@ function AdminOrders() {
 
   const getStatusBadge = (status) => {
     const statusStyles = {
-      pending: { bg: '#ff9800', color: '#fff' },
-      confirmed: { bg: '#4caf50', color: '#fff' },
-      cancelled: { bg: '#f44336', color: '#fff' }
+      PENDING: { bg: '#ff9800', color: '#fff' },
+      CONFIRMED: { bg: '#4caf50', color: '#fff' },
+      CANCELLED: { bg: '#f44336', color: '#fff' }
     };
     
-    const style = statusStyles[status] || statusStyles.pending;
+    const style = statusStyles[status] || statusStyles.PENDING;
     
     return (
       <span 
-        className={`status-badge ${status}`}
+        className={`status-badge ${status?.toLowerCase()}`}
         style={{
           backgroundColor: style.bg,
           color: style.color,
@@ -88,41 +86,13 @@ function AdminOrders() {
 
   const filteredBookings = filterStatus === 'all' 
     ? bookings 
-    : bookings.filter(booking => booking.status === filterStatus);
+    : bookings.filter(booking => booking.status === filterStatus.toUpperCase());
 
   return (
     <div className="admin-orders-wrapper">
       <div className="admin-section-header">
         <div>
           <h2>Customer Bookings</h2>
-          {(stats.new > 0 || stats.updated > 0) && (
-            <div style={{ marginTop: '10px', display: 'flex', gap: '15px', alignItems: 'center' }}>
-              {stats.new > 0 && (
-                <span style={{
-                  background: '#f44336',
-                  color: 'white',
-                  padding: '4px 12px',
-                  borderRadius: '12px',
-                  fontSize: '0.85rem',
-                  fontWeight: '600'
-                }}>
-                  ⚠️ {stats.new} New Booking{stats.new !== 1 ? 's' : ''}
-                </span>
-              )}
-              {stats.updated > 0 && (
-                <span style={{
-                  background: '#ff9800',
-                  color: 'white',
-                  padding: '4px 12px',
-                  borderRadius: '12px',
-                  fontSize: '0.85rem',
-                  fontWeight: '600'
-                }}>
-                  ✏️ {stats.updated} Updated Booking{stats.updated !== 1 ? 's' : ''}
-                </span>
-              )}
-            </div>
-          )}
         </div>
         <div className="filter-tabs">
           {['all', 'pending', 'confirmed', 'cancelled'].map((s) => (
@@ -157,34 +127,27 @@ function AdminOrders() {
             <tbody>
               {filteredBookings.length > 0 ? (
                 filteredBookings.map((order) => (
-                  <tr 
-                    key={order._id}
-                    style={{
-                      backgroundColor: order.isNewBooking ? '#fff3cd' : order.isUpdated ? '#ffe0b2' : 'transparent'
-                    }}
-                  >
+                  <tr key={order.id}>
                     <td>
-                      <strong>#{order._id.slice(-6)}</strong>
-                      {order.isNewBooking && <span style={{ marginLeft: '8px', color: '#f44336' }}>🆕</span>}
-                      {order.isUpdated && !order.isNewBooking && <span style={{ marginLeft: '8px', color: '#ff9800' }}>✏️</span>}
+                      <strong>#{order.id.slice(-6)}</strong>
                     </td>
-                    <td>{order.fullName}</td>
-                    <td>{order.tour?.name || 'N/A'}</td>
-                    <td>{order.numberOfTourists} Person(s)</td>
+                    <td>{order.user?.name}</td>
+                    <td>{order.tour?.title || 'N/A'}</td>
+                    <td>{order.guests} Person(s)</td>
                     <td style={{ overflow: 'visible' }}>
-                      <div className="status-dropdown-container" ref={el => dropdownRefs.current[order._id] = el}>
+                      <div className="status-dropdown-container" ref={el => dropdownRefs.current[order.id] = el}>
                         <button 
                           className="status-trigger"
-                          onClick={() => setActiveDropdown(activeDropdown === order._id ? null : order._id)}
+                          onClick={() => setActiveDropdown(activeDropdown === order.id ? null : order.id)}
                         >
                           {getStatusBadge(order.status)} <small>▼</small>
                         </button>
                         
-                        {activeDropdown === order._id && (
+                        {activeDropdown === order.id && (
                           <div className="status-menu">
-                            <button onClick={() => handleStatusChange(order._id, 'pending')}>Mark Pending</button>
-                            <button onClick={() => handleStatusChange(order._id, 'confirmed')}>Mark Confirmed</button>
-                            <button onClick={() => handleStatusChange(order._id, 'cancelled')}>Mark Cancelled</button>
+                            <button onClick={() => handleStatusChange(order.id, 'PENDING')}>Mark Pending</button>
+                            <button onClick={() => handleStatusChange(order.id, 'CONFIRMED')}>Mark Confirmed</button>
+                            <button onClick={() => handleStatusChange(order.id, 'CANCELLED')}>Mark Cancelled</button>
                           </div>
                         )}
                       </div>
@@ -192,7 +155,7 @@ function AdminOrders() {
                     <td>
                       <div className="action-btns">
                         <button className="view-btn" onClick={() => setSelectedOrder(order)}>👁️ Details</button>
-                        <button className="delete-btn" onClick={() => handleDelete(order._id)}>🗑️</button>
+                        <button className="delete-btn" onClick={() => handleDelete(order.id)}>🗑️</button>
                       </div>
                     </td>
                   </tr>
@@ -217,29 +180,29 @@ function AdminOrders() {
             <div className="card-content">
               <div className="card-header">
                 <h3>Booking Details</h3>
-                <span className="order-tag">#{selectedOrder._id.slice(-6)}</span>
+                <span className="order-tag">#{selectedOrder.id.slice(-6)}</span>
               </div>
 
               <div className="detail-grid">
                 <div className="info-group">
                   <label>Customer Name</label>
-                  <p>{selectedOrder.fullName}</p>
+                  <p>{selectedOrder.user?.name}</p>
                 </div>
                 <div className="info-group">
                   <label>Phone Number</label>
-                  <p>{selectedOrder.phone}</p>
+                  <p>{selectedOrder.user?.phone}</p>
                 </div>
                 <div className="info-group">
                   <label>Email Address</label>
-                  <p>{selectedOrder.email}</p>
+                  <p>{selectedOrder.user?.email}</p>
                 </div>
                 <div className="info-group">
                   <label>Tour Package</label>
-                  <p className="highlight-text">{selectedOrder.tour?.name || 'N/A'}</p>
+                  <p className="highlight-text">{selectedOrder.tour?.title || 'N/A'}</p>
                 </div>
                 <div className="info-group">
                   <label>Visitors</label>
-                  <p>{selectedOrder.numberOfTourists} Person(s)</p>
+                  <p>{selectedOrder.guests} Person(s)</p>
                 </div>
                 <div className="info-group">
                   <label>Duration</label>
@@ -247,7 +210,7 @@ function AdminOrders() {
                 </div>
                 <div className="info-group full">
                   <label>Travel Dates</label>
-                  <p>📅 {selectedOrder.dateFrom ? new Date(selectedOrder.dateFrom).toLocaleDateString() : 'N/A'} ➔ {selectedOrder.dateTo ? new Date(selectedOrder.dateTo).toLocaleDateString() : 'N/A'}</p>
+                  <p>📅 {selectedOrder.travelDate ? new Date(selectedOrder.travelDate).toLocaleDateString() : 'N/A'} ➔ {selectedOrder.travelDateEnd ? new Date(selectedOrder.travelDateEnd).toLocaleDateString() : 'N/A'}</p>
                 </div>
                 <div className="info-group full">
                   <label>Customer Comment</label>
@@ -255,12 +218,6 @@ function AdminOrders() {
                     {selectedOrder.comments || "No specific comments provided."}
                   </div>
                 </div>
-                {selectedOrder.isUpdated && (
-                  <div className="info-group full">
-                    <label style={{ color: '#ff9800' }}>⚠️ Last Updated</label>
-                    <p>{selectedOrder.lastUpdatedAt ? new Date(selectedOrder.lastUpdatedAt).toLocaleString() : 'N/A'}</p>
-                  </div>
-                )}
               </div>
               
               <div className="card-actions">
@@ -276,5 +233,3 @@ function AdminOrders() {
 }
 
 export default AdminOrders;
-
-

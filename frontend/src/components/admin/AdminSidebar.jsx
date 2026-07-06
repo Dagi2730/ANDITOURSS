@@ -4,7 +4,7 @@ import { FaTachometerAlt, FaBox, FaShoppingCart, FaUsers, FaStar, FaSignOutAlt, 
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
 
-function AdminSidebar({ activeTab, setActiveTab }) {
+function AdminSidebar({ activeTab, setActiveTab, mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
@@ -19,7 +19,7 @@ function AdminSidebar({ activeTab, setActiveTab }) {
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      // Clear any admin authentication tokens from localStorage/sessionStorage
+      if (setMobileOpen) setMobileOpen(false);
       dispatch(logout());
       localStorage.removeItem('user');
       localStorage.removeItem('token');
@@ -27,22 +27,31 @@ function AdminSidebar({ activeTab, setActiveTab }) {
       localStorage.removeItem('adminUser');
       sessionStorage.removeItem('adminToken');
       sessionStorage.removeItem('adminUser');
-      
-      // Clear any cookies that might be storing admin auth
-      document.cookie = "adminToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      
-      // Redirect to home page
+      document.cookie = 'adminToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       navigate('/');
-      
-      // Optional: Show a success message
       alert('Logged out successfully!');
     }
   };
 
+  const handleSidebarItemClick = (itemId) => {
+    setActiveTab(itemId);
+    if (setMobileOpen) setMobileOpen(false);
+  };
+
   return (
-    <aside className="admin-sidebar">
+    <aside className={`admin-sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
       <div className="admin-sidebar-logo">
         <h2>🌿 ANDI TOURS</h2>
+        {mobileOpen && (
+          <button
+            type="button"
+            className="admin-sidebar-close"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close admin menu"
+          >
+            ×
+          </button>
+        )}
       </div>
       
       <ul className="admin-nav-list">
@@ -50,7 +59,7 @@ function AdminSidebar({ activeTab, setActiveTab }) {
           <li key={item.id}>
             <button
               className={`admin-nav-item ${activeTab === item.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleSidebarItemClick(item.id)}
             >
               <span className="admin-nav-icon">{item.icon}</span>
               <span className="admin-nav-text">{item.label}</span>
@@ -59,7 +68,7 @@ function AdminSidebar({ activeTab, setActiveTab }) {
         ))}
       </ul>
       
-      <div style={{ padding: '20px', marginTop: 'auto' }}>
+      <div className="admin-sidebar-footer" style={{ padding: '20px', marginTop: 'auto' }}>
         <button
           className="admin-nav-item logout-btn"
           onClick={handleLogout}
@@ -175,39 +184,62 @@ function AdminSidebar({ activeTab, setActiveTab }) {
         .logout-btn:hover .admin-nav-icon {
           color: #e53935;
         }
-        
+
+        .admin-sidebar-close {
+          background: transparent;
+          border: none;
+          color: white;
+          font-size: 1.8rem;
+          cursor: pointer;
+          line-height: 1;
+          padding: 0;
+          margin-left: 8px;
+        }
+
         @media (max-width: 768px) {
           .admin-sidebar {
-            width: 70px;
-            overflow: hidden;
+            width: 100%;
+            min-width: auto;
+            height: auto;
+            transform: translateY(-110%);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+          }
+
+          .admin-sidebar.mobile-open {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
           }
           
+          .admin-sidebar-logo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+
           .admin-sidebar-logo h2 {
-            font-size: 0;
-            text-align: center;
+            font-size: 1.2rem;
+            margin: 0;
           }
-          
-          .admin-sidebar-logo h2::before {
-            content: "🌿";
-            font-size: 1.5rem;
-          }
-          
+
           .admin-nav-text {
-            display: none;
+            display: inline;
           }
           
           .admin-nav-icon {
-            margin-right: 0;
-            font-size: 1.2rem;
+            margin-right: 12px;
+            font-size: 1.1rem;
           }
           
           .admin-nav-item {
-            justify-content: center;
-            padding: 15px;
+            justify-content: flex-start;
+            padding: 14px 20px;
           }
           
           .logout-btn {
-            justify-content: center;
+            justify-content: flex-start;
           }
         }
       `}</style>

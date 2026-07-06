@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useSelector } from 'react-redux';
+import api from '../lib/api';
 import '../styles/TourDetail.css';
 
 const TourDetail = () => {
@@ -26,9 +26,7 @@ const TourDetail = () => {
   useEffect(() => {
     const fetchTour = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || '';
-        const baseURL = API_URL || 'http://localhost:8000';
-        const response = await axios.get(`${baseURL}/api/tours/${id}`);
+        const response = await api.get(`/tours/${id}`);
         setTour(response.data);
         setLoading(false);
       } catch (error) {
@@ -66,22 +64,10 @@ const TourDetail = () => {
     setSubmitting(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '';
-      const baseURL = API_URL || 'http://localhost:8000';
-      const token = user.token;
-      
-      const response = await axios.post(
-        `${baseURL}/api/bookings`,
-        {
-          tourId: tour._id,
-          ...bookingData
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      await api.post('/bookings', {
+        tourId: tour.id,
+        ...bookingData
+      });
 
       alert('Booking submitted successfully! We will contact you soon.');
       setShowBookingForm(false);
@@ -111,20 +97,16 @@ const TourDetail = () => {
     return <div className="error-container">Tour not found</div>;
   }
 
-  const API_URL = import.meta.env.VITE_API_URL || '';
-  const baseURL = API_URL || 'http://localhost:8000';
-  const imageUrl = tour.imageUrl 
-    ? (tour.imageUrl.startsWith('http') ? tour.imageUrl : `${baseURL}${tour.imageUrl}`)
-    : 'https://via.placeholder.com/800x400?text=Tour+Image';
+  const imageUrl = tour.imageUrl || 'https://via.placeholder.com/800x400?text=Tour+Image';
 
   return (
     <div className="tour-detail-container">
       {/* Hero Section */}
       <div className="tour-detail-hero">
-        <img src={imageUrl} alt={tour.name} className="tour-hero-image" />
+        <img src={imageUrl} alt={tour.title} className="tour-hero-image" />
         <div className="tour-hero-overlay">
           <div className="tour-hero-content">
-            <h1 className="tour-hero-title">{tour.name}</h1>
+            <h1 className="tour-hero-title">{tour.title}</h1>
             <div className="tour-hero-meta">
               <span className="tour-price-large">${tour.price}</span>
               <span className="tour-duration-large">⏱ {tour.duration}</span>
@@ -353,5 +335,3 @@ const TourDetail = () => {
 };
 
 export default TourDetail;
-
-
