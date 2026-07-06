@@ -45,9 +45,6 @@ function Navbar() {
         ) : (
           <>
             <li><Link to="/my-bookings" className="nav-item" onClick={handleLinkClick}>My Bookings</Link></li>
-            {user.role?.toString().toUpperCase() === 'ADMIN' && (
-              <li><Link to="/admin" className="nav-item" onClick={handleLinkClick}>Admin Dashboard</Link></li>
-            )}
             <li>
               <button type="button" onClick={handleLogout} className="nav-item logout-btn">
                 Logout

@@ -395,11 +395,9 @@ function AdminBlog() {
             <p>Loading stories...</p>
           </div>
         ) : posts.length === 0 ? (
-          <div style={{ padding: '30px', textAlign: 'center', color: '#666' }}>
-            <div style={{ fontSize: '3rem', opacity: 0.5, marginBottom: '20px' }}>
-              📝
-            </div>
-            <h3 style={{ color: '#333', marginBottom: '10px' }}>No stories yet</h3>
+            <div className="admin-blog-empty-state">
+            <div className="empty-icon">📝</div>
+            <h3>No stories yet</h3>
             <p>Click "New Story" to create your first gallery item.</p>
           </div>
         ) : (

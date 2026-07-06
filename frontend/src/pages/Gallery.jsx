@@ -20,59 +20,56 @@ function Gallery() {
   };
 
   return (
-    <div className="destinations-page">
-      <section className="hero-section">
-        <div className="hero-overlay">
-          <div className="hero-content">
-            <h1 className="hero-title">Guest Stories & Gallery</h1>
-            <p className="hero-subtitle">
-              Real moments from Andi Tours journeys across Ethiopia – curated by your team.
-            </p>
-          </div>
+    <div className="destinations-container gallery-page">
+      <section className="destinations-hero-transparent gallery-hero">
+        <div className="gallery-hero-content">
+          <p className="gallery-eyebrow">Travel Stories</p>
+          <h1 className="hero-title-white">Guest Stories & Gallery</h1>
+          <p className="hero-subtitle">
+            Real moments from Andi Tours journeys across Ethiopia — curated by your team.
+          </p>
         </div>
       </section>
 
-      <section className="destinations-list" style={{ paddingTop: '40px' }}>
+      <section className="gallery-content-section">
         {isLoading && posts.length === 0 ? (
-          <div className="loading-message">Loading stories...</div>
+          <div className="gallery-loading">Loading stories...</div>
         ) : posts.length === 0 ? (
-          <div className="no-destinations">
+          <div className="gallery-empty-state">
             <p>No stories have been published yet. Check back soon!</p>
           </div>
         ) : (
-          <div className="destinations-grid">
+          <div className="destinations-grid gallery-grid">
             {posts.map((post) => (
-              <article key={post.id} className="destination-card">
-                <div className="destination-image-wrapper">
+              <article key={post.id} className="tour-card gallery-card">
+                <div className="tour-image gallery-image-wrapper">
                   <img
                     src={resolveImage(post.imageUrl)}
                     alt={post.title}
-                    className="destination-image"
+                    className="gallery-image"
                   />
                   {post.featured && (
-                    <span className="destination-badge">Featured</span>
+                    <span className="tour-price">Featured</span>
                   )}
                 </div>
-                <div className="destination-content">
-                  <h2 className="destination-title">{post.title}</h2>
+                <div className="tour-info gallery-content">
+                  <h2 className="gallery-title">{post.title}</h2>
                   {post.tour && (
-                    <p className="destination-meta" style={{ fontWeight: 600 }}>
-                      Tour: {post.tour.title}
-                    </p>
+                    <p className="gallery-tour">{post.tour.title}</p>
                   )}
                   {post.location && (
-                    <p className="destination-location">📍 {post.location}</p>
+                    <p className="location">📍 {post.location}</p>
                   )}
                   {post.subtitle && (
-                    <p className="destination-meta">{post.subtitle}</p>
+                    <p className="gallery-subtitle">{post.subtitle}</p>
                   )}
-                  <p className="destination-description">
+                  <p className="gallery-excerpt">
                     {post.story.length > 160
                       ? `${post.story.substring(0, 160)}...`
                       : post.story}
                   </p>
-                  <div className="destination-footer">
-                    <span className="destination-duration">
+                  <div className="tour-footer gallery-footer">
+                    <span className="gallery-date">
                       {new Date(post.createdAt).toLocaleDateString(undefined, {
                         year: 'numeric',
                         month: 'short',
@@ -80,9 +77,11 @@ function Gallery() {
                       })}
                     </span>
                     {post.tags && post.tags.length > 0 && (
-                      <span className="destination-price">
-                        {post.tags.slice(0, 2).join(' • ')}
-                      </span>
+                      <div className="gallery-tags">
+                        {post.tags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="gallery-tag">{tag}</span>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
