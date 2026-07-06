@@ -1,4 +1,5 @@
-import { randomUUID, createHash } from 'crypto';
+import { randomUUID } from 'crypto';
+import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -7,18 +8,19 @@ async function main() {
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@anditours.com';
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
+  // 1. Hash the password using bcrypt (standardized approach)
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(adminPassword, salt);
+
   const tours = [
     {
       title: 'Lalibela Historical Tour',
-      description:
-        'Explore the rock-hewn churches of Lalibela, a UNESCO World Heritage site and one of Ethiopia\'s most sacred destinations.',
+      description: 'Explore the rock-hewn churches of Lalibela, a UNESCO World Heritage site and one of Ethiopia\'s most sacred destinations.',
       price: 850,
       duration: '4 Days / 3 Nights',
       location: 'Lalibela, Amhara',
-      highlights:
-        'Visit all 11 monolithic churches\nWitness traditional Ethiopian Orthodox ceremonies\nExplore local markets and cuisine',
-      travelDetails:
-        'Includes airport transfers, guided tours, accommodation, and daily breakfast.',
+      highlights: 'Visit all 11 monolithic churches\nWitness traditional Ethiopian Orthodox ceremonies\nExplore local markets and cuisine',
+      travelDetails: 'Includes airport transfers, guided tours, accommodation, and daily breakfast.',
       itinerary: [
         { day: 1, title: 'Arrival in Lalibela', description: 'Airport pickup and hotel check-in.' },
         { day: 2, title: 'Northern Cluster Churches', description: 'Guided tour of the northern church group.' },
@@ -29,8 +31,7 @@ async function main() {
     },
     {
       title: 'Simien Mountains Trek',
-      description:
-        'Trek through dramatic escarpments and spot gelada baboons in the Simien Mountains National Park.',
+      description: 'Trek through dramatic escarpments and spot gelada baboons in the Simien Mountains National Park.',
       price: 1200,
       duration: '6 Days / 5 Nights',
       location: 'Simien Mountains, Amhara',
@@ -44,23 +45,19 @@ async function main() {
     },
   ];
 
+  // Seed Tours
   for (const tour of tours) {
-    await prisma.tour.upsert({
-      where: { id: '00000000-0000-0000-0000-000000000001' },
-      update: {},
-      create: tour,
-    }).catch(async () => {
-      await prisma.tour.create({ data: tour });
-    });
+    await prisma.tour.create({ data: tour });
   }
 
+  // Seed Admin User
   await prisma.user.upsert({
     where: { email: adminEmail },
-    update: { role: 'ADMIN', password: createHash('sha256').update(adminPassword).digest('hex') },
+    update: { role: 'ADMIN', password: hashedPassword },
     create: {
       id: randomUUID(),
       email: adminEmail,
-      password: createHash('sha256').update(adminPassword).digest('hex'),
+      password: hashedPassword,
       name: 'Admin',
       role: 'ADMIN',
     },

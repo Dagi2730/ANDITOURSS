@@ -1,9 +1,8 @@
-import { randomUUID, createHash } from 'crypto';
+import { randomUUID } from 'crypto';
+import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
 import prisma from '../lib/prisma.js';
 import generateToken from '../utils/generateToken.js';
-
-const hashPassword = (password) => createHash('sha256').update(password).digest('hex');
 
 const register = asyncHandler(async (req, res) => {
   const { name, email, phone, password } = req.body;
@@ -19,11 +18,15 @@ const register = asyncHandler(async (req, res) => {
     throw new Error('User already exists');
   }
 
+  // Hash password with bcrypt
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
   const user = await prisma.user.create({
     data: {
       id: randomUUID(),
       email,
-      password: hashPassword(password),
+      password: hashedPassword,
       name: name || null,
       phone: phone || null,
       role: 'USER',
@@ -51,7 +54,11 @@ const login = asyncHandler(async (req, res) => {
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || user.password !== hashPassword(password)) {
+
+  // Compare entered password with bcrypt hash
+  const isMatch = user && (await bcrypt.compare(password, user.password));
+
+  if (!isMatch) {
     res.status(401);
     throw new Error('Invalid credentials');
   }

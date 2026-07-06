@@ -18,9 +18,14 @@ const requireAuth = asyncHandler(async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'anditours-local-secret');
+    // Ensure the secret exists
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('JWT_SECRET is not defined in environment variables');
+
+    const decoded = jwt.verify(token, secret);
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
+      select: { id: true, email: true, name: true, phone: true, role: true } // Don't expose password
     });
 
     if (!user) {
@@ -29,7 +34,6 @@ const requireAuth = asyncHandler(async (req, res, next) => {
     }
 
     req.user = user;
-    req.token = token;
     next();
   } catch (error) {
     res.status(401);

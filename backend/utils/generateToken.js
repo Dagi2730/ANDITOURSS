@@ -1,9 +1,10 @@
-// backend/utils/generateToken.js
-
 import jwt from 'jsonwebtoken';
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'anditours-local-secret', {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET is not defined');
+  
+  return jwt.sign({ id }, secret, {
     expiresIn: '30d',
   });
 };
