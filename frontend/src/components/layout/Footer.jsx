@@ -18,7 +18,7 @@ function Footer() {
         </div>
       </div>
       <div className="credit">
-        Created by <span>Dagmawit Andargachev</span> | all rights reserved!
+        Created by <span>Dagmawit Andargachew</span> | all rights reserved!
       </div>
     </footer>
   );
