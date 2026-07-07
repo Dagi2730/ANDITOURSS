@@ -76,13 +76,33 @@ const getMe = asyncHandler(async (req, res) => {
 
 // @desc    Update current user profile
 const updateMe = asyncHandler(async (req, res) => {
-  const { name, phone } = req.body;
+  const { name, phone, email, password } = req.body;
+
+  if (email && email !== req.user.email) {
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser && existingUser.id !== req.user.id) {
+      res.status(400);
+      throw new Error('Email already in use');
+    }
+  }
+
+  const updateData = {
+    name: name !== undefined ? name : req.user.name,
+    phone: phone !== undefined ? phone : req.user.phone,
+  };
+
+  if (email !== undefined) {
+    updateData.email = email;
+  }
+
+  if (password) {
+    const salt = await bcrypt.genSalt(10);
+    updateData.password = await bcrypt.hash(password, salt);
+  }
+
   const updated = await prisma.user.update({
     where: { id: req.user.id },
-    data: {
-      name: name !== undefined ? name : req.user.name,
-      phone: phone !== undefined ? phone : req.user.phone,
-    },
+    data: updateData,
   });
 
   res.json({ id: updated.id, email: updated.email, name: updated.name, phone: updated.phone, role: updated.role });

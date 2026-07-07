@@ -5,7 +5,7 @@ import { getBookings, getBookingStats, updateBookingStatus, deleteBooking } from
 function AdminOrders() {
   const { bookings, stats, isLoading } = useSelector((state) => state.adminBooking);
   const dispatch = useDispatch();
-  
+
   const [filterStatus, setFilterStatus] = useState('all');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -14,12 +14,12 @@ function AdminOrders() {
   useEffect(() => {
     dispatch(getBookings());
     dispatch(getBookingStats());
-    
+
     const interval = setInterval(() => {
       dispatch(getBookings());
       dispatch(getBookingStats());
     }, 30000);
-    
+
     return () => clearInterval(interval);
   }, [dispatch]);
 
@@ -63,11 +63,11 @@ function AdminOrders() {
       CONFIRMED: { bg: '#4caf50', color: '#fff' },
       CANCELLED: { bg: '#f44336', color: '#fff' }
     };
-    
+
     const style = statusStyles[status] || statusStyles.PENDING;
-    
+
     return (
-      <span 
+      <span
         className={`status-badge ${status?.toLowerCase()}`}
         style={{
           backgroundColor: style.bg,
@@ -84,8 +84,8 @@ function AdminOrders() {
     );
   };
 
-  const filteredBookings = filterStatus === 'all' 
-    ? bookings 
+  const filteredBookings = filterStatus === 'all'
+    ? bookings
     : bookings.filter(booking => booking.status === filterStatus.toUpperCase());
 
   return (
@@ -96,9 +96,9 @@ function AdminOrders() {
         </div>
         <div className="filter-tabs">
           {['all', 'pending', 'confirmed', 'cancelled'].map((s) => (
-            <button 
-              key={s} 
-              className={filterStatus === s ? 'active' : ''} 
+            <button
+              key={s}
+              className={filterStatus === s ? 'active' : ''}
               onClick={() => setFilterStatus(s)}
             >
               {s.toUpperCase()}
@@ -112,7 +112,7 @@ function AdminOrders() {
           Loading bookings...
         </div>
       ) : (
-        <div className="admin-table-container">
+        <div className="admin-table-container orders-table-container">
           <table className="admin-plain-table">
             <thead>
               <tr>
@@ -136,13 +136,13 @@ function AdminOrders() {
                     <td>{order.guests} Person(s)</td>
                     <td style={{ overflow: 'visible' }}>
                       <div className="status-dropdown-container" ref={el => dropdownRefs.current[order.id] = el}>
-                        <button 
+                        <button
                           className="status-trigger"
                           onClick={() => setActiveDropdown(activeDropdown === order.id ? null : order.id)}
                         >
                           {getStatusBadge(order.status)} <small>▼</small>
                         </button>
-                        
+
                         {activeDropdown === order.id && (
                           <div className="status-menu">
                             <button onClick={() => handleStatusChange(order.id, 'PENDING')}>Mark Pending</button>
@@ -172,7 +172,6 @@ function AdminOrders() {
         </div>
       )}
 
-      {/* Booking Details Modal */}
       {selectedOrder && (
         <div className="admin-modal-overlay" onClick={() => setSelectedOrder(null)}>
           <div className="order-detail-card" onClick={e => e.stopPropagation()}>
@@ -219,7 +218,7 @@ function AdminOrders() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="card-actions">
                 <button className="btn-print" onClick={() => window.print()}>Print Invoice</button>
                 <button className="btn-close" onClick={() => setSelectedOrder(null)}>Close</button>
@@ -228,6 +227,60 @@ function AdminOrders() {
           </div>
         </div>
       )}
+
+      <style>{`
+        .orders-table-container {
+          overflow: visible;
+        }
+
+        .status-dropdown-container {
+          position: relative;
+          display: inline-block;
+        }
+
+        .status-trigger {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 2px;
+        }
+
+        .status-menu {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          margin-top: 6px;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+          z-index: 999;
+          min-width: 160px;
+          overflow: visible;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .status-menu button {
+          padding: 10px 14px;
+          text-align: left;
+          border: none;
+          background: white;
+          cursor: pointer;
+          font-size: 0.85rem;
+          white-space: nowrap;
+        }
+
+        .status-menu button:hover {
+          background: #f5f5f5;
+        }
+
+        .status-menu button:not(:last-child) {
+          border-bottom: 1px solid #f0f0f0;
+        }
+      `}</style>
     </div>
   );
 }

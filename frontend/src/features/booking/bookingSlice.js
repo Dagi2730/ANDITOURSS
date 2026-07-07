@@ -16,7 +16,6 @@ const getConfig = (token) => ({
 const API_URL = import.meta.env.VITE_API_URL || '';
 const baseURL = API_URL || 'http://localhost:8000';
 
-// Get user's bookings
 export const getMyBookings = createAsyncThunk(
   'bookings/getMyBookings',
   async (_, thunkAPI) => {
@@ -32,7 +31,6 @@ export const getMyBookings = createAsyncThunk(
   }
 );
 
-// Create booking
 export const createBooking = createAsyncThunk(
   'bookings/create',
   async (bookingData, thunkAPI) => {
@@ -52,7 +50,6 @@ export const createBooking = createAsyncThunk(
   }
 );
 
-// Update booking
 export const updateBooking = createAsyncThunk(
   'bookings/update',
   async ({ id, bookingData }, thunkAPI) => {
@@ -72,7 +69,6 @@ export const updateBooking = createAsyncThunk(
   }
 );
 
-// Delete booking
 export const deleteBooking = createAsyncThunk(
   'bookings/delete',
   async (id, thunkAPI) => {
@@ -131,18 +127,16 @@ export const bookingSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.bookings = state.bookings.map((booking) =>
-          booking._id === action.payload._id ? action.payload : booking
+          booking.id === action.payload.id ? action.payload : booking
         );
       })
       .addCase(deleteBooking.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.bookings = state.bookings.filter((booking) => booking._id !== action.payload);
+        state.bookings = state.bookings.filter((booking) => booking.id !== action.payload);
       });
   },
 });
 
 export const { reset } = bookingSlice.actions;
 export default bookingSlice.reducer;
-
-

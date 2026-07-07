@@ -8,6 +8,8 @@ router.post('/register', register);
 router.post('/login', login);
 router.get('/me', requireAuth, getMe);
 router.put('/me', requireAuth, updateMe);
+router.get('/profile', requireAuth, getMe);
+router.put('/profile', requireAuth, updateMe);
 router.get('/', requireAuth, requireAdmin, getAllUsers);
 router.put('/:id/role', requireAuth, requireAdmin, updateUserRole);
 router.delete('/:id', requireAuth, requireAdmin, deleteUser);

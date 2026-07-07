@@ -8,6 +8,7 @@ import DestinationsPage from './pages/DestinationsPage';
 import Contact from './pages/Contact';
 import Gallery from './pages/Gallery';
 import TourDetail from './pages/TourDetail';
+import MyBookings from './pages/MyBookings';
 import AdminDashboard from './pages/AdminDashboard';
 import Protected from './components/Protected';
 
@@ -40,6 +41,14 @@ function App() {
             <Route path="contact" element={<Contact />} />
             <Route path="gallery" element={<Gallery />} />
             <Route path="tour/:id" element={<TourDetail />} />
+            <Route
+              path="my-bookings"
+              element={
+                <Protected>
+                  <MyBookings />
+                </Protected>
+              }
+            />
           </Route>
         </Routes>
       </div>
