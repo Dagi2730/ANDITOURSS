@@ -83,11 +83,11 @@ export const tourSlice = createSlice({
             })
             .addCase(deleteTour.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.tours = state.tours.filter((t) => t._id !== action.payload);
+                state.tours = state.tours.filter((t) => t.id !== action.payload);
             })
             .addCase(updateTour.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.tours = state.tours.map((t) => t._id === action.payload._id ? action.payload : t);
+                state.tours = state.tours.map((t) => t.id === action.payload.id ? action.payload : t);
             });
     },
 });

@@ -15,17 +15,25 @@ const getTours = async () => {
   return response.data;
 };
 
-// DELETE TOUR <--- ADD THIS
+// Update an existing tour
+const updateTour = async (tourId, tourData, token) => {
+  const config = { headers: { Authorization: `Bearer ${token}` } };
+  const response = await axios.put(API_URL + tourId, tourData, config);
+  return response.data;
+};
+
+// DELETE TOUR
 const deleteTour = async (tourId, token) => {
   const config = { headers: { Authorization: `Bearer ${token}` } };
   const response = await axios.delete(API_URL + tourId, config);
-  return response.data; // This returns { id: tourId } from the backend usually
+  return response.data;
 };
 
 const tourService = {
   createTour,
   getTours,
-  deleteTour, // <--- MAKE SURE THIS IS EXPORTED
+  updateTour,
+  deleteTour,
 };
 
 export default tourService;
