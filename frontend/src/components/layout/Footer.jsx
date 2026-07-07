@@ -18,7 +18,7 @@ function Footer() {
         </div>
       </div>
       <div className="credit">
-        Created by <span>Dagmawit Andargachew</span> | all rights reserved!
+        Created by <span><a href="https://www.linkedin.com/in/dagmawit-andargachew/" target="_blank" rel="noopener noreferrer">Dagmawit Andargachew</a></span> | all rights reserved!
       </div>
     </footer>
   );
