@@ -86,13 +86,16 @@ const DestinationsPage = () => {
           padding: 16px 25px;
           border-radius: 50px;
           border: 1px solid rgba(255,255,255,0.3);
-          background: rgba(255,255,255,0.15);
+          background: rgba(255,255,255,0.22);
           backdrop-filter: blur(15px);
           -webkit-backdrop-filter: blur(15px);
-          color: white;
+          color: #ffffff;
           font-size: 1.1rem;
+          font-weight: 700;
           outline: none;
           transition: 0.3s;
+          caret-color: #ffffff;
+          -webkit-text-fill-color: #ffffff;
         }
 
         .search-bar input::placeholder {

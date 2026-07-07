@@ -297,9 +297,9 @@ const MyBookings = () => {
         .mb-header h1 { font-size: 1.8rem; color: #2b2b1f; margin: 0 0 6px 0; }
         .mb-header p { color: #777; font-size: 0.95rem; margin: 0 0 28px 0; }
         .mb-tabs { display: flex; gap: 8px; border-bottom: 1px solid #e5e5e0; margin-bottom: 28px; }
-        .mb-tab { padding: 10px 20px; background: none; border: none; border-bottom: 2px solid transparent; font-size: 0.95rem; font-weight: 500; color: #888; cursor: pointer; transition: all 0.15s ease; }
-        .mb-tab.active { color: #556B2F; border-bottom-color: #556B2F; }
-        .mb-tab:hover { color: #556B2F; }
+        .mb-tab { padding: 10px 20px; background: none; border: none; border-bottom: 2px solid transparent; font-size: 0.98rem; font-weight: 800; color: #ffffff; cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.02em; }
+        .mb-tab.active { color: #ffffff; border-bottom-color: #C0CA33; text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+        .mb-tab:hover { color: #ffffff; }
         .mb-section h2 { font-size: 1.15rem; color: #333; margin-bottom: 18px; }
         .mb-loading, .mb-empty { text-align: center; padding: 60px 20px; color: #888; }
         .mb-list { display: flex; flex-direction: column; gap: 18px; }
@@ -319,7 +319,7 @@ const MyBookings = () => {
         .mb-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
         .mb-form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
         .mb-form-group label { font-size: 0.82rem; font-weight: 600; color: #555; }
-        .mb-form-group input, .mb-form-group textarea { padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
+        .mb-form-group input, .mb-form-group textarea { padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-weight: 700; color: #1f1f1f; background: #fff; caret-color: #1f1f1f; -webkit-text-fill-color: #1f1f1f; }
         .mb-form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
         .mb-btn-save { padding: 9px 18px; border-radius: 8px; background: #556B2F; color: white; border: none; cursor: pointer; }
         .mb-btn-cancel { padding: 9px 18px; border-radius: 8px; background: #f0f0f0; color: #555; border: none; cursor: pointer; }

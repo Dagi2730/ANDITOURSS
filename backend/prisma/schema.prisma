@@ -79,16 +79,20 @@ model Review {
 }
 
 model BlogPost {
-  id        String   @id @default(uuid())
-  tourId    String?
-  title     String
-  subtitle  String?
-  location  String?
-  story     String
-  tags      String[] @default([])
-  featured  Boolean  @default(false)
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tour      Tour?    @relation(fields: [tourId], references: [id], onDelete: SetNull)
+  id               String   @id @default(uuid())
+  tourId           String?
+  title            String
+  subtitle         String?
+  location         String?
+  story            String
+  tags             String[] @default([])
+  featured         Boolean  @default(false)
+  imageUrl         String?
+  status           String   @default("APPROVED")
+  submittedByGuest Boolean  @default(false)
+  submittedByName  String?
+  submittedByEmail String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  tour             Tour?    @relation(fields: [tourId], references: [id], onDelete: SetNull)
 }

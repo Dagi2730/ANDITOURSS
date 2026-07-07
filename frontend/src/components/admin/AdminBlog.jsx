@@ -80,6 +80,17 @@ function AdminBlog() {
     }
   };
 
+  const handleApprove = async (post) => {
+    try {
+      const payload = new FormData();
+      payload.append('status', 'APPROVED');
+      await dispatch(updateBlogPost({ id: post.id, formData: payload })).unwrap();
+      alert('Story approved successfully');
+    } catch (err) {
+      alert(err || 'Failed to approve story');
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -345,6 +356,8 @@ function AdminBlog() {
                 <div className="ablg-row-top">
                   <h3 className="ablg-row-title">{post.title}</h3>
                   {post.featured && <span className="ablg-badge">Featured</span>}
+                  {post.submittedByGuest && <span className="ablg-badge ablg-badge-guest">Guest</span>}
+                  {post.status === 'PENDING' && <span className="ablg-badge ablg-badge-pending">Pending</span>}
                 </div>
                 <div className="ablg-row-meta">
                   {post.tour && <span>{post.tour.title}</span>}
@@ -368,6 +381,11 @@ function AdminBlog() {
               </div>
 
               <div className="ablg-row-actions">
+                {post.status === 'PENDING' && (
+                  <button className="ablg-btn ablg-btn-primary ablg-btn-sm" onClick={() => handleApprove(post)}>
+                    ✓ Approve
+                  </button>
+                )}
                 <button className="ablg-btn ablg-btn-secondary ablg-btn-sm" onClick={() => handleEdit(post)}>
                   ✏️ Edit
                 </button>
@@ -444,6 +462,12 @@ function AdminBlog() {
         .ablg-badge {
           background: #B5651D; color: #fff; font-size: 0.68rem; font-weight: 700;
           text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 10px; border-radius: 999px;
+        }
+        .ablg-badge-guest {
+          background: var(--ablg-olive);
+        }
+        .ablg-badge-pending {
+          background: #c97d00;
         }
 
         .ablg-row-meta {

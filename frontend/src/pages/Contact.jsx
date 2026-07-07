@@ -232,13 +232,16 @@ const Contact = () => {
         .input-group textarea {
           width: 100%;
           padding: 16px;
-          background: rgba(0, 0, 0, 0.25);
+          background: rgba(0, 0, 0, 0.32);
           border: 1px solid rgba(255, 255, 255, 0.3);
           border-radius: 12px;
           color: #ffffff;
           font-size: 1rem;
+          font-weight: 700;
           outline: none;
           transition: 0.3s;
+          caret-color: #ffffff;
+          -webkit-text-fill-color: #ffffff;
         }
 
         /* High visibility placeholders */

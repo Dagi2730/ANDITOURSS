@@ -5,6 +5,7 @@ import {
   getBlogPosts,
   getBlogPostById,
   createBlogPost,
+  createGuestSubmission,
   updateBlogPost,
   deleteBlogPost,
 } from '../controllers/blogController.js';
@@ -21,9 +22,11 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
+router.post('/submit', upload.single('image'), createGuestSubmission);
+
 router.route('/')
   .get(getBlogPosts)
-  .post(requireAuth, requireAdmin, upload.single('image'), createBlogPost);
+  .post(requireAuth, upload.single('image'), createBlogPost);
 
 router.route('/:id')
   .get(getBlogPostById)

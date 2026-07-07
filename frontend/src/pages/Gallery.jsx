@@ -1,10 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
 import { getBlogPosts } from '../features/blog/blogSlice';
 
 function Gallery() {
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
   const { posts, isLoading } = useSelector((state) => state.blog);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [formData, setFormData] = useState({
+    title: '',
+    subtitle: '',
+    location: '',
+    story: '',
+    tags: '',
+  });
 
   useEffect(() => {
     dispatch(getBlogPosts());
@@ -13,9 +26,60 @@ function Gallery() {
   const API_URL = import.meta.env.VITE_API_URL || '';
   const baseURL = API_URL || 'http://localhost:8000';
 
+  const approvedPosts = useMemo(() => {
+    return (posts || []).filter((post) => post.status !== 'PENDING');
+  }, [posts]);
+
   const resolveImage = (imageUrl) => {
     if (!imageUrl) return 'https://via.placeholder.com/800x500?text=Andi+Tours';
     return imageUrl.startsWith('http') ? imageUrl : `${baseURL}${imageUrl}`;
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleGuestSubmission = async (e) => {
+    e.preventDefault();
+    if (!formData.title || !formData.story) {
+      setSubmitMessage('Please add a title and a short story.');
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitMessage('');
+
+    try {
+      const payload = new FormData();
+      payload.append('title', formData.title);
+      payload.append('subtitle', formData.subtitle);
+      payload.append('location', formData.location);
+      payload.append('story', formData.story);
+      payload.append('tags', formData.tags);
+      if (imageFile) payload.append('image', imageFile);
+
+      const headers = user?.token ? { Authorization: `Bearer ${user.token}` } : {};
+      await axios.post(`${baseURL}/api/blog/submit`, payload, { headers });
+
+      setSubmitMessage('Thank you! Your photo story has been submitted and will be reviewed by the admin.');
+      setFormData({ title: '', subtitle: '', location: '', story: '', tags: '' });
+      setImageFile(null);
+      setPreviewUrl('');
+      dispatch(getBlogPosts());
+    } catch (error) {
+      console.error('Guest submission error:', error);
+      setSubmitMessage(error.response?.data?.message || 'Unable to submit your story right now.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -31,15 +95,15 @@ function Gallery() {
       </section>
 
       <section className="gly-body">
-        {isLoading && posts.length === 0 ? (
+        {isLoading && approvedPosts.length === 0 ? (
           <div className="gly-state">Loading stories...</div>
-        ) : posts.length === 0 ? (
+        ) : approvedPosts.length === 0 ? (
           <div className="gly-state">
             <p>No stories have been published yet. Check back soon!</p>
           </div>
         ) : (
           <div className="gly-grid">
-            {posts.map((post) => (
+            {approvedPosts.map((post) => (
               <article key={post.id} className="gly-card">
                 <div className="gly-image-frame">
                   <img
@@ -48,6 +112,7 @@ function Gallery() {
                     className="gly-image"
                   />
                   {post.featured && <span className="gly-stamp">Featured</span>}
+                  {post.submittedByGuest && <span className="gly-stamp gly-guest-stamp">Guest</span>}
                   {post.location && (
                     <span className="gly-location-tag">📍 {post.location}</span>
                   )}
@@ -87,6 +152,29 @@ function Gallery() {
             ))}
           </div>
         )}
+
+        <div className="gly-submission-card">
+          <div className="gly-submission-copy">
+            <span className="gly-submission-eyebrow">Share Your Moment</span>
+            <h2>Have a photo from your trip? Add it to the public gallery.</h2>
+            <p>Your submission will appear after an admin approves it.</p>
+          </div>
+          <form className="gly-submission-form" onSubmit={handleGuestSubmission}>
+            <input type="text" name="title" value={formData.title} onChange={handleInputChange} placeholder="Story title" required />
+            <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="Location" />
+            <textarea name="story" value={formData.story} onChange={handleInputChange} placeholder="Tell us about the moment" rows="3" required />
+            <input type="text" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="Tags (e.g. culture, trekking)" />
+            {previewUrl && <img src={previewUrl} alt="Preview" className="gly-upload-preview" />}
+            <label className="gly-upload-label">
+              <span>{imageFile ? imageFile.name : 'Choose an image'}</span>
+              <input type="file" accept="image/*" onChange={handleImageSelect} />
+            </label>
+            <button type="submit" className="gly-submit-btn" disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Submit for Review'}
+            </button>
+            {submitMessage && <p className="gly-submit-message">{submitMessage}</p>}
+          </form>
+        </div>
       </section>
 
       <style>{`
@@ -101,18 +189,16 @@ function Gallery() {
           --gly-sage: #E3E7D3;
           font-family: 'Inter', sans-serif;
           color: var(--gly-ink);
-          background: var(--gly-ivory);
           min-height: 100vh;
         }
 
         .gly-hero {
-          background: linear-gradient(160deg, var(--gly-olive-dark) 0%, var(--gly-olive) 100%);
-          padding: 72px 24px 64px;
+          padding: 80px 20px 40px;
           text-align: center;
         }
 
         .gly-hero-inner {
-          max-width: 680px;
+          max-width: 720px;
           margin: 0 auto;
         }
 
@@ -121,23 +207,25 @@ function Gallery() {
           font-size: 0.78rem;
           letter-spacing: 0.16em;
           text-transform: uppercase;
-          color: #D8E3B8;
+          color: white;
           margin-bottom: 14px;
-          font-weight: 600;
+          font-weight: 700;
+          text-shadow: 0 2px 8px rgba(0,0,0,0.25);
         }
 
         .gly-hero-title {
           font-family: 'Fraunces', serif;
           font-size: clamp(2.2rem, 4.5vw, 3.2rem);
-          font-weight: 600;
-          color: #ffffff;
+          font-weight: 800;
+          color: white;
           margin: 0 0 16px;
           line-height: 1.15;
+          text-shadow: 0 4px 10px rgba(0,0,0,0.28);
         }
 
         .gly-hero-subtitle {
           font-size: 1.05rem;
-          color: #EDF1E0;
+          color: rgba(255,255,255,0.92);
           line-height: 1.6;
           margin: 0;
         }
@@ -146,6 +234,114 @@ function Gallery() {
           max-width: 1280px;
           margin: 0 auto;
           padding: 56px 24px 80px;
+        }
+
+        .gly-submission-card {
+          background: rgba(255,255,255,0.15);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255,255,255,0.3);
+          border-radius: 18px;
+          padding: 24px;
+          display: grid;
+          grid-template-columns: 1.1fr 1fr;
+          gap: 24px;
+          margin-bottom: 32px;
+          color: white;
+        }
+
+        .gly-submission-copy h2 {
+          margin: 0 0 10px;
+          font-size: 1.3rem;
+          color: white;
+        }
+
+        .gly-submission-copy p {
+          margin: 0;
+          color: rgba(255,255,255,0.9);
+          line-height: 1.6;
+        }
+
+        .gly-submission-eyebrow {
+          display: inline-block;
+          font-size: 0.72rem;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #C0CA33;
+          font-weight: 700;
+          margin-bottom: 10px;
+        }
+
+        .gly-submission-form {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .gly-submission-form input,
+        .gly-submission-form textarea {
+          width: 100%;
+          border: 1px solid rgba(255,255,255,0.3);
+          border-radius: 8px;
+          padding: 10px 12px;
+          font: inherit;
+          font-weight: 700;
+          box-sizing: border-box;
+          background: rgba(255,255,255,0.22);
+          color: #ffffff;
+          caret-color: #ffffff;
+          -webkit-text-fill-color: #ffffff;
+        }
+
+        .gly-submission-form input::placeholder,
+        .gly-submission-form textarea::placeholder {
+          color: rgba(255,255,255,0.8);
+        }
+
+        .gly-upload-label {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 12px;
+          border: 1px dashed rgba(255,255,255,0.4);
+          border-radius: 8px;
+          background: rgba(255,255,255,0.12);
+          color: rgba(255,255,255,0.95);
+          cursor: pointer;
+          font-size: 0.92rem;
+        }
+
+        .gly-upload-label input {
+          display: none;
+        }
+
+        .gly-upload-preview {
+          width: 100%;
+          max-height: 180px;
+          object-fit: cover;
+          border-radius: 8px;
+          border: 1px solid rgba(255,255,255,0.25);
+        }
+
+        .gly-submit-btn {
+          border: none;
+          border-radius: 8px;
+          background: #C0CA33;
+          color: #233100;
+          padding: 10px 16px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+        .gly-submit-btn:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        .gly-submit-message {
+          margin: 0;
+          font-size: 0.9rem;
+          color: rgba(255,255,255,0.95);
         }
 
         .gly-state {
@@ -210,6 +406,11 @@ function Gallery() {
           padding: 5px 12px;
           border-radius: 999px;
           box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .gly-guest-stamp {
+          top: 48px;
+          background: var(--gly-olive);
         }
 
         .gly-location-tag {
@@ -302,6 +503,12 @@ function Gallery() {
           background: var(--gly-sage);
           padding: 3px 10px;
           border-radius: 999px;
+        }
+
+        @media (max-width: 840px) {
+          .gly-submission-card {
+            grid-template-columns: 1fr;
+          }
         }
 
         @media (max-width: 640px) {
