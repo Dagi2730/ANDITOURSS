@@ -1,95 +1,60 @@
 import React, { useState, useEffect, useRef } from 'react';
+import api from '../../lib/api';
 
 function AdminStats() {
-  const [orders, setOrders] = useState([
-    { 
-      id: 1, 
-      orderId: '#ORD-001', 
-      customer: 'John Smith', 
-      email: 'john@example.com', 
-      phone: '+251 911 223344',
-      package: 'Simien Mountains Trek', 
-      date: '2024-03-15', 
-      amount: '$1,250', 
-      status: 'pending', 
-      startDate: '2024-04-10',
-      endDate: '2024-04-17',
-      duration: '7 days',
-      visitors: 2,
-      comment: 'We need an English speaking guide and a mule for luggage.'
-    },
-    { 
-      id: 2, 
-      orderId: '#ORD-002', 
-      customer: 'Sarah Johnson', 
-      email: 'sarah@example.com', 
-      phone: '+251 911 334455',
-      package: 'Danakil Depression Adventure', 
-      date: '2024-03-14', 
-      amount: '$2,100', 
-      status: 'confirmed', 
-      startDate: '2024-04-05',
-      endDate: '2024-04-12',
-      duration: '7 days',
-      visitors: 4,
-      comment: 'Looking forward to the salt lakes and volcanic activity.'
-    },
-    { 
-      id: 3, 
-      orderId: '#ORD-003', 
-      customer: 'Michael Brown', 
-      email: 'michael@example.com', 
-      phone: '+251 911 445566',
-      package: 'Lalibela Historical Tour', 
-      date: '2024-03-12', 
-      amount: '$1,850', 
-      status: 'confirmed', 
-      startDate: '2024-04-15',
-      endDate: '2024-04-22',
-      duration: '7 days',
-      visitors: 3,
-      comment: 'Interested in the rock-hewn churches and religious history.'
-    },
-    { 
-      id: 4, 
-      orderId: '#ORD-004', 
-      customer: 'Emma Wilson', 
-      email: 'emma@example.com', 
-      phone: '+251 911 556677',
-      package: 'Omo Valley Cultural Experience', 
-      date: '2024-03-10', 
-      amount: '$1,500', 
-      status: 'pending', 
-      startDate: '2024-05-01',
-      endDate: '2024-05-10',
-      duration: '9 days',
-      visitors: 2,
-      comment: 'Excited to experience the tribal cultures and traditions.'
-    },
-    { 
-      id: 5, 
-      orderId: '#ORD-005', 
-      customer: 'David Lee', 
-      email: 'david@example.com', 
-      phone: '+251 911 667788',
-      package: 'Bale Mountains National Park', 
-      date: '2024-03-08', 
-      amount: '$980', 
-      status: 'cancelled', 
-      startDate: '2024-04-20',
-      endDate: '2024-04-25',
-      duration: '5 days',
-      visitors: 1,
-      comment: 'Postponed due to scheduling conflicts.'
-    },
-  ]);
-
+  const [orders, setOrders] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [tours, setTours] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const dropdownRefs = useRef({});
 
-  // Close dropdown when clicking outside
+  const mapBookingToOrder = (booking) => ({
+    id: booking.id,
+    orderId: `#${booking.id.slice(-6).toUpperCase()}`,
+    customer: booking.user?.name || 'Unknown customer',
+    email: booking.user?.email || '',
+    phone: booking.user?.phone || '',
+    package: booking.tour?.title || 'N/A',
+    date: booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A',
+    amount: booking.tour ? `$${(booking.tour.price * (booking.guests || 1)).toLocaleString()}` : '$0',
+    status: (booking.status || 'PENDING').toLowerCase(),
+    startDate: booking.travelDate ? new Date(booking.travelDate).toISOString().split('T')[0] : 'N/A',
+    endDate: booking.travelDateEnd ? new Date(booking.travelDateEnd).toISOString().split('T')[0] : 'N/A',
+    duration: booking.tour?.duration || 'N/A',
+    visitors: booking.guests || 1,
+    comment: booking.comments || 'No specific comments provided.',
+    raw: booking,
+  });
+
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      const [bookingsRes, usersRes, toursRes] = await Promise.all([
+        api.get('/bookings'),
+        api.get('/users'),
+        api.get('/tours'),
+      ]);
+
+      setOrders((bookingsRes.data || []).map(mapBookingToOrder));
+      setUsers(usersRes.data || []);
+      setTours(toursRes.data || []);
+    } catch (err) {
+      console.error('Failed to load dashboard data:', err);
+      setError('Unable to load live dashboard data.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (activeDropdown !== null) {
@@ -103,49 +68,79 @@ function AdminStats() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [activeDropdown]);
 
-  const handleStatusChange = (orderId, newStatus) => {
-    setOrders(prevOrders => 
-      prevOrders.map(order => 
-        order.orderId === orderId ? { ...order, status: newStatus } : order
-      )
-    );
-    setActiveDropdown(null);
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      const targetBooking = orders.find((order) => order.id === orderId);
+      if (!targetBooking) return;
+
+      await api.put(`/bookings/${targetBooking.id}`, { status: newStatus.toUpperCase() });
+      await fetchDashboardData();
+    } catch (error) {
+      console.error('Failed to update booking status:', error);
+      alert('Failed to update booking status');
+    } finally {
+      setActiveDropdown(null);
+    }
+  };
+
+  const handleDelete = async (orderId) => {
+    if (!window.confirm('Delete this booking?')) return;
+
+    try {
+      const targetBooking = orders.find((order) => order.id === orderId);
+      if (!targetBooking) return;
+
+      await api.delete(`/bookings/${targetBooking.id}`);
+      await fetchDashboardData();
+    } catch (error) {
+      console.error('Failed to delete booking:', error);
+      alert('Failed to delete booking');
+    }
   };
 
   const getStatusBadge = (status) => {
-    return <span className={`status-badge ${status}`}>{status.toUpperCase()}</span>;
+    const normalizedStatus = (status || 'pending').toString().toLowerCase();
+    return <span className={`status-badge ${normalizedStatus}`}>{normalizedStatus.toUpperCase()}</span>;
   };
 
-  const filteredOrders = filterStatus === 'all' 
-    ? orders 
-    : orders.filter(order => order.status === filterStatus);
+  const filteredOrders = filterStatus === 'all'
+    ? orders
+    : orders.filter((order) => order.status === filterStatus);
+
+  const totalRevenue = orders.reduce((sum, order) => {
+    const amount = Number(order.raw?.tour?.price || 0) * Number(order.raw?.guests || 1);
+    return sum + amount;
+  }, 0);
+
+  const pendingCount = orders.filter((order) => order.status === 'pending').length;
+  const confirmedCount = orders.filter((order) => order.status === 'confirmed').length;
 
   const stats = [
-    { 
-      title: 'Total Users', 
-      value: '1,254', 
-      change: '+12.5%', 
+    {
+      title: 'Total Users',
+      value: users.length.toLocaleString(),
+      change: `${users.length} registered accounts`,
       positive: true,
       icon: '👤'
     },
-    { 
-      title: 'Total Orders', 
-      value: orders.length.toString(), 
-      change: '+8.2%', 
+    {
+      title: 'Total Bookings',
+      value: orders.length.toString(),
+      change: `${confirmedCount} confirmed`,
       positive: true,
       icon: '📦'
     },
-    { 
-      title: 'Revenue', 
-      value: '$24,580', 
-      change: '+15.3%', 
+    {
+      title: 'Revenue',
+      value: `$${totalRevenue.toLocaleString()}`,
+      change: `${pendingCount} pending`,
       positive: true,
       icon: '💰'
     },
-    { 
-      title: 'Growth Rate', 
-      value: '24.5%', 
-      change: '+3.2%', 
+    {
+      title: 'Active Packages',
+      value: tours.length.toString(),
+      change: `${tours.length} available tours`,
       positive: true,
       icon: '📈'
     },
