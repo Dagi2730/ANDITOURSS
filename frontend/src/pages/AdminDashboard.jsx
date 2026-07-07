@@ -7,7 +7,6 @@ import AdminStats from '../components/admin/AdminStats';
 import AdminPackages from '../components/admin/AdminPackages';
 import AdminOrders from '../components/admin/AdminOrders';
 import AdminUsers from '../components/admin/AdminUsers';
-import AdminReviews from '../components/admin/AdminReviews';
 import AdminBlog from '../components/admin/AdminBlog';
 
 function AdminDashboard() {
@@ -23,7 +22,6 @@ function AdminDashboard() {
       case 'orders': return <AdminOrders />;
       case 'users': return <AdminUsers />;
       case 'blog': return <AdminBlog />;
-      case 'reviews': return <AdminReviews />;
       default: return <AdminStats />;
     }
   };

@@ -24,6 +24,7 @@ const MyBookings = () => {
   const [profileData, setProfileData] = useState({
     name: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: ''
   });
@@ -39,6 +40,7 @@ const MyBookings = () => {
     setProfileData({
       name: user.name || '',
       email: user.email || '',
+      phone: user.phone || '',
       password: '',
       confirmPassword: ''
     });
@@ -111,7 +113,8 @@ const MyBookings = () => {
 
       const updateData = {
         name: profileData.name,
-        email: profileData.email
+        email: profileData.email,
+        phone: profileData.phone
       };
 
       if (profileData.password) {
@@ -269,6 +272,10 @@ const MyBookings = () => {
             <div className="form-group mb-form-group">
               <label htmlFor="email">Email Address *</label>
               <input type="email" id="email" name="email" value={profileData.email} onChange={handleProfileChange} required />
+            </div>
+            <div className="form-group mb-form-group">
+              <label htmlFor="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" value={profileData.phone} onChange={handleProfileChange} placeholder="Enter phone number" />
             </div>
             <div className="form-group mb-form-group">
               <label htmlFor="password">New Password (leave blank to keep current)</label>

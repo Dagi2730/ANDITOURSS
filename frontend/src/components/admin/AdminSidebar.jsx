@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { FaTachometerAlt, FaBox, FaShoppingCart, FaUsers, FaStar, FaSignOutAlt, FaImages } from 'react-icons/fa';
+import { FaTachometerAlt, FaBox, FaShoppingCart, FaUsers, FaSignOutAlt, FaImages } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
 
@@ -14,7 +14,6 @@ function AdminSidebar({ activeTab, setActiveTab, mobileOpen, setMobileOpen }) {
     { id: 'orders', label: 'Orders', icon: <FaShoppingCart /> },
     { id: 'users', label: 'Users', icon: <FaUsers /> },
     { id: 'blog', label: 'Stories & Gallery', icon: <FaImages /> },
-    { id: 'reviews', label: 'Reviews', icon: <FaStar /> },
   ];
 
   const handleLogout = () => {
