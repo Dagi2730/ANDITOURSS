@@ -217,14 +217,39 @@ function AdminOrders() {
                 <div className="info-group full">
                   <label>Passport Copy</label>
                   {selectedOrder.passportUrl ? (
-                    <a 
-                      href={`${baseURL}${selectedOrder.passportUrl}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="passport-view-link"
-                    >
-                      📄 View Passport Document
-                    </a>
+                    <div className="passport-container">
+                      <img 
+                        src={`${baseURL}${selectedOrder.passportUrl}`}
+                        alt="Passport Copy"
+                        className="passport-image"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.parentElement.innerHTML = `
+                            <div class="passport-error">
+                              <p>⚠️ Failed to load passport image</p>
+                              <a 
+                                href="${baseURL}${selectedOrder.passportUrl}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="passport-view-link"
+                              >
+                                📄 View Passport Document
+                              </a>
+                            </div>
+                          `;
+                        }}
+                      />
+                      <div className="passport-actions">
+                        <a 
+                          href={`${baseURL}${selectedOrder.passportUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="passport-view-link"
+                        >
+                          📄 Open Full Size
+                        </a>
+                      </div>
+                    </div>
                   ) : (
                     <p className="passport-missing">No passport copy on file</p>
                   )}
@@ -292,6 +317,27 @@ function AdminOrders() {
         .status-menu button:not(:last-child) {
           border-bottom: 1px solid #f0f0f0;
         }
+        
+        /* Passport styles */
+        .passport-container {
+          margin-top: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .passport-image {
+          max-width: 100%;
+          max-height: 300px;
+          border-radius: 8px;
+          border: 1px solid #e0e0e0;
+          object-fit: contain;
+          background: #f9f9f9;
+          padding: 8px;
+        }
+        .passport-actions {
+          display: flex;
+          gap: 10px;
+        }
         .passport-view-link {
           display: inline-flex;
           align-items: center;
@@ -312,6 +358,16 @@ function AdminOrders() {
           color: #999;
           font-size: 0.88rem;
           font-style: italic;
+        }
+        .passport-error {
+          padding: 12px;
+          background: #fff3f3;
+          border-radius: 8px;
+          border: 1px solid #ffcdd2;
+        }
+        .passport-error p {
+          margin: 0 0 10px 0;
+          color: #c62828;
         }
       `}</style>
     </div>
