@@ -41,7 +41,7 @@ function AdminSidebar({ activeTab, setActiveTab, mobileOpen, setMobileOpen }) {
   return (
     <aside className={`admin-sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
       <div className="admin-sidebar-logo">
-        <h2>🌿 ANDI TOURS</h2>
+        <h2>🌿 DOBI TOURS</h2>
         {mobileOpen && (
           <button
             type="button"

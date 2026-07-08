@@ -36,10 +36,17 @@ export const createBooking = createAsyncThunk(
   async (bookingData, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
+      // bookingData is expected to be a FormData object (so the passport file can be attached).
+      // Content-Type is deliberately NOT set manually — axios/browser sets the correct
+      // multipart boundary automatically when the body is a FormData instance.
       const response = await axios.post(
         `${baseURL}/api/bookings`,
         bookingData,
-        getConfig(token)
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       return response.data;
     } catch (error) {

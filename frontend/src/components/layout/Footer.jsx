@@ -7,9 +7,10 @@ function Footer() {
         <div className="box">
           <h3>Contact Info</h3>
           <p>+251911661377</p>
-          <p>ANDI TOURS</p>
+          <p>+251901592929</p>
+          <p>DOBI TOURS</p>
           <p>📍 Addis Ababa, Ethiopia</p>
-          <p>Andidagmawit@yahoo.com</p>
+          <p>dobitoursethiopia@gmail.com</p>
         </div>
         <div className="box">
           <h3>Follow Us</h3>

@@ -58,6 +58,7 @@ model Booking {
   travelDateEnd DateTime?
   guests        Int
   comments      String?
+  passportUrl   String?
   status        BookingStatus @default(PENDING)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

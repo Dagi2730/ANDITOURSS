@@ -41,7 +41,6 @@ const Contact = () => {
             <div className="icon">📍</div>
             <div>
               <h3>Location</h3>
-              <p>Addis Ababa, Ethiopia<br />Bole Road, Friendship Building</p>
             </div>
           </div>
 
@@ -49,7 +48,8 @@ const Contact = () => {
             <div className="icon">📞</div>
             <div>
               <h3>Phone</h3>
-              <p>+251 911 000 000</p>
+              <p>+251 911 661377</p>
+              <p>+251 901 592929</p>
             </div>
           </div>
 
@@ -57,7 +57,7 @@ const Contact = () => {
             <div className="icon">✉️</div>
             <div>
               <h3>Email</h3>
-              <p>info@anditours.com</p>
+              <p>dobitoursethiopia@gmail.com </p>
             </div>
           </div>
 

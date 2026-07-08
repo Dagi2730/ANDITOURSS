@@ -11,6 +11,9 @@ function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const dropdownRefs = useRef({});
 
+  const API_URL = import.meta.env.VITE_API_URL || '';
+  const baseURL = API_URL || 'http://localhost:8000';
+
   useEffect(() => {
     dispatch(getBookings());
     dispatch(getBookingStats());
@@ -212,6 +215,21 @@ function AdminOrders() {
                   <p>📅 {selectedOrder.travelDate ? new Date(selectedOrder.travelDate).toLocaleDateString() : 'N/A'} ➔ {selectedOrder.travelDateEnd ? new Date(selectedOrder.travelDateEnd).toLocaleDateString() : 'N/A'}</p>
                 </div>
                 <div className="info-group full">
+                  <label>Passport Copy</label>
+                  {selectedOrder.passportUrl ? (
+                    <a 
+                      href={`${baseURL}${selectedOrder.passportUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="passport-view-link"
+                    >
+                      📄 View Passport Document
+                    </a>
+                  ) : (
+                    <p className="passport-missing">No passport copy on file</p>
+                  )}
+                </div>
+                <div className="info-group full">
                   <label>Customer Comment</label>
                   <div className="comment-display">
                     {selectedOrder.comments || "No specific comments provided."}
@@ -232,12 +250,10 @@ function AdminOrders() {
         .orders-table-container {
           overflow: visible;
         }
-
         .status-dropdown-container {
           position: relative;
           display: inline-block;
         }
-
         .status-trigger {
           display: flex;
           align-items: center;
@@ -247,7 +263,6 @@ function AdminOrders() {
           cursor: pointer;
           padding: 2px;
         }
-
         .status-menu {
           position: absolute;
           top: 100%;
@@ -262,7 +277,6 @@ function AdminOrders() {
           display: flex;
           flex-direction: column;
         }
-
         .status-menu button {
           padding: 10px 14px;
           text-align: left;
@@ -272,13 +286,32 @@ function AdminOrders() {
           font-size: 0.85rem;
           white-space: nowrap;
         }
-
         .status-menu button:hover {
           background: #f5f5f5;
         }
-
         .status-menu button:not(:last-child) {
           border-bottom: 1px solid #f0f0f0;
+        }
+        .passport-view-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 14px;
+          background: #f0f4e8;
+          color: #556B2F;
+          border-radius: 8px;
+          font-size: 0.88rem;
+          font-weight: 600;
+          text-decoration: none;
+          margin-top: 4px;
+        }
+        .passport-view-link:hover {
+          background: #e2e9d4;
+        }
+        .passport-missing {
+          color: #999;
+          font-size: 0.88rem;
+          font-style: italic;
         }
       `}</style>
     </div>

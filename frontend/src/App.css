@@ -110,89 +110,6 @@ html, body {
 .nav-links li:nth-child(4) .nav-item { animation-delay: 0.4s; }
 .nav-links li:nth-child(5) .nav-item { animation-delay: 0.5s; }
 
-/* 4. HERO SECTION - CENTERED with clean animations */
-.home-hero {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    min-height: 100vh;
-    padding: 0 5%;
-    text-align: center;
-    width: 100%;
-    position: relative;
-}
-
-/* Main title with line break */
-.home-hero h1 {
-    font-family: 'Raleway', sans-serif;
-    font-size: clamp(3rem, 9vw, 5rem);
-    font-weight: 800;
-    margin-bottom: 30px;
-    line-height: 1.1;
-    text-shadow: 2px 2px 15px rgba(0,0,0,0.7);
-    color: white;
-    width: 100%;
-    max-width: 900px;
-    animation: fadeInScale 1s ease-out 0.3s backwards;
-}
-
-/* Ethiopia text styling - SIMPLE VERSION */
-.home-hero h1 span {
-    display: inline-block;
-    margin-top: 10px;
-    color: #fff;
-    text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
-    /* Removed gradient text effect */
-}
-
-/* Subtitle with line break */
-.hero-subtitle {
-    font-size: clamp(1.2rem, 3vw, 1.8rem);
-    margin-bottom: 50px;
-    max-width: 700px;
-    line-height: 1.7;
-    text-shadow: 1px 1px 8px rgba(0,0,0,0.6);
-    opacity: 0;
-    animation: fadeInUp 1s ease-out 0.8s forwards;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-}
-
-/* Hero button with clean animation */
-.hero-btn {
-    background: linear-gradient(145deg, #556B2F, #6B8E23);
-    color: white;
-    padding: 20px 60px;
-    border: none;
-    border-radius: 50px;
-    font-weight: bold;
-    font-size: 1.3rem;
-    cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    transition: all 0.4s ease;
-    font-family: 'Raleway', sans-serif;
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
-    opacity: 0;
-    animation: fadeInUp 1s ease-out 1.2s forwards;
-    transform: translateY(20px);
-}
-
-/* Button hover effects - NO BOUNCING */
-.hero-btn:hover {
-    background: linear-gradient(145deg, #6B8E23, #556B2F);
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(107, 142, 35, 0.4);
-    letter-spacing: 1.5px;
-}
-
-.hero-btn:active {
-    transform: translateY(-2px);
-}
 
 /* 5. GLASS EFFECT FOOTER - Same style as navbar */
 .footer {
@@ -586,14 +503,11 @@ html, body {
         flex-direction: column;
         gap: 30px;
     }
-
-        .footer .box {
+    
+    
+    .footer .box {
         min-width: 100%;
         text-align: center;
-    }
-    
-    .footer .box a {
-    color: #556b2f;
     }
     
     .footer .box a:hover {

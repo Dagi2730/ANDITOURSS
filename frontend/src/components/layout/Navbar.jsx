@@ -21,7 +21,7 @@ function Navbar() {
 
   return (
     <nav className="navbar-custom">
-      <Link to="/" className="logo-text">ANDI TOURS</Link>
+      <Link to="/" className="logo-text">DOBI TOURS</Link>
 
       <button
         type="button"

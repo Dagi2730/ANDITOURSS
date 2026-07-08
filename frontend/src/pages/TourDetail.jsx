@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { createBooking } from '../features/booking/bookingSlice';
 import api from '../lib/api';
 import '../styles/TourDetail.css';
 
 const TourDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,6 +23,8 @@ const TourDetail = () => {
     dateTo: '',
     comments: ''
   });
+  const [passportFile, setPassportFile] = useState(null);
+  const [passportPreviewName, setPassportPreviewName] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -46,28 +50,67 @@ const TourDetail = () => {
     }));
   };
 
+  const handlePassportChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Passport copy must be less than 5MB');
+      e.target.value = '';
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please upload a JPG, PNG, WebP, or PDF file');
+      e.target.value = '';
+      return;
+    }
+
+    setPassportFile(file);
+    setPassportPreviewName(file.name);
+  };
+
+  const removePassport = () => {
+    setPassportFile(null);
+    setPassportPreviewName('');
+  };
+
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!user) {
       alert('Please login to book a tour');
       navigate('/login');
       return;
     }
 
-    if (!bookingData.fullName || !bookingData.phone || !bookingData.email || 
+    if (!bookingData.fullName || !bookingData.phone || !bookingData.email ||
         !bookingData.dateFrom || !bookingData.dateTo || !bookingData.numberOfTourists) {
       alert('Please fill in all required fields');
+      return;
+    }
+
+    if (!passportFile) {
+      alert('Please upload a copy of your passport to complete the booking');
       return;
     }
 
     setSubmitting(true);
 
     try {
-      await api.post('/bookings', {
-        tourId: tour.id,
-        ...bookingData
-      });
+      const formData = new FormData();
+      formData.append('tourId', tour.id);
+      formData.append('fullName', bookingData.fullName);
+      formData.append('phone', bookingData.phone);
+      formData.append('email', bookingData.email);
+      formData.append('numberOfTourists', bookingData.numberOfTourists);
+      formData.append('dateFrom', bookingData.dateFrom);
+      formData.append('dateTo', bookingData.dateTo);
+      formData.append('comments', bookingData.comments);
+      formData.append('passport', passportFile);
+
+      await dispatch(createBooking(formData)).unwrap();
 
       alert('Booking submitted successfully! We will contact you soon.');
       setShowBookingForm(false);
@@ -80,10 +123,11 @@ const TourDetail = () => {
         dateTo: '',
         comments: ''
       });
+      removePassport();
       navigate('/my-bookings');
     } catch (error) {
       console.error('Error submitting booking:', error);
-      alert(error.response?.data?.message || 'Error submitting booking. Please try again.');
+      alert(error || 'Error submitting booking. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -101,7 +145,6 @@ const TourDetail = () => {
 
   return (
     <div className="tour-detail-container">
-      {/* Hero Section */}
       <div className="tour-detail-hero">
         <img src={imageUrl} alt={tour.title} className="tour-hero-image" />
         <div className="tour-hero-overlay">
@@ -117,7 +160,6 @@ const TourDetail = () => {
 
       <div className="tour-detail-content">
         <div className="tour-detail-main">
-          {/* Tab Navigation */}
           <div className="tour-tabs">
             <button
               className={`tab-button ${activeTab === 'highlights' ? 'active' : ''}`}
@@ -139,7 +181,6 @@ const TourDetail = () => {
             </button>
           </div>
 
-          {/* Tab Content */}
           <div className="tab-content">
             {activeTab === 'highlights' && (
               <div className="tab-panel">
@@ -189,14 +230,12 @@ const TourDetail = () => {
             )}
           </div>
 
-          {/* Description Section */}
           <div className="tour-description-section">
             <h2>About This Tour</h2>
             <p>{tour.description}</p>
           </div>
         </div>
 
-        {/* Booking Section */}
         <div className="tour-booking-sidebar">
           <div className="booking-card">
             <h3>Book This Trip</h3>
@@ -297,6 +336,38 @@ const TourDetail = () => {
                 </div>
 
                 <div className="form-group">
+                  <label htmlFor="passport">Passport Copy *</label>
+                  {passportPreviewName ? (
+                    <div className="passport-preview">
+                      <span className="passport-file-name">📄 {passportPreviewName}</span>
+                      <button
+                        type="button"
+                        className="passport-remove-btn"
+                        onClick={removePassport}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="passport-upload-area">
+                      <label htmlFor="passport" className="passport-upload-label">
+                        <span className="passport-upload-icon">🛂</span>
+                        <span>Click to upload passport copy</span>
+                        <span className="passport-upload-hint">JPG, PNG, WebP, or PDF (Max 5MB)</span>
+                      </label>
+                      <input
+                        id="passport"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,application/pdf"
+                        onChange={handlePassportChange}
+                        className="passport-file-input"
+                        required
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
                   <label htmlFor="comments">Comments / Special Requests</label>
                   <textarea
                     id="comments"
@@ -330,6 +401,75 @@ const TourDetail = () => {
           </div>
         </div>
       </div>
+
+      <style>{`
+        .passport-upload-area {
+          border: 2px dashed #ccc;
+          border-radius: 10px;
+          padding: 22px 16px;
+          text-align: center;
+          position: relative;
+          cursor: pointer;
+        }
+
+        .passport-upload-label {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          color: #555;
+        }
+
+        .passport-upload-icon {
+          font-size: 1.8rem;
+          margin-bottom: 4px;
+        }
+
+        .passport-upload-hint {
+          font-size: 0.78rem;
+          color: #999;
+        }
+
+        .passport-file-input {
+          position: absolute;
+          inset: 0;
+          opacity: 0;
+          cursor: pointer;
+        }
+
+        .passport-preview {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #f0f4e8;
+          border: 1px solid #d5e2c0;
+          border-radius: 8px;
+          padding: 10px 14px;
+        }
+
+        .passport-file-name {
+          font-size: 0.88rem;
+          color: #556B2F;
+          font-weight: 600;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-width: 220px;
+        }
+
+        .passport-remove-btn {
+          border: none;
+          background: #fdeceb;
+          color: #c62828;
+          padding: 5px 12px;
+          border-radius: 6px;
+          font-size: 0.78rem;
+          font-weight: 600;
+          cursor: pointer;
+        }
+      `}</style>
     </div>
   );
 };
