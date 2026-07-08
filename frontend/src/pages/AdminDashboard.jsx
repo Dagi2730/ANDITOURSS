@@ -8,6 +8,7 @@ import AdminPackages from '../components/admin/AdminPackages';
 import AdminOrders from '../components/admin/AdminOrders';
 import AdminUsers from '../components/admin/AdminUsers';
 import AdminBlog from '../components/admin/AdminBlog';
+import AdminMessages from '../components/admin/AdminMessages';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -22,6 +23,7 @@ function AdminDashboard() {
       case 'orders': return <AdminOrders />;
       case 'users': return <AdminUsers />;
       case 'blog': return <AdminBlog />;
+      case 'messages': return <AdminMessages />;
       default: return <AdminStats />;
     }
   };

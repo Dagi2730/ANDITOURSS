@@ -9,6 +9,7 @@ import userRoutes from './routes/userRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import blogRoutes from './routes/blogRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
 import errorHandler from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -45,6 +46,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/messages', messageRoutes);
 
 app.use(errorHandler);
 

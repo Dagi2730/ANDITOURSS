@@ -96,3 +96,13 @@ model BlogPost {
   updatedAt        DateTime @updatedAt
   tour             Tour?    @relation(fields: [tourId], references: [id], onDelete: SetNull)
 }
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

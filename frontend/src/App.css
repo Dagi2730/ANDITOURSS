@@ -586,10 +586,14 @@ html, body {
         flex-direction: column;
         gap: 30px;
     }
-    
-    .footer .box {
+
+        .footer .box {
         min-width: 100%;
         text-align: center;
+    }
+    
+    .footer .box a {
+    color: #556b2f;
     }
     
     .footer .box a:hover {

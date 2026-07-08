@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from '../lib/api';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -7,16 +8,24 @@ const Contact = () => {
     subject: '',
     message: ''
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logic for backend will go here
-    console.log("Contact Form Data:", formData);
-    alert("Message sent! Andi Tours will get back to you shortly.");
+    setSubmitting(true);
+    try {
+      await api.post('/messages', formData);
+      alert("Message sent! Andi Tours will get back to you shortly.");
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      alert(error.response?.data?.message || 'Failed to send message. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -69,6 +78,7 @@ const Contact = () => {
                   type="text" 
                   name="name" 
                   placeholder="Your Full Name" 
+                  value={formData.name}
                   onChange={handleChange} 
                   required 
                 />
@@ -78,6 +88,7 @@ const Contact = () => {
                   type="email" 
                   name="email" 
                   placeholder="Your Email Address" 
+                  value={formData.email}
                   onChange={handleChange} 
                   required 
                 />
@@ -87,6 +98,7 @@ const Contact = () => {
                   type="text" 
                   name="subject" 
                   placeholder="Subject" 
+                  value={formData.subject}
                   onChange={handleChange} 
                   required 
                 />
@@ -96,11 +108,14 @@ const Contact = () => {
                   name="message" 
                   placeholder="How can we help you?" 
                   rows="5" 
+                  value={formData.message}
                   onChange={handleChange} 
                   required 
                 ></textarea>
               </div>
-              <button type="submit" className="send-btn">Send Message</button>
+              <button type="submit" className="send-btn" disabled={submitting}>
+                {submitting ? 'Sending...' : 'Send Message'}
+              </button>
             </form>
           </div>
         </div>
@@ -114,7 +129,6 @@ const Contact = () => {
           align-items: center;
           justify-content: center;
           padding: 140px 20px 60px;
-          /* Background is inherited from your current setup */
         }
 
         .contact-wrapper {
@@ -126,7 +140,6 @@ const Contact = () => {
           flex-wrap: wrap;
         }
 
-        /* Column 1: Left Side */
         .contact-info {
           flex: 1;
           color: white;
@@ -200,7 +213,6 @@ const Contact = () => {
           border-color: #C0CA33;
         }
 
-        /* Column 2: Right Side (Glass) */
         .contact-form-container {
           flex: 1;
           min-width: 380px;
@@ -244,7 +256,6 @@ const Contact = () => {
           -webkit-text-fill-color: #ffffff;
         }
 
-        /* High visibility placeholders */
         .input-group input::placeholder, 
         .input-group textarea::placeholder {
           color: rgba(255, 255, 255, 0.9);
@@ -275,6 +286,12 @@ const Contact = () => {
           background: #ffffff;
           transform: translateY(-5px);
           box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .send-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
         }
 
         @media (max-width: 900px) {
