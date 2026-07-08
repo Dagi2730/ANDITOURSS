@@ -158,7 +158,7 @@ const MyBookings = () => {
   return (
     <div className="my-bookings-container mb-page">
       <div className="my-bookings-header mb-header">
-        <h1>My Account</h1>
+        <h1>Bookings</h1>
         <p>Manage your bookings and account information</p>
       </div>
 
@@ -292,40 +292,302 @@ const MyBookings = () => {
         </div>
       )}
 
-      <style>{`
-        .mb-page { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
-        .mb-header h1 { font-size: 1.8rem; color: #2b2b1f; margin: 0 0 6px 0; }
-        .mb-header p { color: #777; font-size: 0.95rem; margin: 0 0 28px 0; }
-        .mb-tabs { display: flex; gap: 8px; border-bottom: 1px solid #e5e5e0; margin-bottom: 28px; }
-        .mb-tab { padding: 10px 20px; background: none; border: none; border-bottom: 2px solid transparent; font-size: 0.98rem; font-weight: 800; color: #ffffff; cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.02em; }
-        .mb-tab.active { color: #ffffff; border-bottom-color: #C0CA33; text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
-        .mb-tab:hover { color: #ffffff; }
-        .mb-section h2 { font-size: 1.15rem; color: #333; margin-bottom: 18px; }
-        .mb-loading, .mb-empty { text-align: center; padding: 60px 20px; color: #888; }
-        .mb-list { display: flex; flex-direction: column; gap: 18px; }
-        .mb-card { background: white; border: 1px solid #ececec; border-radius: 14px; padding: 22px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-        .mb-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
-        .booking-status-badge { padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+<style>{`
+        .mb-page {
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 110px 24px 80px;
+        }
+
+        .mb-header {
+          margin-bottom: 28px;
+        }
+
+        .mb-header h1 {
+          font-size: 1.9rem;
+          color: #ffffff;
+          margin: 0 0 6px 0;
+          font-weight: 800;
+          text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        }
+
+        .mb-header p {
+          color: rgba(255, 255, 255, 0.85);
+          font-size: 0.95rem;
+          margin: 0;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+        }
+
+        .mb-tabs {
+          display: flex;
+          gap: 8px;
+          background: #fff;
+          border: 1px solid #ececec;
+          border-radius: 12px;
+          padding: 6px;
+          margin-bottom: 28px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .mb-tab {
+          flex: 1;
+          padding: 12px 20px;
+          background: none;
+          border: none;
+          border-radius: 8px;
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #6b6a63;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          letter-spacing: 0.01em;
+        }
+
+        .mb-tab.active {
+          color: #ffffff;
+          background: #556B2F;
+          box-shadow: 0 2px 8px rgba(85, 107, 47, 0.3);
+        }
+
+        .mb-tab:not(.active):hover {
+          background: #f5f5f0;
+          color: #333;
+        }
+
+        .mb-section h2 {
+          font-size: 1.15rem;
+          color: #ffffff;
+          margin-bottom: 18px;
+          font-weight: 700;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+        }
+
+        .mb-loading, .mb-empty {
+          text-align: center;
+          padding: 60px 20px;
+          color: #f0f0f0;
+        }
+
+        .mb-empty p {
+          margin-bottom: 16px;
+          font-size: 1rem;
+        }
+
+        .mb-list {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+        }
+
+        .mb-card {
+          background: white;
+          border: 1px solid #ececec;
+          border-radius: 14px;
+          padding: 22px 24px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .mb-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 16px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .mb-card-header h3 {
+          font-size: 1.1rem;
+          color: #222;
+          margin: 0 0 4px 0;
+        }
+
+        .mb-booking-id {
+          font-size: 0.8rem;
+          color: #999;
+          font-family: monospace;
+          margin: 0;
+        }
+
+        .booking-status-badge {
+          padding: 5px 14px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+          white-space: nowrap;
+        }
+
         .status-pending { background: #fff3e0; color: #e65100; }
         .status-confirmed { background: #e8f5e9; color: #2e7d32; }
         .status-cancelled { background: #ffebee; color: #c62828; }
-        .mb-details { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin-bottom: 18px; }
-        .mb-detail-label { font-size: 0.75rem; text-transform: uppercase; color: #999; font-weight: 600; }
-        .mb-actions { display: flex; gap: 10px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
-        .mb-btn-edit, .mb-btn-delete { padding: 9px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; }
+
+        .mb-details {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px 24px;
+          margin-bottom: 18px;
+        }
+
+        .mb-detail-item {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .mb-detail-item.full {
+          grid-column: 1 / -1;
+        }
+
+        .mb-detail-item span:last-child {
+          font-size: 0.92rem;
+          color: #333;
+        }
+
+        .mb-detail-label {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+          color: #999;
+          font-weight: 600;
+        }
+
+        .mb-actions {
+          display: flex;
+          gap: 10px;
+          padding-top: 16px;
+          border-top: 1px solid #f0f0f0;
+        }
+
+        .mb-btn-edit, .mb-btn-delete {
+          padding: 9px 18px;
+          border-radius: 8px;
+          font-size: 0.88rem;
+          font-weight: 600;
+          cursor: pointer;
+          border: none;
+          transition: all 0.15s ease;
+        }
+
         .mb-btn-edit { background: #f0f4e8; color: #556B2F; }
+        .mb-btn-edit:hover { background: #e2e9d4; }
         .mb-btn-delete { background: #fdeceb; color: #c62828; }
-        .mb-edit-form { background: #fafaf8; border-radius: 10px; padding: 18px; }
-        .mb-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
-        .mb-form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-        .mb-form-group label { font-size: 0.82rem; font-weight: 600; color: #555; }
-        .mb-form-group input, .mb-form-group textarea { padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-weight: 700; color: #1f1f1f; background: #fff; caret-color: #1f1f1f; -webkit-text-fill-color: #1f1f1f; }
-        .mb-form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
-        .mb-btn-save { padding: 9px 18px; border-radius: 8px; background: #556B2F; color: white; border: none; cursor: pointer; }
-        .mb-btn-cancel { padding: 9px 18px; border-radius: 8px; background: #f0f0f0; color: #555; border: none; cursor: pointer; }
-        .mb-profile-form { background: white; border: 1px solid #ececec; border-radius: 14px; padding: 28px; max-width: 480px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-        .mb-btn-primary { padding: 11px 26px; border-radius: 8px; background: #556B2F; color: white; border: none; cursor: pointer; }
-        @media (max-width: 600px) { .mb-details, .mb-form-row { grid-template-columns: 1fr; } .mb-actions { flex-direction: column; } }
+        .mb-btn-delete:hover { background: #fadbd8; }
+
+        .mb-edit-form {
+          background: #fafaf8;
+          border-radius: 10px;
+          padding: 18px;
+        }
+
+        .mb-form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          margin-bottom: 14px;
+        }
+
+        .mb-form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          margin-bottom: 14px;
+        }
+
+        .mb-form-group label {
+          font-size: 0.82rem;
+          font-weight: 600;
+          color: #555;
+        }
+
+        .mb-form-group input,
+        .mb-form-group textarea {
+          padding: 10px 12px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: #1f1f1f;
+          background: #fff;
+          font-family: inherit;
+        }
+
+        .mb-form-group input:focus,
+        .mb-form-group textarea:focus {
+          outline: none;
+          border-color: #556B2F;
+        }
+
+        .mb-form-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          margin-top: 6px;
+        }
+
+        .mb-btn-cancel {
+          padding: 9px 18px;
+          border-radius: 8px;
+          background: #f0f0f0;
+          color: #555;
+          border: none;
+          cursor: pointer;
+          font-size: 0.88rem;
+          font-weight: 600;
+        }
+
+        .mb-btn-save {
+          padding: 9px 18px;
+          border-radius: 8px;
+          background: #556B2F;
+          color: white;
+          border: none;
+          cursor: pointer;
+          font-size: 0.88rem;
+          font-weight: 600;
+        }
+
+        .mb-btn-save:hover { background: #445924; }
+
+        .mb-profile-form {
+          background: white;
+          border: 1px solid #ececec;
+          border-radius: 14px;
+          padding: 28px;
+          max-width: 480px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .mb-btn-primary {
+          padding: 11px 26px;
+          border-radius: 8px;
+          background: #556B2F;
+          color: white;
+          border: none;
+          cursor: pointer;
+          font-size: 0.92rem;
+          font-weight: 600;
+          margin-top: 6px;
+        }
+
+        .mb-btn-primary:hover { background: #445924; }
+        .mb-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        @media (max-width: 600px) {
+          .mb-details, .mb-form-row {
+            grid-template-columns: 1fr;
+          }
+          .mb-actions {
+            flex-direction: column;
+          }
+          .mb-actions button {
+            width: 100%;
+          }
+          .mb-tabs {
+            flex-direction: column;
+          }
+        }
       `}</style>
     </div>
   );
