@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../features/auth/authSlice';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import AdminStats from '../components/admin/AdminStats';
 import AdminPackages from '../components/admin/AdminPackages';
@@ -6,10 +9,13 @@ import AdminOrders from '../components/admin/AdminOrders';
 import AdminUsers from '../components/admin/AdminUsers';
 import AdminBlog from '../components/admin/AdminBlog';
 import AdminMessages from '../components/admin/AdminMessages';
+import AdminReviews from '../components/admin/AdminReviews';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const renderContent = () => {
     switch (activeTab) {
@@ -18,6 +24,7 @@ function AdminDashboard() {
       case 'orders': return <AdminOrders />;
       case 'users': return <AdminUsers />;
       case 'blog': return <AdminBlog />;
+      case 'reviews': return <AdminReviews />;
       case 'messages': return <AdminMessages />;
       default: return <AdminStats />;
     }
@@ -44,6 +51,7 @@ function AdminDashboard() {
             ☰
           </button>
           <h1>Admin Control Center</h1>
+          <button onClick={() => { dispatch(logout()); navigate('/login'); }} className="logout-btn">Logout</button>
         </header>
         <section className="admin-view-container">{renderContent()}</section>
       </main>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { FaTachometerAlt, FaBox, FaShoppingCart, FaUsers, FaSignOutAlt, FaImages, FaEnvelope } from 'react-icons/fa';
+import { FaTachometerAlt, FaBox, FaShoppingCart, FaUsers, FaSignOutAlt, FaImages, FaEnvelope, FaStar } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
 
@@ -14,6 +14,7 @@ function AdminSidebar({ activeTab, setActiveTab, mobileOpen, setMobileOpen }) {
     { id: 'orders', label: 'Orders', icon: <FaShoppingCart /> },
     { id: 'users', label: 'Users', icon: <FaUsers /> },
     { id: 'blog', label: 'Stories & Gallery', icon: <FaImages /> },
+    { id: 'reviews', label: 'Reviews', icon: <FaStar /> },
     { id: 'messages', label: 'Messages', icon: <FaEnvelope /> },
   ];
 
@@ -41,7 +42,7 @@ function AdminSidebar({ activeTab, setActiveTab, mobileOpen, setMobileOpen }) {
   return (
     <aside className={`admin-sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
       <div className="admin-sidebar-logo">
-        <h2>🌿 DOBI TOURS</h2>
+        <h2>🌿 ANDI TOURS</h2>
         {mobileOpen && (
           <button
             type="button"

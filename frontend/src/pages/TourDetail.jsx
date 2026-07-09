@@ -2,14 +2,48 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { createBooking } from '../features/booking/bookingSlice';
+import {
+  getReviewsByTour,
+  checkEligibility,
+  createReview,
+  reset as resetReviews,
+} from '../features/review/reviewSlice';
 import api from '../lib/api';
 import '../styles/TourDetail.css';
+
+function StarInput({ value, onChange }) {
+  return (
+    <div className="star-input">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <span
+          key={n}
+          className={n <= value ? 'star-filled' : 'star-empty'}
+          onClick={() => onChange(n)}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function StarDisplay({ rating }) {
+  return (
+    <span className="star-display">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <span key={n} className={n <= rating ? 'star-filled' : 'star-empty'}>★</span>
+      ))}
+    </span>
+  );
+}
 
 const TourDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const { reviews, eligibility, isLoading: reviewsLoading } = useSelector((state) => state.review);
+
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('highlights');
@@ -27,6 +61,9 @@ const TourDetail = () => {
   const [passportPreviewName, setPassportPreviewName] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   useEffect(() => {
     const fetchTour = async () => {
       try {
@@ -41,6 +78,16 @@ const TourDetail = () => {
 
     fetchTour();
   }, [id]);
+
+  useEffect(() => {
+    dispatch(getReviewsByTour(id));
+    if (user) {
+      dispatch(checkEligibility(id));
+    }
+    return () => {
+      dispatch(resetReviews());
+    };
+  }, [id, user, dispatch]);
 
   const handleBookingChange = (e) => {
     const { name, value } = e.target;
@@ -133,6 +180,28 @@ const TourDetail = () => {
     }
   };
 
+  const handleReviewChange = (e) => {
+    setReviewForm(prev => ({ ...prev, comment: e.target.value }));
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!reviewForm.comment.trim()) {
+      alert('Please write a comment for your review');
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      await dispatch(createReview({ tourId: id, rating: reviewForm.rating, comment: reviewForm.comment })).unwrap();
+      setReviewForm({ rating: 5, comment: '' });
+      alert('Thank you! Your review has been posted.');
+    } catch (err) {
+      alert(err || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   if (loading) {
     return <div className="loading-container">Loading tour details...</div>;
   }
@@ -142,6 +211,10 @@ const TourDetail = () => {
   }
 
   const imageUrl = tour.imageUrl || 'https://via.placeholder.com/800x400?text=Tour+Image';
+
+  const averageRating = reviews.length > 0
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : null;
 
   return (
     <div className="tour-detail-container">
@@ -153,6 +226,11 @@ const TourDetail = () => {
             <div className="tour-hero-meta">
               <span className="tour-price-large">${tour.price}</span>
               <span className="tour-duration-large">⏱ {tour.duration}</span>
+              {averageRating && (
+                <span className="tour-rating-large">
+                  <StarDisplay rating={Math.round(averageRating)} /> {averageRating} ({reviews.length})
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -178,6 +256,12 @@ const TourDetail = () => {
               onClick={() => setActiveTab('travelDetails')}
             >
               Travel Details
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
+              onClick={() => setActiveTab('reviews')}
+            >
+              Reviews {reviews.length > 0 && `(${reviews.length})`}
             </button>
           </div>
 
@@ -225,6 +309,71 @@ const TourDetail = () => {
                   </div>
                 ) : (
                   <p className="no-content">No travel details available for this tour.</p>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'reviews' && (
+              <div className="tab-panel">
+                <h2>Customer Reviews</h2>
+
+                {user && eligibility.eligible && (
+                  <form className="review-form" onSubmit={handleReviewSubmit}>
+                    <h3>Share your experience</h3>
+                    <StarInput
+                      value={reviewForm.rating}
+                      onChange={(n) => setReviewForm(prev => ({ ...prev, rating: n }))}
+                    />
+                    <textarea
+                      value={reviewForm.comment}
+                      onChange={handleReviewChange}
+                      rows="4"
+                      placeholder="Tell other travelers about your trip..."
+                      required
+                    />
+                    <button type="submit" className="btn-submit-review" disabled={submittingReview}>
+                      {submittingReview ? 'Submitting...' : 'Post Review'}
+                    </button>
+                  </form>
+                )}
+
+                {user && eligibility.alreadyReviewed && (
+                  <p className="review-note">You've already reviewed this tour. Thank you!</p>
+                )}
+
+                {user && !eligibility.hasConfirmedBooking && !eligibility.alreadyReviewed && (
+                  <p className="review-note">
+                    Only customers with a confirmed booking for this tour can leave a review.
+                  </p>
+                )}
+
+                {!user && (
+                  <p className="review-note">
+                    <span onClick={() => navigate('/login')} className="review-login-link">Log in</span> to leave a review if you've completed this tour.
+                  </p>
+                )}
+
+                {reviewsLoading && reviews.length === 0 ? (
+                  <p className="no-content">Loading reviews...</p>
+                ) : reviews.length > 0 ? (
+                  <div className="reviews-list">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="review-card">
+                        <div className="review-card-header">
+                          <strong>{review.user?.name}</strong>
+                          <StarDisplay rating={review.rating} />
+                        </div>
+                        <p className="review-comment">{review.comment}</p>
+                        <span className="review-date">
+                          {new Date(review.createdAt).toLocaleDateString(undefined, {
+                            year: 'numeric', month: 'short', day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="no-content">No reviews yet. Be the first to share your experience!</p>
                 )}
               </div>
             )}
@@ -468,6 +617,39 @@ const TourDetail = () => {
           font-size: 0.78rem;
           font-weight: 600;
           cursor: pointer;
+        }
+
+        .star-input { font-size: 1.6rem; cursor: pointer; margin-bottom: 12px; }
+        .star-display { font-size: 1rem; }
+        .star-filled { color: #f5a623; }
+        .star-empty { color: #ddd; }
+
+        .review-form {
+          background: #f9f9f7; border: 1px solid #eee; border-radius: 10px;
+          padding: 20px; margin-bottom: 24px;
+        }
+        .review-form h3 { margin: 0 0 10px; font-size: 1.05rem; }
+        .review-form textarea {
+          width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;
+          font-family: inherit; font-size: 0.92rem; box-sizing: border-box; resize: vertical;
+        }
+        .btn-submit-review {
+          margin-top: 10px; background: #556B2F; color: #fff; border: none;
+          padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;
+        }
+        .btn-submit-review:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .review-note { color: #777; font-style: italic; margin-bottom: 20px; }
+        .review-login-link { color: #556B2F; font-weight: 600; cursor: pointer; text-decoration: underline; }
+
+        .reviews-list { display: flex; flex-direction: column; gap: 14px; }
+        .review-card { border-bottom: 1px solid #eee; padding-bottom: 14px; }
+        .review-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+        .review-comment { margin: 4px 0; line-height: 1.6; color: #444; }
+        .review-date { font-size: 0.78rem; color: #999; }
+
+        .tour-rating-large {
+          display: inline-flex; align-items: center; gap: 6px; margin-left: 10px;
         }
       `}</style>
     </div>

@@ -1,8 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { getFeaturedReviews } from '../features/review/reviewSlice';
+
+function StarDisplay({ rating }) {
+  return (
+    <span className="fr-stars">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <span key={n} className={n <= rating ? 'fr-star-filled' : 'fr-star-empty'}>★</span>
+      ))}
+    </span>
+  );
+}
 
 function Home() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { featuredReviews } = useSelector((state) => state.review);
+
+  useEffect(() => {
+    dispatch(getFeaturedReviews());
+  }, [dispatch]);
 
   const handleStartExploring = () => {
     navigate('/destinations');
@@ -61,6 +79,24 @@ function Home() {
             </button>
           </div>
         </div>
+
+        {featuredReviews.length > 0 && (
+          <div className="fr-block">
+            <h3 className="expertise-heading">What Our Guests Say</h3>
+            <div className="fr-grid">
+              {featuredReviews.map((review) => (
+                <div key={review.id} className="fr-card">
+                  <StarDisplay rating={review.rating} />
+                  <p className="fr-comment">"{review.comment}"</p>
+                  <div className="fr-footer">
+                    <strong>{review.user?.name}</strong>
+                    {review.tour?.title && <span className="fr-tour">{review.tour.title}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
@@ -211,12 +247,78 @@ function Home() {
           margin: 0;
         }
 
+        .fr-block {
+          margin-top: 90px;
+        }
+
+        .fr-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          gap: 28px;
+        }
+
+        .fr-card {
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 16px;
+          padding: 28px 26px;
+          text-align: left;
+          transition: all 0.3s ease;
+        }
+
+        .fr-card:hover {
+          background: rgba(255, 255, 255, 0.13);
+          border-color: rgba(168, 197, 90, 0.4);
+          transform: translateY(-6px);
+        }
+
+        .fr-stars {
+          display: block;
+          margin-bottom: 14px;
+          font-size: 1.1rem;
+        }
+
+        .fr-star-filled { color: #A8C55A; }
+        .fr-star-empty { color: rgba(255, 255, 255, 0.25); }
+
+        .fr-comment {
+          color: rgba(255, 255, 255, 0.88);
+          font-style: italic;
+          line-height: 1.7;
+          font-size: 0.98rem;
+          margin: 0 0 18px 0;
+          text-shadow: 1px 1px 6px rgba(0,0,0,0.4);
+        }
+
+        .fr-footer {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .fr-footer strong {
+          color: #ffffff;
+          font-size: 0.95rem;
+          text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+        }
+
+        .fr-tour {
+          color: #A8C55A;
+          font-size: 0.82rem;
+          font-weight: 700;
+        }
+
         @media (max-width: 600px) {
           .welcome-section {
             padding: 110px 6% 80px;
           }
           .welcome-intro {
             margin-bottom: 50px;
+          }
+          .fr-block {
+            margin-top: 60px;
           }
         }
       `}</style>

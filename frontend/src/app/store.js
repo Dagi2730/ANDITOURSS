@@ -7,6 +7,8 @@ import bookingReducer from '../features/booking/bookingSlice';
 import adminBookingReducer from '../features/booking/adminBookingSlice';
 import blogReducer from '../features/blog/blogSlice';
 import adminMessageReducer from '../features/message/adminMessageSlice';
+import reviewReducer from '../features/review/reviewSlice';
+import adminReviewReducer from '../features/review/adminReviewSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +18,7 @@ export const store = configureStore({
     adminBooking: adminBookingReducer,
     blog: blogReducer,
     adminMessage: adminMessageReducer,
+    review: reviewReducer,
+    adminReview: adminReviewReducer,
   },
 });
