@@ -12,23 +12,31 @@ function AdminStats() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const dropdownRefs = useRef({});
 
-  const mapBookingToOrder = (booking) => ({
-    id: booking.id,
-    orderId: `#${booking.id.slice(-6).toUpperCase()}`,
-    customer: booking.user?.name || 'Unknown customer',
-    email: booking.user?.email || '',
-    phone: booking.user?.phone || '',
-    package: booking.tour?.title || 'N/A',
-    date: booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A',
-    amount: booking.tour ? `$${(booking.tour.price * (booking.guests || 1)).toLocaleString()}` : '$0',
-    status: (booking.status || 'PENDING').toLowerCase(),
-    startDate: booking.travelDate ? new Date(booking.travelDate).toISOString().split('T')[0] : 'N/A',
-    endDate: booking.travelDateEnd ? new Date(booking.travelDateEnd).toISOString().split('T')[0] : 'N/A',
-    duration: booking.tour?.duration || 'N/A',
-    visitors: booking.guests || 1,
-    comment: booking.comments || 'No specific comments provided.',
-    raw: booking,
-  });
+  const mapBookingToOrder = (booking, index, array) => {
+    let orderNum = booking.orderNumber;
+    if (!orderNum && array) {
+      const sorted = [...array].sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+      const idx = sorted.findIndex((b) => b.id === booking.id);
+      orderNum = idx >= 0 ? '#' + String(idx + 1).padStart(5, '0') : '#00001';
+    }
+
+    return {
+      id: booking.id,
+      orderId: orderNum || '#00001',
+      customer: booking.user?.name || 'Unknown customer',
+      email: booking.user?.email || '',
+      phone: booking.user?.phone || '',
+      package: booking.tour?.title || 'N/A',
+      date: booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A',
+      status: (booking.status || 'PENDING').toLowerCase(),
+      startDate: booking.travelDate ? new Date(booking.travelDate).toISOString().split('T')[0] : 'N/A',
+      endDate: booking.travelDateEnd ? new Date(booking.travelDateEnd).toISOString().split('T')[0] : 'N/A',
+      duration: booking.tour?.duration || 'N/A',
+      visitors: booking.guests || 1,
+      comment: booking.comments || 'No specific comments provided.',
+      raw: booking,
+    };
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -40,7 +48,8 @@ function AdminStats() {
         api.get('/tours'),
       ]);
 
-      setOrders((bookingsRes.data || []).map(mapBookingToOrder));
+      const rawBookings = bookingsRes.data || [];
+      setOrders(rawBookings.map((b, i, arr) => mapBookingToOrder(b, i, arr)));
       setUsers(usersRes.data || []);
       setTours(toursRes.data || []);
     } catch (err) {
@@ -107,11 +116,6 @@ function AdminStats() {
     ? orders
     : orders.filter((order) => order.status === filterStatus);
 
-  const totalRevenue = orders.reduce((sum, order) => {
-    const amount = Number(order.raw?.tour?.price || 0) * Number(order.raw?.guests || 1);
-    return sum + amount;
-  }, 0);
-
   const pendingCount = orders.filter((order) => order.status === 'pending').length;
   const confirmedCount = orders.filter((order) => order.status === 'confirmed').length;
 
@@ -130,13 +134,7 @@ function AdminStats() {
       positive: true,
       icon: '📦'
     },
-    {
-      title: 'Revenue',
-      value: `$${totalRevenue.toLocaleString()}`,
-      change: `${pendingCount} pending`,
-      positive: true,
-      icon: '💰'
-    },
+
     {
       title: 'Active Packages',
       value: tours.length.toString(),
@@ -178,25 +176,27 @@ function AdminStats() {
           </div>
         </div>
 
-        <div className="admin-table-container">
+        <div className="admin-table-container orders-table-container">
           <table className="admin-plain-table">
             <thead>
               <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Package</th>
-                <th>Visitors</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th style={{ width: '90px' }}>Order ID</th>
+                <th style={{ width: '180px' }}>Customer</th>
+                <th style={{ width: '140px' }}>Package</th>
+                <th style={{ width: '100px' }}>Visitors</th>
+                <th style={{ width: '130px' }}>Status</th>
+                <th style={{ width: '140px' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredOrders.map((order) => (
                 <tr key={order.id}>
-                  <td><strong>{order.orderId}</strong></td>
-                  <td>{order.customer}</td>
-                  <td>{order.package}</td>
-                  <td>{order.visitors} Persons</td>
+                  <td>
+                    <span className="order-id-badge">{order.orderId}</span>
+                  </td>
+                  <td className="customer-name-cell">{order.customer}</td>
+                  <td className="package-title-cell">{order.package}</td>
+                  <td>{order.visitors} Person(s)</td>
                   <td style={{ overflow: 'visible' }}>
                     <div className="status-dropdown-container" ref={el => dropdownRefs.current[order.orderId] = el}>
                       <button 
@@ -218,10 +218,7 @@ function AdminStats() {
                   <td>
                     <div className="action-btns">
                       <button className="view-btn" onClick={() => setSelectedOrder(order)}>👁️ Details</button>
-                      <button className="delete-btn" onClick={() => {
-                          if(window.confirm("Delete this booking?")) 
-                          setOrders(prevOrders => prevOrders.filter(o => o.orderId !== order.orderId))
-                      }}>🗑️</button>
+                      <button className="delete-btn" onClick={() => handleDelete(order.orderId)}>🗑️</button>
                     </div>
                   </td>
                 </tr>
@@ -382,12 +379,44 @@ function AdminStats() {
           background: #e0e0e0;
         }
         
+        .orders-table-container {
+          overflow-x: auto;
+          width: 100%;
+          padding-bottom: 10px;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .order-id-badge {
+          background: #f1f5f9;
+          color: #334155;
+          padding: 5px 10px;
+          border-radius: 6px;
+          font-weight: 700;
+          font-family: monospace;
+          font-size: 0.9rem;
+          border: 1px solid #cbd5e1;
+          display: inline-block;
+        }
+
+        .customer-name-cell {
+          font-weight: 700 !important;
+          color: #0f172a !important;
+          white-space: nowrap !important;
+        }
+
+        .package-title-cell {
+          font-weight: 600;
+          color: #334155;
+          white-space: nowrap;
+        }
+
         .admin-table-container {
           padding: 20px;
         }
         
         .admin-plain-table {
           width: 100%;
+          min-width: 920px;
           border-collapse: collapse;
         }
         
@@ -488,6 +517,8 @@ function AdminStats() {
           display: flex;
           gap: 8px;
           align-items: center;
+          white-space: nowrap;
+          min-width: 140px;
         }
         
         .view-btn {

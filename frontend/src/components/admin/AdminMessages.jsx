@@ -98,7 +98,7 @@ function AdminMessages() {
       </div>
 
       <style>{`
-        .amsg-wrapper { padding: 20px; font-family: 'Inter', sans-serif; }
+        .amsg-wrapper { padding: 20px; font-family: 'Raleway', sans-serif; }
 
         .amsg-header {
           display: flex; justify-content: space-between; align-items: flex-start;

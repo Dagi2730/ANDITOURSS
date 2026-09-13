@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { getMyBookings, updateBooking, deleteBooking } from '../features/booking/bookingSlice';
+import { logout } from '../features/auth/authSlice';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../styles/MyBookings.css';
@@ -14,6 +16,8 @@ const MyBookings = () => {
 
   const [activeSection, setActiveSection] = useState('bookings');
   const [editingBooking, setEditingBooking] = useState(null);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [bookingFormData, setBookingFormData] = useState({
     guests: 1,
     travelDate: '',
@@ -145,6 +149,11 @@ const MyBookings = () => {
     }
   };
 
+  const handleLogout = async () => {
+    await dispatch(logout());
+    navigate('/');
+  };
+
   const getStatusBadge = (status) => {
     return (
       <span className={`booking-status-badge status-${status?.toLowerCase()}`}>
@@ -158,7 +167,7 @@ const MyBookings = () => {
   return (
     <div className="my-bookings-container mb-page">
       <div className="my-bookings-header mb-header">
-        <h1>Bookings</h1>
+        <h1>My Account</h1>
         <p>Manage your bookings and account information</p>
       </div>
 
@@ -189,36 +198,38 @@ const MyBookings = () => {
                   <div className="booking-card-header mb-card-header">
                     <div>
                       <h3>{booking.tour?.title || 'Tour Package'}</h3>
-                      <p className="booking-id mb-booking-id">Booking ID: #{booking.id.slice(-6)}</p>
+                      <p className="booking-id mb-booking-id">
+                        Booking ID: {booking.orderNumber || `#${String(booking.id).slice(-5)}`}
+                      </p>
                     </div>
                     {getStatusBadge(booking.status)}
                   </div>
 
                   {editingBooking === booking.id ? (
-                    <div className="booking-edit-form mb-edit-form">
+                    <div className="booking-edit-form glass-form" style={{maxWidth: '100%', padding: '30px', marginTop: '20px'}}>
                       <div className="form-row mb-form-row">
-                        <div className="form-group mb-form-group">
+                        <div className="input-group">
                           <label>Number of Tourists *</label>
                           <input type="number" name="guests" value={bookingFormData.guests} onChange={handleBookingChange} min="1" required />
                         </div>
                       </div>
-                      <div className="form-row mb-form-row">
-                        <div className="form-group mb-form-group">
+                      <div className="form-row mb-form-row" style={{display: 'flex', gap: '20px'}}>
+                        <div className="input-group" style={{flex: 1}}>
                           <label>Date From *</label>
                           <input type="date" name="travelDate" value={bookingFormData.travelDate} onChange={handleBookingChange} required />
                         </div>
-                        <div className="form-group mb-form-group">
+                        <div className="input-group" style={{flex: 1}}>
                           <label>Date To *</label>
                           <input type="date" name="travelDateEnd" value={bookingFormData.travelDateEnd} onChange={handleBookingChange} required />
                         </div>
                       </div>
-                      <div className="form-group mb-form-group">
+                      <div className="input-group">
                         <label>Comments</label>
                         <textarea name="comments" value={bookingFormData.comments} onChange={handleBookingChange} rows="3" />
                       </div>
-                      <div className="form-actions mb-form-actions">
-                        <button className="btn-cancel mb-btn-cancel" onClick={() => setEditingBooking(null)}>Cancel</button>
-                        <button className="btn-save mb-btn-save" onClick={() => handleUpdateBooking(booking.id)}>Save Changes</button>
+                      <div className="form-actions mb-form-actions" style={{display: 'flex', gap: '15px'}}>
+                        <button className="send-btn" style={{background: 'rgba(255,255,255,0.1)', color: '#fff'}} onClick={() => setEditingBooking(null)}>Cancel</button>
+                        <button className="send-btn" onClick={() => handleUpdateBooking(booking.id)}>Save Changes</button>
                       </div>
                     </div>
                   ) : (
@@ -263,32 +274,75 @@ const MyBookings = () => {
 
       {activeSection === 'account' && (
         <div className="account-section mb-section">
-          <h2>Manage Account</h2>
-          <form className="profile-form mb-profile-form" onSubmit={handleUpdateProfile}>
-            <div className="form-group mb-form-group">
-              <label htmlFor="name">Full Name *</label>
-              <input type="text" id="name" name="name" value={profileData.name} onChange={handleProfileChange} required />
-            </div>
-            <div className="form-group mb-form-group">
-              <label htmlFor="email">Email Address *</label>
-              <input type="email" id="email" name="email" value={profileData.email} onChange={handleProfileChange} required />
-            </div>
-            <div className="form-group mb-form-group">
-              <label htmlFor="phone">Phone Number</label>
-              <input type="tel" id="phone" name="phone" value={profileData.phone} onChange={handleProfileChange} placeholder="Enter phone number" />
-            </div>
-            <div className="form-group mb-form-group">
-              <label htmlFor="password">New Password (leave blank to keep current)</label>
-              <input type="password" id="password" name="password" value={profileData.password} onChange={handleProfileChange} />
-            </div>
-            <div className="form-group mb-form-group">
-              <label htmlFor="confirmPassword">Confirm New Password</label>
-              <input type="password" id="confirmPassword" name="confirmPassword" value={profileData.confirmPassword} onChange={handleProfileChange} />
-            </div>
-            <button type="submit" className="btn-primary mb-btn-primary" disabled={updatingProfile}>
-              {updatingProfile ? 'Updating...' : 'Update Profile'}
-            </button>
-          </form>
+          <div className="glass-form" style={{maxWidth: '600px', width: '100%', margin: '0 auto'}}>
+            <h2>Manage Account</h2>
+            <form className="profile-form" onSubmit={handleUpdateProfile}>
+              <div className="input-group">
+                <label htmlFor="name">Full Name *</label>
+                <input type="text" id="name" name="name" value={profileData.name} onChange={handleProfileChange} required />
+              </div>
+              <div className="input-group">
+                <label htmlFor="email">Email Address *</label>
+                <input type="email" id="email" name="email" value={profileData.email} onChange={handleProfileChange} required />
+              </div>
+              <div className="input-group">
+                <label htmlFor="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" value={profileData.phone} onChange={handleProfileChange} placeholder="Enter phone number" />
+              </div>
+              <div className="input-group">
+                <label htmlFor="password">New Password (leave blank to keep current)</label>
+                <div className="password-input-container">
+                  <input 
+                    type={showNewPassword ? 'text' : 'password'} 
+                    id="password" 
+                    name="password" 
+                    value={profileData.password} 
+                    onChange={handleProfileChange} 
+                    placeholder="Enter new password"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    title={showNewPassword ? 'Hide Password' : 'Show Password'}
+                    aria-label={showNewPassword ? 'Hide Password' : 'Show Password'}
+                  >
+                    {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+              <div className="input-group">
+                <label htmlFor="confirmPassword">Confirm New Password</label>
+                <div className="password-input-container">
+                  <input 
+                    type={showConfirmPassword ? 'text' : 'password'} 
+                    id="confirmPassword" 
+                    name="confirmPassword" 
+                    value={profileData.confirmPassword} 
+                    onChange={handleProfileChange} 
+                    placeholder="Confirm new password"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    title={showConfirmPassword ? 'Hide Password' : 'Show Password'}
+                    aria-label={showConfirmPassword ? 'Hide Password' : 'Show Password'}
+                  >
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+              <div className="account-actions" style={{display: 'flex', gap: '15px', marginTop: '30px'}}>
+                <button type="button" className="send-btn" style={{background: 'rgba(255,255,255,0.1)', color: '#fff'}} onClick={handleLogout}>
+                  Logout
+                </button>
+                <button type="submit" className="send-btn" disabled={updatingProfile}>
+                  {updatingProfile ? 'Updating...' : 'Update Profile'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
@@ -587,6 +641,107 @@ const MyBookings = () => {
           .mb-tabs {
             flex-direction: column;
           }
+        }
+
+        .password-input-container {
+          position: relative;
+          width: 100%;
+          display: flex;
+          align-items: center;
+        }
+
+        .password-input-container input {
+          padding-right: 48px !important;
+        }
+
+        .password-toggle-btn {
+          position: absolute;
+          right: 14px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: transparent;
+          border: none;
+          color: rgba(255, 255, 255, 0.85);
+          cursor: pointer;
+          font-size: 1.15rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          transition: color 0.2s ease, transform 0.2s ease;
+          z-index: 10;
+        }
+
+        .password-toggle-btn:hover {
+          color: #C0CA33;
+          transform: translateY(-50%) scale(1.1);
+        }
+
+        .profile-form input,
+        .glass-form input,
+        .glass-form textarea,
+        .input-group input,
+        .input-group textarea {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          caret-color: #ffffff !important;
+          background: rgba(0, 0, 0, 0.45) !important;
+          border: 1px solid rgba(255, 255, 255, 0.3) !important;
+          font-weight: 600 !important;
+          font-size: 1rem !important;
+        }
+
+        .profile-form input:-webkit-autofill,
+        .profile-form input:-webkit-autofill:hover,
+        .profile-form input:-webkit-autofill:focus,
+        .glass-form input:-webkit-autofill,
+        .glass-form input:-webkit-autofill:hover,
+        .glass-form input:-webkit-autofill:focus,
+        .input-group input:-webkit-autofill,
+        .input-group input:-webkit-autofill:hover,
+        .input-group input:-webkit-autofill:focus {
+          -webkit-text-fill-color: #ffffff !important;
+          -webkit-box-shadow: 0 0 0px 1000px rgba(20, 25, 15, 0.95) inset !important;
+          color: #ffffff !important;
+        }
+
+        .profile-form label,
+        .glass-form label,
+        .input-group label {
+          color: #ffffff !important;
+          font-weight: 600 !important;
+          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        .profile-form input::placeholder,
+        .glass-form input::placeholder,
+        .input-group input::placeholder {
+          color: rgba(255, 255, 255, 0.75) !important;
+          -webkit-text-fill-color: rgba(255, 255, 255, 0.75) !important;
+          opacity: 1 !important;
+        }
+
+        .account-actions {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 20px;
+        }
+
+        .mb-btn-logout {
+          padding: 11px 26px;
+          border-radius: 8px;
+          background: transparent;
+          color: #c62828;
+          border: 1px solid #c62828;
+          cursor: pointer;
+          font-size: 0.92rem;
+          font-weight: 600;
+          transition: all 0.2s ease;
+        }
+
+        .mb-btn-logout:hover {
+          background: #fdeceb;
         }
       `}</style>
     </div>

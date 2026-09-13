@@ -1,6 +1,43 @@
 import asyncHandler from 'express-async-handler';
 import prisma from '../lib/prisma.js';
 
+const validateAndParseDate = (dateStr) => {
+  if (!dateStr) return null;
+  const parsed = new Date(dateStr);
+  if (isNaN(parsed.getTime())) return null;
+  const year = parsed.getFullYear();
+  if (year < 2000 || year > 2100) return null;
+  return parsed;
+};
+
+const attachOrderNumbers = async (bookingsData) => {
+  try {
+    const allBookings = await prisma.booking.findMany({
+      select: { id: true, createdAt: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    const idMap = new Map();
+    allBookings.forEach((b, idx) => {
+      idMap.set(b.id, '#' + String(idx + 1).padStart(5, '0'));
+    });
+
+    if (Array.isArray(bookingsData)) {
+      return bookingsData.map((b) => ({
+        ...b,
+        orderNumber: idMap.get(b.id) || '#00001',
+      }));
+    } else if (bookingsData && bookingsData.id) {
+      return {
+        ...bookingsData,
+        orderNumber: idMap.get(bookingsData.id) || '#00001',
+      };
+    }
+  } catch (err) {
+    console.error('Error mapping order numbers:', err);
+  }
+  return bookingsData;
+};
+
 const createBooking = asyncHandler(async (req, res) => {
   const {
     tourId,
@@ -17,10 +54,24 @@ const createBooking = asyncHandler(async (req, res) => {
   const resolvedTravelDate = travelDate || dateFrom;
   const resolvedTravelDateEnd = travelDateEnd || dateTo || null;
   const resolvedGuests = guests || numberOfTourists;
+  const parsedGuests = parseInt(resolvedGuests, 10);
 
-  if (!resolvedTourId || !resolvedTravelDate || !resolvedGuests) {
+  if (!resolvedTourId || !resolvedTravelDate || !resolvedGuests || isNaN(parsedGuests) || parsedGuests < 1) {
     res.status(400);
-    throw new Error('Please fill in all required fields');
+    throw new Error('Please fill in all required fields with a valid number of tourists');
+  }
+
+  const startDate = validateAndParseDate(resolvedTravelDate);
+  const endDate = resolvedTravelDateEnd ? validateAndParseDate(resolvedTravelDateEnd) : null;
+
+  if (!startDate) {
+    res.status(400);
+    throw new Error('Please provide a valid travel start date (e.g. 2026-09-20)');
+  }
+
+  if (resolvedTravelDateEnd && !endDate) {
+    res.status(400);
+    throw new Error('Please provide a valid travel end date (e.g. 2026-09-25)');
   }
 
   const tour = await prisma.tour.findUnique({ where: { id: resolvedTourId } });
@@ -33,11 +84,9 @@ const createBooking = asyncHandler(async (req, res) => {
     data: {
       userId: req.user.id,
       tourId: resolvedTourId,
-      travelDate: new Date(resolvedTravelDate),
-      travelDateEnd: resolvedTravelDateEnd
-        ? new Date(resolvedTravelDateEnd)
-        : null,
-      guests: Number(resolvedGuests),
+      travelDate: startDate,
+      travelDateEnd: endDate,
+      guests: parsedGuests,
       comments: comments || '',
       status: 'PENDING',
     },
@@ -49,7 +98,7 @@ const createBooking = asyncHandler(async (req, res) => {
     },
   });
 
-  res.status(201).json(booking);
+  res.status(201).json(await attachOrderNumbers(booking));
 });
 
 const getBookings = asyncHandler(async (req, res) => {
@@ -63,7 +112,7 @@ const getBookings = asyncHandler(async (req, res) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  res.json(bookings);
+  res.json(await attachOrderNumbers(bookings));
 });
 
 const getMyBookings = asyncHandler(async (req, res) => {
@@ -84,7 +133,7 @@ const getMyBookings = asyncHandler(async (req, res) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  res.json(bookings);
+  res.json(await attachOrderNumbers(bookings));
 });
 
 const getBookingById = asyncHandler(async (req, res) => {
@@ -106,7 +155,7 @@ const getBookingById = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to access this booking');
   }
 
-  res.json(booking);
+  res.json(await attachOrderNumbers(booking));
 });
 
 const updateBooking = asyncHandler(async (req, res) => {
@@ -147,7 +196,10 @@ const updateBooking = asyncHandler(async (req, res) => {
     data.travelDateEnd = new Date(travelDateEnd || dateTo);
   }
   if (guests !== undefined || numberOfTourists !== undefined) {
-    data.guests = Number(guests ?? numberOfTourists);
+    const parsedG = parseInt(guests ?? numberOfTourists, 10);
+    if (!isNaN(parsedG) && parsedG > 0) {
+      data.guests = parsedG;
+    }
   }
   if (comments !== undefined) {
     data.comments = comments;
@@ -171,7 +223,7 @@ const updateBooking = asyncHandler(async (req, res) => {
     },
   });
 
-  res.json(updated);
+  res.json(await attachOrderNumbers(updated));
 });
 
 const cancelBooking = asyncHandler(async (req, res) => {
@@ -200,7 +252,7 @@ const cancelBooking = asyncHandler(async (req, res) => {
     },
   });
 
-  res.json(updated);
+  res.json(await attachOrderNumbers(updated));
 });
 
 const getBookingStats = asyncHandler(async (req, res) => {

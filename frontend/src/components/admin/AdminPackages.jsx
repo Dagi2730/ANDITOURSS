@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
 
+const getImageUrl = (url) => {
+  if (!url) return 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80';
+  if (url.startsWith('http') || url.startsWith('blob:')) return url;
+  const backendBase = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+  return `${backendBase}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 function AdminPackages() {
   const [packages, setPackages] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingPackage, setEditingPackage] = useState(null);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [showDetailsCard, setShowDetailsCard] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
@@ -57,7 +65,11 @@ function AdminPackages() {
         : [{ day: 1, title: '', description: '' }],
       imageUrl: pkg.imageUrl || ''
     });
-    setImagePreview(pkg.imageUrl || null);
+    setImageFiles([]);
+    const existingImages = Array.isArray(pkg.images) && pkg.images.length > 0
+      ? pkg.images.map(img => getImageUrl(img))
+      : [getImageUrl(pkg.imageUrl)];
+    setImagePreviews(existingImages);
     setShowForm(true);
   };
 
@@ -77,7 +89,8 @@ function AdminPackages() {
       travelDetails: '', itinerary: [{ day: 1, title: '', description: '' }],
       imageUrl: ''
     });
-    setImagePreview(null);
+    setImageFiles([]);
+    setImagePreviews([]);
     setShowForm(true);
   };
 
@@ -93,9 +106,9 @@ function AdminPackages() {
   };
 
   const addItineraryDay = () => {
-    setFormData(prev => ({ 
-      ...prev, 
-      itinerary: [...prev.itinerary, { day: prev.itinerary.length + 1, title: '', description: '' }] 
+    setFormData(prev => ({
+      ...prev,
+      itinerary: [...prev.itinerary, { day: prev.itinerary.length + 1, title: '', description: '' }]
     }));
   };
 
@@ -105,34 +118,48 @@ function AdminPackages() {
   };
 
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setFormData(prev => ({ ...prev, imageUrl: url }));
-      setImagePreview(url);
+    const selected = Array.from(e.target.files);
+    if (selected.length > 0) {
+      const sliced = selected.slice(0, 5);
+      setImageFiles(sliced);
+      const previews = sliced.map(f => URL.createObjectURL(f));
+      setImagePreviews(previews);
     }
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    const submissionData = {
-      ...formData,
-      location: formData.location || 'Ethiopia'
-    };
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('duration', formData.duration);
+    data.append('location', formData.location || 'Ethiopia');
+    data.append('description', formData.description);
+    data.append('highlights', formData.highlights || '');
+    data.append('travelDetails', formData.travelDetails || '');
+    data.append('price', '0');
+    data.append('itinerary', JSON.stringify(formData.itinerary || []));
+
+    if (imageFiles.length > 0) {
+      imageFiles.forEach(file => {
+        data.append('images', file);
+      });
+    } else if (formData.imageUrl) {
+      data.append('imageUrl', formData.imageUrl);
+    }
 
     try {
       if (editingPackage) {
-        const res = await api.put(`/tours/${editingPackage.id}`, submissionData);
+        const res = await api.put(`/tours/${editingPackage.id}`, data);
         setPackages(packages.map(p => p.id === editingPackage.id ? res.data : p));
       } else {
-        const res = await api.post('/tours', submissionData);
-        setPackages([...packages, res.data]);
+        const res = await api.post('/tours', data);
+        setPackages([res.data, ...packages]);
       }
       setShowForm(false);
     } catch (err) {
-      console.error("Save error:", err);
-      alert("Error saving data to database. Ensure backend is running.");
+      console.error("Save error:", err.response?.data || err);
+      alert(err.response?.data?.message || "Error saving package. Please check all fields.");
     }
   };
 
@@ -145,32 +172,32 @@ function AdminPackages() {
 
       {/* --- ORIGINAL STYLE DETAIL CARD --- */}
       {showDetailsCard && selectedPackage && (
-        <div className="admin-modal-overlay" style={{position:'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.5)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:1000}} onClick={() => setShowDetailsCard(false)}>
+        <div className="admin-modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }} onClick={() => setShowDetailsCard(false)}>
           <div className="package-detail-card" onClick={e => e.stopPropagation()}>
-            <div style={{padding: '20px'}}>
-              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <h3>{selectedPackage.title}</h3>
+            <div style={{ padding: '25px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0, fontSize: '1.5rem', color: '#1e293b' }}>{selectedPackage.title}</h3>
                 <span className="package-tag">{selectedPackage.duration}</span>
               </div>
 
               {selectedPackage.imageUrl && (
                 <div className="package-image-container">
-                  <img src={selectedPackage.imageUrl} alt={selectedPackage.title} className="package-image" />
+                  <img src={getImageUrl(selectedPackage.imageUrl)} alt={selectedPackage.title} className="package-image" />
                 </div>
               )}
 
               <div className="description-display">
-                <strong>Description:</strong><br/>{selectedPackage.description}
+                <strong>Description:</strong><br />{selectedPackage.description}
               </div>
 
               <div className="highlights-display">
-                <strong>Highlights:</strong><br/>{selectedPackage.highlights}
+                <strong>Highlights:</strong><br />{selectedPackage.highlights}
               </div>
 
               <div className="travel-details-display">
-                <strong>Travel Details:</strong><br/>{selectedPackage.travelDetails}
+                <strong>Travel Details:</strong><br />{selectedPackage.travelDetails}
               </div>
-              
+
               {selectedPackage.itinerary?.length > 0 && (
                 <div className="itinerary-display">
                   <h4>Full Itinerary</h4>
@@ -185,9 +212,9 @@ function AdminPackages() {
                   ))}
                 </div>
               )}
-              
-              <div style={{marginTop: '20px'}}>
-                <button className="remove-image-btn" onClick={() => setShowDetailsCard(false)}>Close Details</button>
+
+              <div style={{ marginTop: '20px', textAlign: 'right' }}>
+                <button className="btn-cancel" onClick={() => setShowDetailsCard(false)}>Close Details</button>
               </div>
             </div>
           </div>
@@ -196,59 +223,111 @@ function AdminPackages() {
 
       {/* --- FORM MODAL --- */}
       {showForm && (
-        <div className="form-modal-overlay" style={{position:'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.5)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:1000}}>
-          <div className="package-detail-card" style={{padding: '30px'}}>
-            <div className="itinerary-header-section">
-              <h3>{editingPackage ? 'Edit Package' : 'Add New Package'}</h3>
-              <button className="remove-itinerary-btn" onClick={() => setShowForm(false)}>✕</button>
+        <div className="form-modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.55)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div className="package-detail-card" style={{ padding: '30px', maxWidth: '850px' }}>
+            <div className="itinerary-header-section" style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #e2e8f0' }}>
+              <h3 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a' }}>{editingPackage ? 'Edit Package' : 'Add New Package'}</h3>
+              <button className="remove-day-btn" onClick={() => setShowForm(false)}>✕ Close</button>
             </div>
-            <form onSubmit={handleFormSubmit} style={{display: 'flex', flexDirection:'column', gap:'10px'}}>
-              <div className="image-upload-container">
-                 <input type="file" onChange={handleImageUpload} className="file-input" id="fileInput" />
-                 <label htmlFor="fileInput" className="upload-label">
-                    <span className="upload-icon">📷</span>
-                    <span>Click to Upload Image</span>
-                 </label>
-                 {imagePreview && <img src={imagePreview} className="package-thumbnail" style={{width: '100px', marginTop: '10px'}} alt="preview" />}
+
+            <form onSubmit={handleFormSubmit} className="admin-package-form">
+              <div className="form-group">
+                <label className="form-label">Package Images (Up to 5)</label>
+                <div className="image-upload-container">
+                  <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="file-input" id="fileInput" />
+                  <label htmlFor="fileInput" className="upload-label">
+                    <span className="upload-icon" style={{ fontSize: '1.5rem' }}>📷</span>
+                    <span style={{ fontWeight: 600, color: '#475569' }}>Click to Upload Package Images (Select up to 5)</span>
+                  </label>
+                  {imagePreviews.length > 0 && (
+                    <div style={{ marginTop: '12px', display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                      {imagePreviews.map((url, idx) => (
+                        <img key={idx} src={url} style={{ width: '90px', height: '65px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #556B2F' }} alt={`preview ${idx + 1}`} />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <input type="text" name="title" placeholder="Package Name" className="itinerary-item-form" style={{width:'100%'}} value={formData.title} onChange={handleInputChange} required />
-              <input type="text" name="duration" placeholder="Duration (e.g. 5 Days / 4 Nights)" className="itinerary-item-form" style={{width:'100%'}} value={formData.duration} onChange={handleInputChange} required />
-              <input type="text" name="location" placeholder="Location (e.g. Lalibela, Ethiopia)" className="itinerary-item-form" style={{width:'100%'}} value={formData.location} onChange={handleInputChange} />
-              <textarea name="description" placeholder="Description" className="description-display" style={{width:'100%'}} value={formData.description} onChange={handleInputChange} required />
-              <textarea name="highlights" placeholder="Highlights" className="highlights-display" style={{width:'100%'}} value={formData.highlights} onChange={handleInputChange} />
-              <textarea name="travelDetails" placeholder="Travel Details" className="travel-details-display" style={{width:'100%'}} value={formData.travelDetails} onChange={handleInputChange} />
-              
+              <div className="form-grid-2">
+                <div className="form-group">
+                  <label className="form-label">Title *</label>
+                  <input type="text" name="title" placeholder="e.g. Historic Route & Lalibela" className="admin-form-input" value={formData.title} onChange={handleInputChange} required />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Duration *</label>
+                  <input type="text" name="duration" placeholder="e.g. 5 Days / 4 Nights" className="admin-form-input" value={formData.duration} onChange={handleInputChange} required />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Location</label>
+                <input type="text" name="location" placeholder="e.g. Lalibela, Ethiopia" className="admin-form-input" value={formData.location} onChange={handleInputChange} />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Description *</label>
+                <textarea name="description" rows="3" placeholder="Package overview..." className="admin-form-textarea" value={formData.description} onChange={handleInputChange} required />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Highlights</label>
+                <textarea name="highlights" rows="3" placeholder="Key highlights of the tour..." className="admin-form-textarea" value={formData.highlights} onChange={handleInputChange} />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Travel Details</label>
+                <textarea name="travelDetails" rows="3" placeholder="Important travel & booking details..." className="admin-form-textarea" value={formData.travelDetails} onChange={handleInputChange} />
+              </div>
+
+              {/* --- ITINERARY SECTION --- */}
               <div className="itinerary-form-section">
-                <div className="itinerary-header-section">
-                  <h4>Itinerary Days</h4>
-                  <button type="button" className="add-itinerary-btn" onClick={addItineraryDay}>+ Add Day</button>
+                <div className="itinerary-section-header">
+                  <h4 style={{ margin: 0, color: '#1e293b', fontSize: '1.1rem', fontWeight: 700 }}>Itinerary Days</h4>
+                  <button type="button" className="add-day-btn" onClick={addItineraryDay}>+ Add Day</button>
                 </div>
                 {formData.itinerary.map((item, index) => (
-                  <div key={index} className="itinerary-item-form">
-                    <div className="itinerary-item-header">
-                       <h5>Day {item.day}</h5>
-                       <button type="button" className="remove-itinerary-btn" onClick={() => removeItineraryDay(index)}>Remove</button>
+                  <div key={index} className="itinerary-day-card">
+                    <div className="itinerary-day-header">
+                      <span className="day-badge">Day {item.day}</span>
+                      <button type="button" className="remove-day-btn" onClick={() => removeItineraryDay(index)}>Remove</button>
                     </div>
                     <div className="itinerary-fields">
-                       <input type="text" value={item.title} onChange={(e) => handleItineraryChange(index, 'title', e.target.value)} placeholder="Title" />
-                       <textarea value={item.description} onChange={(e) => handleItineraryChange(index, 'description', e.target.value)} placeholder="What happens on this day?" />
+                      <input
+                        type="text"
+                        className="admin-form-input"
+                        value={item.title}
+                        onChange={(e) => handleItineraryChange(index, 'title', e.target.value)}
+                        placeholder="Title (e.g. Flight to Lalibela & Rock Churches)"
+                      />
+                      <textarea
+                        rows="3"
+                        className="admin-form-textarea"
+                        value={item.description}
+                        onChange={(e) => handleItineraryChange(index, 'description', e.target.value)}
+                        placeholder="What happens on this day?"
+                      />
                     </div>
                   </div>
                 ))}
               </div>
-              <button type="submit" className="add-itinerary-btn" style={{padding:'15px', fontSize:'1rem'}}>Save Package to Database</button>
+
+              <div className="form-modal-actions">
+                <button type="button" className="btn-cancel" onClick={() => setShowForm(false)}>Cancel</button>
+                <button type="submit" className="btn-save">Add </button>
+              </div>
             </form>
           </div>
         </div>
       )}
 
       {/* --- LIST TABLE --- */}
-      <div className="admin-table-container" style={{marginTop: '20px'}}>
-        <table style={{width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '8px', overflow: 'hidden'}}>
-          <thead style={{background: '#f8f9fa', borderBottom: '2px solid #eee'}}>
+      <div className="admin-table-container" style={{ marginTop: '20px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '8px', overflow: 'hidden' }}>
+          <thead style={{ background: '#f8f9fa', borderBottom: '2px solid #eee' }}>
             <tr>
-              <th style={{padding: '15px'}}>Image</th>
+              <th style={{ padding: '15px' }}>Image</th>
               <th>Name</th>
               <th>Duration</th>
               <th>Actions</th>
@@ -256,16 +335,16 @@ function AdminPackages() {
           </thead>
           <tbody>
             {packages.map((pkg) => (
-              <tr key={pkg.id} style={{borderBottom: '1px solid #eee'}}>
-                <td className="package-table-image" style={{padding: '10px'}}>
-                   <img src={pkg.imageUrl} className="package-thumbnail" alt="" />
+              <tr key={pkg.id} style={{ borderBottom: '1px solid #eee' }}>
+                <td className="package-table-image" style={{ padding: '10px' }}>
+                  <img src={getImageUrl(pkg.imageUrl)} className="package-thumbnail" alt="" />
                 </td>
-                <td style={{padding: '10px'}}><strong>{pkg.title}</strong></td>
+                <td style={{ padding: '10px' }}><strong>{pkg.title}</strong></td>
                 <td>{pkg.duration}</td>
                 <td className="action-btns">
                   <button className="view-btn" onClick={() => handleView(pkg)}>View</button>
-                  <button className="add-itinerary-btn" style={{background:'#556B2F'}} onClick={() => handleEdit(pkg)}>Edit</button>
-                  <button className="remove-itinerary-btn" onClick={() => handleDelete(pkg.id, pkg.title)}>Delete</button>
+                  <button className="add-itinerary-btn" style={{ background: '#556B2F' }} onClick={() => handleEdit(pkg)}>Edit</button>
+                  <button className="remove-day-btn" onClick={() => handleDelete(pkg.id, pkg.title)}>Delete</button>
                 </td>
               </tr>
             ))}
@@ -275,30 +354,242 @@ function AdminPackages() {
 
       <style>{`
         .admin-packages-wrapper { padding: 20px; }
-        .package-detail-card { background: white; border-radius: 12px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); animation: slideIn 0.3s ease; position: relative; }
-        .package-image-container { margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        .package-detail-card { 
+          background: white; 
+          border-radius: 16px; 
+          width: 100%; 
+          max-width: 800px; 
+          max-height: 90vh; 
+          overflow-y: auto; 
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25); 
+          animation: slideIn 0.3s ease; 
+          position: relative; 
+        }
+        .package-image-container { margin: 20px 0; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
         .package-image { width: 100%; height: 300px; object-fit: cover; display: block; }
-        .package-tag { background: #f5f5f5; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; color: #333; font-weight: 500; }
-        .description-display, .highlights-display, .travel-details-display { background: #faf8f4; border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin-top: 10px; line-height: 1.6; color: #333; font-style: italic; min-height: 80px; max-height: 200px; overflow-y: auto; }
-        .highlights-display { background-color: #fff8e1; }
-        .travel-details-display { background-color: #e8f5e9; }
-        .itinerary-display { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-top: 10px; }
-        .itinerary-item { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e9ecef; }
-        .itinerary-day { background: #556B2F; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; min-width: 60px; text-align: center; }
+        .package-tag { background: #f1f5f9; padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; color: #334155; font-weight: 600; }
+        
+        .description-display, .highlights-display, .travel-details-display { 
+          background: #f8fafc; 
+          border: 1px solid #cbd5e1; 
+          border-radius: 8px; 
+          padding: 15px; 
+          margin-top: 10px; 
+          line-height: 1.6; 
+          color: #1e293b; 
+          min-height: 80px; 
+          max-height: 200px; 
+          overflow-y: auto; 
+        }
+
+        .itinerary-display { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 15px; }
+        .itinerary-item { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+        .itinerary-day { background: #556B2F; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; min-width: 60px; text-align: center; }
         .itinerary-header { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
-        .itinerary-title { margin: 0; color: #333; font-size: 1.1rem; }
-        .itinerary-description { margin: 0; color: #555; line-height: 1.6; padding-left: 75px; }
-        .itinerary-form-section { border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: #f9f9f9; }
+        .itinerary-title { margin: 0; color: #0f172a; font-size: 1.1rem; font-weight: 700; }
+        .itinerary-description { margin: 0; color: #334155; line-height: 1.6; padding-left: 75px; }
         .itinerary-header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .add-itinerary-btn { background: #4CAF50; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s ease; }
-        .itinerary-item-form { background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 10px; }
-        .itinerary-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .remove-itinerary-btn { background: #ffebee; color: #c62828; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-        .image-upload-container { border: 2px dashed #ddd; border-radius: 8px; padding: 20px; background: #fafafa; text-align: center; }
+
+        /* --- UNIFORM FORM STYLING --- */
+        .admin-package-form {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .form-grid-2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+
+        @media (max-width: 650px) {
+          .form-grid-2 {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          text-align: left;
+        }
+
+        .form-label {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #334155;
+        }
+
+        .admin-form-input,
+        .admin-form-textarea {
+          width: 100% !important;
+          background-color: #ffffff !important;
+          color: #0f172a !important;
+          border: 1px solid #cbd5e1 !important;
+          border-radius: 8px !important;
+          padding: 12px 16px !important;
+          font-size: 0.95rem !important;
+          font-family: inherit !important;
+          box-sizing: border-box !important;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+        }
+
+        .admin-form-input::placeholder,
+        .admin-form-textarea::placeholder {
+          color: #64748b !important;
+          opacity: 1 !important;
+        }
+
+        .admin-form-input:focus,
+        .admin-form-textarea:focus {
+          outline: none !important;
+          border-color: #556B2F !important;
+          box-shadow: 0 0 0 3px rgba(85, 107, 47, 0.15) !important;
+          background-color: #ffffff !important;
+        }
+
+        .admin-form-textarea {
+          resize: vertical;
+          min-height: 80px;
+        }
+
+        /* --- ITINERARY FORM SECTION --- */
+        .itinerary-form-section {
+          border: 1px solid #cbd5e1;
+          border-radius: 12px;
+          padding: 20px;
+          background-color: #f8fafc;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .itinerary-section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 4px;
+        }
+
+        .add-day-btn {
+          background-color: #556B2F;
+          color: #ffffff;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 6px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+        }
+
+        .add-day-btn:hover {
+          background-color: #6B8E23;
+        }
+
+        .itinerary-day-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 18px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .itinerary-day-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .day-badge {
+          background: #556B2F;
+          color: white;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 700;
+        }
+
+        .remove-day-btn {
+          background: #fee2e2;
+          color: #dc2626;
+          border: 1px solid #fca5a5;
+          padding: 5px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.8rem;
+          font-weight: 600;
+          transition: all 0.2s ease;
+        }
+
+        .remove-day-btn:hover {
+          background: #dc2626;
+          color: white;
+        }
+
+        .itinerary-fields {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .form-modal-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 12px;
+          margin-top: 10px;
+          padding-top: 16px;
+          border-top: 1px solid #e2e8f0;
+        }
+
+        .btn-cancel {
+          padding: 10px 20px;
+          background: #f1f5f9;
+          color: #475569;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .btn-cancel:hover {
+          background: #e2e8f0;
+        }
+
+        .btn-save {
+          padding: 12px 24px;
+          background: #556B2F;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 0.95rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-save:hover {
+          background: #6B8E23;
+          transform: translateY(-1px);
+        }
+
+        .add-itinerary-btn { background: #556B2F; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s ease; }
+        .add-itinerary-btn:hover { background: #6B8E23; }
+
+        .image-upload-container { border: 2px dashed #cbd5e1; border-radius: 10px; padding: 20px; background: #f8fafc; text-align: center; }
         .file-input { display: none; }
-        .upload-label { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
-        .package-thumbnail { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
-        .view-btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; background: #e3f2fd; color: #0277bd; }
+        .upload-label { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .package-thumbnail { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; }
+        .view-btn { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; background: #e0f2fe; color: #0369a1; font-weight: 600; }
+        .view-btn:hover { background: #bae6fd; }
+
         @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>

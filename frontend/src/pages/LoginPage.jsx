@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login, register } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -17,7 +19,7 @@ const Login = () => {
     e.preventDefault();
     setError('');
     try {
-      const result = await dispatch(isLogin ? login(formData) : register(formData)).unwrap();
+      const result = await dispatch(isLogin ? login({ email: formData.email, password: formData.password }) : register(formData)).unwrap();
       alert(isLogin ? 'Welcome back to Andi Tours!' : 'Account created successfully!');
       navigate(result?.role?.toUpperCase() === 'ADMIN' ? '/admin' : '/');
     } catch (err) {
@@ -33,25 +35,80 @@ const Login = () => {
 
   return (
     <div className="auth-page">
-      <div className="glass-card">
-        <div className="auth-header">
-          <h2>{isLogin ? 'Login' : 'Register'}</h2>
-          <p>{isLogin ? 'Explore the beauty of Ethiopia' : 'Join our travel community'}</p>
+      <div className="glass-form" style={{maxWidth: '440px', width: '100%'}}>
+        <div className="auth-header" style={{textAlign: 'center'}}>
+          <h2>{isLogin ? 'Welcome Back' : 'Join Andi Tours'}</h2>
+          <p style={{marginBottom: '25px', color: 'rgba(255, 255, 255, 0.9)'}}>
+            {isLogin ? 'Sign in to manage your bookings' : 'Create an account to start your journey'}
+          </p>
         </div>
 
         {error && <div className="error-box">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit}>
           {!isLogin && (
             <>
-              <input type="text" name="name" placeholder="Full Name" onChange={handleChange} required />
-              <input type="text" name="phone" placeholder="Phone Number" onChange={handleChange} required />
+              <div className="input-group">
+                <label style={{color: '#fff', fontSize: '0.9rem', marginBottom: '6px', display: 'block', fontWeight: 600}}>Full Name *</label>
+                <input 
+                  type="text" 
+                  name="name" 
+                  placeholder="Your Full Name" 
+                  value={formData.name} 
+                  onChange={handleChange} 
+                  required 
+                />
+              </div>
+              <div className="input-group">
+                <label style={{color: '#fff', fontSize: '0.9rem', marginBottom: '6px', display: 'block', fontWeight: 600}}>Phone Number *</label>
+                <input 
+                  type="tel" 
+                  name="phone" 
+                  placeholder="+251 911 223344" 
+                  value={formData.phone} 
+                  onChange={handleChange} 
+                  required 
+                />
+              </div>
             </>
           )}
-          <input type="email" name="email" placeholder="Email Address" onChange={handleChange} required />
-          <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
+
+          <div className="input-group">
+            <label style={{color: '#fff', fontSize: '0.9rem', marginBottom: '6px', display: 'block', fontWeight: 600}}>Email Address *</label>
+            <input 
+              type="email" 
+              name="email" 
+              placeholder="your.email@example.com" 
+              value={formData.email} 
+              onChange={handleChange} 
+              required 
+            />
+          </div>
+
+          <div className="input-group">
+            <label style={{color: '#fff', fontSize: '0.9rem', marginBottom: '6px', display: 'block', fontWeight: 600}}>Password *</label>
+            <div className="password-input-container">
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                name="password" 
+                placeholder="Enter password" 
+                value={formData.password} 
+                onChange={handleChange} 
+                required 
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? 'Hide Password' : 'Show Password'}
+                aria-label={showPassword ? 'Hide Password' : 'Show Password'}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+          </div>
           
-          <button type="submit" className="submit-btn">
+          <button type="submit" className="send-btn" style={{marginTop: '15px'}}>
             {isLogin ? 'Sign In' : 'Create Account'}
           </button>
         </form>
@@ -59,7 +116,7 @@ const Login = () => {
         <div className="toggle-text">
           <p>
             {isLogin ? "Don't have an account?" : "Already have an account?"}
-            <span onClick={() => setIsLogin(!isLogin)}>{isLogin ? 'Register' : 'Login'}</span>
+            <span onClick={() => { setIsLogin(!isLogin); setError(''); }}>{isLogin ? 'Register' : 'Login'}</span>
           </p>
         </div>
       </div>
@@ -70,98 +127,83 @@ const Login = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+          padding: 120px 20px 60px;
+          background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), 
                       url('https://images.unsplash.com/photo-1523805081446-ed9a7bb84eaa?q=80&w=2070&auto=format&fit=crop');
           background-size: cover;
           background-position: center;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          font-family: 'Raleway', sans-serif;
         }
 
-        .glass-card {
-          width: 380px;
-          padding: 45px 35px;
-          background: rgba(255, 255, 255, 0.12);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          border-radius: 24px;
-          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-          color: #ffffff;
-          text-align: center;
-        }
-
-        .auth-header h2 {
-          font-size: 2.2rem;
-          margin-bottom: 8px;
-          font-weight: 700;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .auth-header p {
-          font-size: 0.95rem;
-          margin-bottom: 30px;
-          color: rgba(255, 255, 255, 0.9);
-        }
-
-        .auth-form input {
+        .password-input-container {
+          position: relative;
           width: 100%;
-          padding: 14px;
-          margin-bottom: 18px;
-          background: rgba(0, 0, 0, 0.32);
-          border: 1px solid rgba(255, 255, 255, 0.4);
-          border-radius: 10px;
-          color: #ffffff;
-          font-size: 1rem;
-          font-weight: 700;
-          outline: none;
-          transition: all 0.3s ease;
-          caret-color: #ffffff;
-          -webkit-text-fill-color: #ffffff;
+          display: flex;
+          align-items: center;
         }
 
-        .auth-form input::placeholder {
-          color: rgba(255, 255, 255, 0.9) !important;
-          opacity: 1;
+        .password-input-container input {
+          padding-right: 48px !important;
         }
 
-        .auth-form input:focus {
-          background: rgba(0, 0, 0, 0.4);
-          border-color: #C0CA33;
-          box-shadow: 0 0 8px rgba(192, 202, 51, 0.4);
-        }
-
-        .submit-btn {
-          width: 100%;
-          padding: 14px;
-          background: #556B2F; 
-          color: white;
+        .password-toggle-btn {
+          position: absolute;
+          right: 14px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: transparent;
           border: none;
-          border-radius: 10px;
-          font-weight: 700;
-          font-size: 1.1rem;
+          color: rgba(255, 255, 255, 0.8);
           cursor: pointer;
-          margin-top: 10px;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-          transition: 0.3s;
+          font-size: 1.15rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          transition: color 0.2s ease, transform 0.2s ease;
+          z-index: 10;
         }
 
-        .submit-btn:hover {
-          background: #6B8E23;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        .password-toggle-btn:hover {
+          color: #C0CA33;
+          transform: translateY(-50%) scale(1.1);
+        }
+
+        .auth-page input {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          caret-color: #ffffff !important;
+          background: rgba(0, 0, 0, 0.45) !important;
+          border: 1px solid rgba(255, 255, 255, 0.3) !important;
+          font-weight: 600 !important;
+        }
+
+        .auth-page input:-webkit-autofill,
+        .auth-page input:-webkit-autofill:hover,
+        .auth-page input:-webkit-autofill:focus {
+          -webkit-text-fill-color: #ffffff !important;
+          -webkit-box-shadow: 0 0 0px 1000px rgba(20, 25, 15, 0.95) inset !important;
+          color: #ffffff !important;
+        }
+
+        .auth-page input::placeholder {
+          color: rgba(255, 255, 255, 0.75) !important;
+          -webkit-text-fill-color: rgba(255, 255, 255, 0.75) !important;
+          opacity: 1 !important;
         }
 
         .toggle-text {
           margin-top: 25px;
-          font-size: 0.9rem;
-          color: rgba(255, 255, 255, 0.8);
+          font-size: 0.95rem;
+          color: rgba(255, 255, 255, 0.9);
+          text-align: center;
         }
 
         .toggle-text span {
           cursor: pointer;
           font-weight: 700;
           color: #C0CA33;
-          margin-left: 5px;
+          margin-left: 6px;
           transition: 0.2s;
         }
 
@@ -171,13 +213,14 @@ const Login = () => {
         }
 
         .error-box {
-          background: rgba(211, 47, 47, 0.4);
+          background: rgba(211, 47, 47, 0.5);
           color: white;
-          padding: 12px;
+          padding: 12px 16px;
           border-radius: 8px;
           margin-bottom: 20px;
-          font-size: 0.85rem;
-          border: 1px solid rgba(211, 47, 47, 0.5);
+          font-size: 0.9rem;
+          border: 1px solid rgba(211, 47, 47, 0.7);
+          text-align: center;
         }
       `}</style>
     </div>

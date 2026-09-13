@@ -8,6 +8,7 @@ import {
   createReview,
   reset as resetReviews,
 } from '../features/review/reviewSlice';
+import PrintItineraryButton from '../components/PrintItineraryButton';
 import api from '../lib/api';
 import '../styles/TourDetail.css';
 
@@ -63,6 +64,7 @@ const TourDetail = () => {
 
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchTour = async () => {
@@ -143,6 +145,26 @@ const TourDetail = () => {
       return;
     }
 
+    const dFrom = new Date(bookingData.dateFrom);
+    const dTo = new Date(bookingData.dateTo);
+    const yearFrom = dFrom.getFullYear();
+    const yearTo = dTo.getFullYear();
+
+    if (isNaN(dFrom.getTime()) || yearFrom < 2024 || yearFrom > 2035) {
+      alert('Please select a valid Travel Start Date (e.g. year between 2024 and 2035)');
+      return;
+    }
+
+    if (isNaN(dTo.getTime()) || yearTo < 2024 || yearTo > 2035) {
+      alert('Please select a valid Travel End Date (e.g. year between 2024 and 2035)');
+      return;
+    }
+
+    if (dTo < dFrom) {
+      alert('Travel End Date cannot be earlier than Travel Start Date');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -202,39 +224,128 @@ const TourDetail = () => {
     }
   };
 
+  const handleClose = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate('/destinations');
+    }
+  };
+
   if (loading) {
-    return <div className="loading-container">Loading tour details...</div>;
+    return (
+      <div className="tour-modal-overlay" onClick={handleClose}>
+        <div className="tour-modal-card" style={{ padding: '50px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+          <button className="tour-modal-close-btn" onClick={handleClose}>✕</button>
+          <div className="loading-container">Loading tour details...</div>
+        </div>
+      </div>
+    );
   }
 
   if (!tour) {
-    return <div className="error-container">Tour not found</div>;
+    return (
+      <div className="tour-modal-overlay" onClick={handleClose}>
+        <div className="tour-modal-card" style={{ padding: '50px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+          <button className="tour-modal-close-btn" onClick={handleClose}>✕</button>
+          <div className="error-container">Tour not found</div>
+        </div>
+      </div>
+    );
   }
 
-  const imageUrl = tour.imageUrl || 'https://via.placeholder.com/800x400?text=Tour+Image';
+  const getImageUrl = (url) => {
+    if (!url) return 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80';
+    if (url.startsWith('http') || url.startsWith('blob:')) return url;
+    const backendBase = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+    return `${backendBase}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  const getImagesList = () => {
+    let list = [];
+    if (tour.images && Array.isArray(tour.images) && tour.images.length > 0) {
+      list = tour.images;
+    } else if (tour.imageUrl) {
+      try {
+        const parsed = JSON.parse(tour.imageUrl);
+        if (Array.isArray(parsed)) list = parsed;
+        else list = [tour.imageUrl];
+      } catch (e) {
+        list = [tour.imageUrl];
+      }
+    }
+    if (list.length === 0) {
+      list = ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80'];
+    }
+    return list.map(url => getImageUrl(url));
+  };
+
+  const imagesList = getImagesList();
+  const currentImage = imagesList[activeImageIndex] || imagesList[0];
+
+  const handlePrevImage = () => {
+    setActiveImageIndex(prev => (prev === 0 ? imagesList.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setActiveImageIndex(prev => (prev === imagesList.length - 1 ? 0 : prev + 1));
+  };
 
   const averageRating = reviews.length > 0
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
 
   return (
-    <div className="tour-detail-container">
-      <div className="tour-detail-hero">
-        <img src={imageUrl} alt={tour.title} className="tour-hero-image" />
-        <div className="tour-hero-overlay">
-          <div className="tour-hero-content">
-            <h1 className="tour-hero-title">{tour.title}</h1>
-            <div className="tour-hero-meta">
-              <span className="tour-price-large">${tour.price}</span>
-              <span className="tour-duration-large">⏱ {tour.duration}</span>
+    <div className="tour-modal-overlay" onClick={handleClose}>
+      <div className="tour-modal-card" onClick={(e) => e.stopPropagation()}>
+        
+        {/* --- MODAL HEADER SECTION --- */}
+        <div className="tour-modal-header">
+          <div>
+            <h1 className="tour-modal-header-title">{tour.title}</h1>
+            <div className="tour-modal-header-meta">
+              <span className="tour-duration-tag">⏱ {tour.duration}</span>
+              {tour.location && <span className="tour-location-tag">📍 {tour.location}</span>}
               {averageRating && (
-                <span className="tour-rating-large">
+                <span className="tour-rating-tag">
                   <StarDisplay rating={Math.round(averageRating)} /> {averageRating} ({reviews.length})
                 </span>
               )}
             </div>
           </div>
+          <button className="tour-modal-close-btn" onClick={handleClose} title="Close Details">
+            ✕
+          </button>
         </div>
-      </div>
+
+        {/* --- STANDALONE IMAGE GALLERY (NO DARK GRADIENT OVERLAY) --- */}
+        <div className="tour-gallery-container">
+          <div className="main-image-wrapper">
+            <img src={currentImage} alt={tour.title} className="tour-standalone-image" />
+            {imagesList.length > 1 && (
+              <>
+                <button className="gallery-arrow arrow-left" onClick={handlePrevImage} title="Previous Image">‹</button>
+                <button className="gallery-arrow arrow-right" onClick={handleNextImage} title="Next Image">›</button>
+                <div className="gallery-badge">{activeImageIndex + 1} / {imagesList.length}</div>
+              </>
+            )}
+          </div>
+
+          {/* THUMBNAIL SELECTORS FOR UP TO 5 IMAGES */}
+          {imagesList.length > 1 && (
+            <div className="gallery-thumbnails">
+              {imagesList.map((imgUrl, idx) => (
+                <div
+                  key={idx}
+                  className={`thumbnail-card ${idx === activeImageIndex ? 'active' : ''}`}
+                  onClick={() => setActiveImageIndex(idx)}
+                >
+                  <img src={imgUrl} alt={`thumbnail ${idx + 1}`} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
       <div className="tour-detail-content">
         <div className="tour-detail-main">
@@ -297,6 +408,7 @@ const TourDetail = () => {
                 ) : (
                   <p className="no-content">No itinerary available for this tour.</p>
                 )}
+                <PrintItineraryButton tour={tour} />
               </div>
             )}
 
@@ -390,10 +502,6 @@ const TourDetail = () => {
             <h3>Book This Trip</h3>
             <div className="booking-summary">
               <div className="booking-summary-item">
-                <span>Price per person:</span>
-                <strong>${tour.price}</strong>
-              </div>
-              <div className="booking-summary-item">
                 <span>Duration:</span>
                 <strong>{tour.duration}</strong>
               </div>
@@ -468,6 +576,8 @@ const TourDetail = () => {
                     name="dateFrom"
                     value={bookingData.dateFrom}
                     onChange={handleBookingChange}
+                    min="2024-01-01"
+                    max="2035-12-31"
                     required
                   />
                 </div>
@@ -480,6 +590,8 @@ const TourDetail = () => {
                     name="dateTo"
                     value={bookingData.dateTo}
                     onChange={handleBookingChange}
+                    min="2024-01-01"
+                    max="2035-12-31"
                     required
                   />
                 </div>
@@ -550,6 +662,7 @@ const TourDetail = () => {
           </div>
         </div>
       </div>
+    </div>
 
       <style>{`
         .passport-upload-area {

@@ -10,7 +10,6 @@ function TourForm() {
         name: '',
         description: '',
         duration: '',
-        price: '',
         highlights: '',
         travelDetails: '',
         imageUrl: '',
@@ -32,7 +31,6 @@ function TourForm() {
                 name: '',
                 description: '',
                 duration: '',
-                price: '',
                 highlights: '',
                 travelDetails: '',
                 imageUrl: '',
@@ -84,8 +82,8 @@ function TourForm() {
     const onSubmit = (e) => {
         e.preventDefault();
 
-        if (!formData.name || !formData.description || !formData.duration || !formData.price) {
-            toast.error('Please fill in all required fields');
+        if (!formData.name || !formData.description || !formData.duration) {
+            toast.error('Please fill in all required fields (Name, Description, Duration)');
             return;
         }
 
@@ -99,7 +97,6 @@ function TourForm() {
             name: formData.name,
             description: formData.description, 
             duration: formData.duration,
-            price: Number(formData.price),
             highlights: formData.highlights || '',
             travelDetails: formData.travelDetails || '',
             imageUrl: formData.imageUrl || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
@@ -149,20 +146,6 @@ function TourForm() {
                         name='duration'
                         placeholder='Duration (e.g., 7 days)'
                         value={formData.duration}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                {/* Price */}
-                <div className='form-group'>
-                    <label htmlFor='price'>Price ($) *</label>
-                    <input
-                        type='number'
-                        id='price'
-                        name='price'
-                        placeholder='Price (e.g., 1250)'
-                        value={formData.price}
                         onChange={handleInputChange}
                         required
                     />

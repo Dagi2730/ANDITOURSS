@@ -5,6 +5,7 @@ import {
   getFeaturedReviews,
   checkEligibility,
   getAllReviews,
+  updateReviewStatus,
   deleteReview,
 } from '../controllers/reviewController.js';
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
@@ -21,6 +22,7 @@ router.post('/', requireAuth, createReview);
 
 // Admin only
 router.get('/', requireAuth, requireAdmin, getAllReviews);
+router.put('/:id/status', requireAuth, requireAdmin, updateReviewStatus);
 router.delete('/:id', requireAuth, requireAdmin, deleteReview);
 
 export default router;

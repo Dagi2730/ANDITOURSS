@@ -21,6 +21,11 @@ export default defineConfig({
         changeOrigin: true, // Needed for making the proxy behave like the real origin
         secure: false, // Recommended for local development
       },
+      '/uploads': {
+        target: process.env.VITE_API_URL || 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   // ---------------------------------

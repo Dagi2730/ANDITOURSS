@@ -44,6 +44,7 @@ const createReview = asyncHandler(async (req, res) => {
       tourId,
       rating: numericRating,
       comment,
+      status: 'PENDING', // Requires admin approval
     },
     include: {
       user: { select: { id: true, name: true } },
@@ -54,10 +55,10 @@ const createReview = asyncHandler(async (req, res) => {
   res.status(201).json(review);
 });
 
-// GET /api/reviews/tour/:tourId - public, all reviews for one tour
+// GET /api/reviews/tour/:tourId - public, only APPROVED reviews for one tour
 const getReviewsByTour = asyncHandler(async (req, res) => {
   const reviews = await prisma.review.findMany({
-    where: { tourId: req.params.tourId },
+    where: { tourId: req.params.tourId, status: 'APPROVED' },
     include: { user: { select: { id: true, name: true } } },
     orderBy: { createdAt: 'desc' },
   });
@@ -65,10 +66,10 @@ const getReviewsByTour = asyncHandler(async (req, res) => {
   res.json(reviews);
 });
 
-// GET /api/reviews/featured - public, top-rated reviews across all tours for marketing display
+// GET /api/reviews/featured - public, top-rated APPROVED reviews across all tours
 const getFeaturedReviews = asyncHandler(async (req, res) => {
   const reviews = await prisma.review.findMany({
-    where: { rating: { gte: 4 } },
+    where: { rating: { gte: 4 }, status: 'APPROVED' },
     include: {
       user: { select: { name: true } },
       tour: { select: { id: true, title: true, imageUrl: true } },
@@ -80,7 +81,7 @@ const getFeaturedReviews = asyncHandler(async (req, res) => {
   res.json(reviews);
 });
 
-// GET /api/reviews/eligibility/:tourId - logged-in user only, tells frontend whether to show the review form
+// GET /api/reviews/eligibility/:tourId - logged-in user only
 const checkEligibility = asyncHandler(async (req, res) => {
   const { tourId } = req.params;
 
@@ -99,7 +100,7 @@ const checkEligibility = asyncHandler(async (req, res) => {
   });
 });
 
-// GET /api/reviews - admin only, all reviews across the site for moderation
+// GET /api/reviews - admin only, all reviews across the site
 const getAllReviews = asyncHandler(async (req, res) => {
   const reviews = await prisma.review.findMany({
     include: {
@@ -110,6 +111,32 @@ const getAllReviews = asyncHandler(async (req, res) => {
   });
 
   res.json(reviews);
+});
+
+// PUT /api/reviews/:id/status - admin only, update approval status
+const updateReviewStatus = asyncHandler(async (req, res) => {
+  const { status } = req.body;
+  if (!status || !['PENDING', 'APPROVED'].includes(status)) {
+    res.status(400);
+    throw new Error('Status must be PENDING or APPROVED');
+  }
+
+  const review = await prisma.review.findUnique({ where: { id: req.params.id } });
+  if (!review) {
+    res.status(404);
+    throw new Error('Review not found');
+  }
+
+  const updated = await prisma.review.update({
+    where: { id: req.params.id },
+    data: { status },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      tour: { select: { id: true, title: true } },
+    },
+  });
+
+  res.json(updated);
 });
 
 // DELETE /api/reviews/:id - admin only
@@ -131,5 +158,6 @@ export {
   getFeaturedReviews,
   checkEligibility,
   getAllReviews,
+  updateReviewStatus,
   deleteReview,
 };

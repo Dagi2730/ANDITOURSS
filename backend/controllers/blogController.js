@@ -1,12 +1,45 @@
 import asyncHandler from 'express-async-handler';
 import prisma from '../lib/prisma.js';
 
+const stringifyTags = (tags) => {
+  if (!tags) return '[]';
+  if (typeof tags === 'string') {
+    const trimmed = tags.trim();
+    if (trimmed.startsWith('[')) return trimmed;
+    const arr = trimmed.split(',').map((t) => t.trim()).filter(Boolean);
+    return JSON.stringify(arr);
+  }
+  if (Array.isArray(tags)) {
+    return JSON.stringify(tags);
+  }
+  return '[]';
+};
+
+const formatBlogPost = (post) => {
+  if (!post) return post;
+  let parsedTags = [];
+  if (post.tags) {
+    try {
+      parsedTags = typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags;
+      if (!Array.isArray(parsedTags)) {
+        parsedTags = [String(parsedTags)];
+      }
+    } catch (e) {
+      parsedTags = typeof post.tags === 'string' ? post.tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
+    }
+  }
+  return {
+    ...post,
+    tags: parsedTags,
+  };
+};
+
 const getBlogPosts = asyncHandler(async (req, res) => {
   const posts = await prisma.blogPost.findMany({
     include: { tour: { select: { id: true, title: true, duration: true } } },
     orderBy: { createdAt: 'desc' },
   });
-  res.json(posts);
+  res.json(posts.map(formatBlogPost));
 });
 
 const getBlogPostById = asyncHandler(async (req, res) => {
@@ -18,7 +51,7 @@ const getBlogPostById = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error('Story not found');
   }
-  res.json(post);
+  res.json(formatBlogPost(post));
 });
 
 const createBlogPost = asyncHandler(async (req, res) => {
@@ -31,9 +64,6 @@ const createBlogPost = asyncHandler(async (req, res) => {
 
   const imageUrl = req.file ? `/uploads/blog/${req.file.filename}` : null;
   const isAdmin = req.user?.role === 'ADMIN';
-  const normalizedTags = tags
-    ? (Array.isArray(tags) ? tags : tags.split(',').map((t) => t.trim()).filter(Boolean))
-    : [];
 
   const post = await prisma.blogPost.create({
     data: {
@@ -42,7 +72,7 @@ const createBlogPost = asyncHandler(async (req, res) => {
       subtitle: subtitle || null,
       location: location || null,
       story,
-      tags: normalizedTags,
+      tags: stringifyTags(tags),
       featured: featured === 'true' || featured === true,
       imageUrl,
       status: isAdmin ? (status || 'APPROVED') : 'PENDING',
@@ -51,7 +81,7 @@ const createBlogPost = asyncHandler(async (req, res) => {
     include: { tour: { select: { id: true, title: true, duration: true } } },
   });
 
-  res.status(201).json(post);
+  res.status(201).json(formatBlogPost(post));
 });
 
 const createGuestSubmission = asyncHandler(async (req, res) => {
@@ -63,9 +93,6 @@ const createGuestSubmission = asyncHandler(async (req, res) => {
   }
 
   const imageUrl = req.file ? `/uploads/blog/${req.file.filename}` : null;
-  const normalizedTags = tags
-    ? (Array.isArray(tags) ? tags : tags.split(',').map((t) => t.trim()).filter(Boolean))
-    : [];
 
   const post = await prisma.blogPost.create({
     data: {
@@ -73,7 +100,7 @@ const createGuestSubmission = asyncHandler(async (req, res) => {
       subtitle: subtitle || null,
       location: location || null,
       story,
-      tags: normalizedTags,
+      tags: stringifyTags(tags),
       featured: featured === 'true' || featured === true,
       imageUrl,
       status: 'PENDING',
@@ -82,7 +109,7 @@ const createGuestSubmission = asyncHandler(async (req, res) => {
     include: { tour: { select: { id: true, title: true, duration: true } } },
   });
 
-  res.status(201).json(post);
+  res.status(201).json(formatBlogPost(post));
 });
 
 const updateBlogPost = asyncHandler(async (req, res) => {
@@ -100,12 +127,13 @@ const updateBlogPost = asyncHandler(async (req, res) => {
     subtitle: subtitle !== undefined ? subtitle : post.subtitle,
     location: location !== undefined ? location : post.location,
     story: story !== undefined ? story : post.story,
-    tags: tags !== undefined
-      ? (Array.isArray(tags) ? tags : tags.split(',').map((t) => t.trim()).filter(Boolean))
-      : post.tags,
     featured: featured !== undefined ? featured === 'true' || featured === true : post.featured,
     status: status !== undefined ? status : post.status,
   };
+
+  if (tags !== undefined) {
+    data.tags = stringifyTags(tags);
+  }
 
   if (req.file) {
     data.imageUrl = `/uploads/blog/${req.file.filename}`;
@@ -117,7 +145,7 @@ const updateBlogPost = asyncHandler(async (req, res) => {
     include: { tour: { select: { id: true, title: true, duration: true } } },
   });
 
-  res.json(updated);
+  res.json(formatBlogPost(updated));
 });
 
 const deleteBlogPost = asyncHandler(async (req, res) => {

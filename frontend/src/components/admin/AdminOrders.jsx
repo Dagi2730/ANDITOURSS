@@ -2,6 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getBookings, getBookingStats, updateBookingStatus, deleteBooking } from '../../features/booking/adminBookingSlice';
 
+const getImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http') || url.startsWith('blob:')) return url;
+  const backendBase = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+  return `${backendBase}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 function AdminOrders() {
   const { bookings, stats, isLoading } = useSelector((state) => state.adminBooking);
   const dispatch = useDispatch();
@@ -10,9 +17,6 @@ function AdminOrders() {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const dropdownRefs = useRef({});
-
-  const API_URL = import.meta.env.VITE_API_URL || '';
-  const baseURL = API_URL || 'http://localhost:8000';
 
   useEffect(() => {
     dispatch(getBookings());
@@ -58,6 +62,18 @@ function AdminOrders() {
         alert('Failed to delete booking');
       }
     }
+  };
+
+  // Sort bookings chronologically ascending to assign clean sequential order IDs (#00001, #00002, ...)
+  const chronologicalBookings = [...bookings].sort(
+    (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
+  );
+
+  const getOrderNumber = (bookingId) => {
+    const booking = bookings.find((b) => b.id === bookingId);
+    if (booking?.orderNumber) return booking.orderNumber;
+    const idx = chronologicalBookings.findIndex((b) => b.id === bookingId);
+    return idx >= 0 ? '#' + String(idx + 1).padStart(5, '0') : '#00001';
   };
 
   const getStatusBadge = (status) => {
@@ -119,12 +135,12 @@ function AdminOrders() {
           <table className="admin-plain-table">
             <thead>
               <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Package</th>
-                <th>Visitors</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th style={{ width: '90px' }}>Order ID</th>
+                <th style={{ width: '180px' }}>Customer</th>
+                <th style={{ width: '140px' }}>Package</th>
+                <th style={{ width: '100px' }}>Visitors</th>
+                <th style={{ width: '130px' }}>Status</th>
+                <th style={{ width: '140px' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -132,10 +148,14 @@ function AdminOrders() {
                 filteredBookings.map((order) => (
                   <tr key={order.id}>
                     <td>
-                      <strong>#{order.id.slice(-6)}</strong>
+                      <span className="order-id-badge">{getOrderNumber(order.id)}</span>
                     </td>
-                    <td>{order.user?.name}</td>
-                    <td>{order.tour?.title || 'N/A'}</td>
+                    <td className="customer-name-cell">
+                      {order.user?.name || 'Guest Customer'}
+                    </td>
+                    <td className="package-title-cell">
+                      {order.tour?.title || 'N/A'}
+                    </td>
                     <td>{order.guests} Person(s)</td>
                     <td style={{ overflow: 'visible' }}>
                       <div className="status-dropdown-container" ref={el => dropdownRefs.current[order.id] = el}>
@@ -182,21 +202,21 @@ function AdminOrders() {
             <div className="card-content">
               <div className="card-header">
                 <h3>Booking Details</h3>
-                <span className="order-tag">#{selectedOrder.id.slice(-6)}</span>
+                <span className="order-tag">{getOrderNumber(selectedOrder.id)}</span>
               </div>
 
               <div className="detail-grid">
                 <div className="info-group">
                   <label>Customer Name</label>
-                  <p>{selectedOrder.user?.name}</p>
+                  <p className="modal-customer-name">{selectedOrder.user?.name || 'Guest Customer'}</p>
                 </div>
                 <div className="info-group">
                   <label>Phone Number</label>
-                  <p>{selectedOrder.user?.phone}</p>
+                  <p>{selectedOrder.user?.phone || 'N/A'}</p>
                 </div>
                 <div className="info-group">
                   <label>Email Address</label>
-                  <p>{selectedOrder.user?.email}</p>
+                  <p>{selectedOrder.user?.email || 'N/A'}</p>
                 </div>
                 <div className="info-group">
                   <label>Tour Package</label>
@@ -215,43 +235,30 @@ function AdminOrders() {
                   <p>📅 {selectedOrder.travelDate ? new Date(selectedOrder.travelDate).toLocaleDateString() : 'N/A'} ➔ {selectedOrder.travelDateEnd ? new Date(selectedOrder.travelDateEnd).toLocaleDateString() : 'N/A'}</p>
                 </div>
                 <div className="info-group full">
-                  <label>Passport Copy</label>
+                  <label>Uploaded Document / Passport Copy</label>
                   {selectedOrder.passportUrl ? (
                     <div className="passport-container">
                       <img 
-                        src={`${baseURL}${selectedOrder.passportUrl}`}
-                        alt="Passport Copy"
+                        src={getImageUrl(selectedOrder.passportUrl)}
+                        alt="Uploaded Document"
                         className="passport-image"
                         onError={(e) => {
                           e.target.style.display = 'none';
-                          e.target.parentElement.innerHTML = `
-                            <div class="passport-error">
-                              <p>⚠️ Failed to load passport image</p>
-                              <a 
-                                href="${baseURL}${selectedOrder.passportUrl}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="passport-view-link"
-                              >
-                                📄 View Passport Document
-                              </a>
-                            </div>
-                          `;
                         }}
                       />
                       <div className="passport-actions">
                         <a 
-                          href={`${baseURL}${selectedOrder.passportUrl}`}
+                          href={getImageUrl(selectedOrder.passportUrl)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="passport-view-link"
                         >
-                          📄 Open Full Size
+                          📄 Open Uploaded Document Full Size
                         </a>
                       </div>
                     </div>
                   ) : (
-                    <p className="passport-missing">No passport copy on file</p>
+                    <p className="passport-missing">No document uploaded with this booking</p>
                   )}
                 </div>
                 <div className="info-group full">
@@ -273,12 +280,75 @@ function AdminOrders() {
 
       <style>{`
         .orders-table-container {
-          overflow: visible;
+          overflow-x: auto;
+          width: 100%;
+          padding-bottom: 10px;
+          -webkit-overflow-scrolling: touch;
         }
+
+        .admin-plain-table {
+          width: 100%;
+          min-width: 920px;
+          border-collapse: separate;
+          border-spacing: 0;
+          background: #ffffff;
+        }
+
+        .admin-plain-table th {
+          background: #f8fafc;
+          color: #475569;
+          font-weight: 700;
+          font-size: 0.88rem;
+          padding: 14px 18px;
+          border-bottom: 2px solid #e2e8f0;
+          text-align: left;
+          white-space: nowrap;
+        }
+
+        .admin-plain-table td {
+          padding: 16px 18px;
+          border-bottom: 1px solid #f1f5f9;
+          vertical-align: middle;
+          font-size: 0.92rem;
+        }
+
+        .order-id-badge {
+          background: #f1f5f9;
+          color: #334155;
+          padding: 5px 10px;
+          border-radius: 6px;
+          font-weight: 700;
+          font-family: monospace;
+          font-size: 0.9rem;
+          border: 1px solid #cbd5e1;
+          display: inline-block;
+        }
+
+        .customer-name-cell {
+          font-weight: 700 !important;
+          color: #0f172a !important;
+          white-space: nowrap !important;
+          padding-right: 24px !important;
+        }
+
+        .package-title-cell {
+          font-weight: 600;
+          color: #334155;
+          white-space: nowrap;
+          padding-right: 20px;
+        }
+
+        .modal-customer-name {
+          font-size: 1.1rem !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+        }
+
         .status-dropdown-container {
           position: relative;
           display: inline-block;
         }
+
         .status-trigger {
           display: flex;
           align-items: center;
@@ -288,6 +358,7 @@ function AdminOrders() {
           cursor: pointer;
           padding: 2px;
         }
+
         .status-menu {
           position: absolute;
           top: 100%;
@@ -302,6 +373,7 @@ function AdminOrders() {
           display: flex;
           flex-direction: column;
         }
+
         .status-menu button {
           padding: 10px 14px;
           text-align: left;
@@ -311,9 +383,11 @@ function AdminOrders() {
           font-size: 0.85rem;
           white-space: nowrap;
         }
+
         .status-menu button:hover {
           background: #f5f5f5;
         }
+
         .status-menu button:not(:last-child) {
           border-bottom: 1px solid #f0f0f0;
         }
@@ -325,49 +399,47 @@ function AdminOrders() {
           flex-direction: column;
           gap: 12px;
         }
+
         .passport-image {
           max-width: 100%;
-          max-height: 300px;
-          border-radius: 8px;
-          border: 1px solid #e0e0e0;
+          max-height: 350px;
+          border-radius: 10px;
+          border: 1px solid #cbd5e1;
           object-fit: contain;
-          background: #f9f9f9;
-          padding: 8px;
+          background: #f8fafc;
+          padding: 10px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
+
         .passport-actions {
           display: flex;
           gap: 10px;
         }
+
         .passport-view-link {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          padding: 8px 14px;
+          padding: 10px 16px;
           background: #f0f4e8;
           color: #556B2F;
           border-radius: 8px;
-          font-size: 0.88rem;
-          font-weight: 600;
+          font-size: 0.9rem;
+          font-weight: 700;
           text-decoration: none;
           margin-top: 4px;
+          border: 1px solid #d5e2c0;
+          transition: background 0.2s ease;
         }
+
         .passport-view-link:hover {
           background: #e2e9d4;
         }
+
         .passport-missing {
-          color: #999;
-          font-size: 0.88rem;
+          color: #94a3b8;
+          font-size: 0.9rem;
           font-style: italic;
-        }
-        .passport-error {
-          padding: 12px;
-          background: #fff3f3;
-          border-radius: 8px;
-          border: 1px solid #ffcdd2;
-        }
-        .passport-error p {
-          margin: 0 0 10px 0;
-          color: #c62828;
         }
       `}</style>
     </div>

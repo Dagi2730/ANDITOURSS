@@ -159,20 +159,30 @@ function Gallery() {
             <h2>Have a photo from your trip? Add it to the public gallery.</h2>
             <p>Your submission will appear after an admin approves it.</p>
           </div>
-          <form className="gly-submission-form" onSubmit={handleGuestSubmission}>
-            <input type="text" name="title" value={formData.title} onChange={handleInputChange} placeholder="Story title" required />
-            <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="Location" />
-            <textarea name="story" value={formData.story} onChange={handleInputChange} placeholder="Tell us about the moment" rows="3" required />
-            <input type="text" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="Tags (e.g. culture, trekking)" />
+          <form className="glass-form" onSubmit={handleGuestSubmission} style={{padding: '30px', margin: 0}}>
+            <div className="input-group">
+              <input type="text" name="title" value={formData.title} onChange={handleInputChange} placeholder="Story title" required />
+            </div>
+            <div className="input-group">
+              <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="Location" />
+            </div>
+            <div className="input-group">
+              <textarea name="story" value={formData.story} onChange={handleInputChange} placeholder="Tell us about the moment" rows="3" required />
+            </div>
+            <div className="input-group">
+              <input type="text" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="Tags (e.g. culture, trekking)" />
+            </div>
             {previewUrl && <img src={previewUrl} alt="Preview" className="gly-upload-preview" />}
-            <label className="gly-upload-label">
-              <span>{imageFile ? imageFile.name : 'Choose an image'}</span>
-              <input type="file" accept="image/*" onChange={handleImageSelect} />
-            </label>
-            <button type="submit" className="gly-submit-btn" disabled={submitting}>
+            <div className="input-group">
+              <label className="gly-upload-label" style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.4)', borderRadius: '12px', cursor: 'pointer', marginBottom: '20px'}}>
+                <span>{imageFile ? imageFile.name : 'Choose an image'}</span>
+                <input type="file" accept="image/*" onChange={handleImageSelect} style={{display: 'none'}} />
+              </label>
+            </div>
+            <button type="submit" className="send-btn" disabled={submitting}>
               {submitting ? 'Submitting...' : 'Submit for Review'}
             </button>
-            {submitMessage && <p className="gly-submit-message">{submitMessage}</p>}
+            {submitMessage && <p className="gly-submit-message" style={{marginTop: '15px'}}>{submitMessage}</p>}
           </form>
         </div>
       </section>
@@ -187,7 +197,7 @@ function Gallery() {
           --gly-ink: #2B2A25;
           --gly-ivory: #FAF7F1;
           --gly-sage: #E3E7D3;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Raleway', sans-serif;
           color: var(--gly-ink);
           min-height: 100vh;
         }
@@ -214,7 +224,7 @@ function Gallery() {
         }
 
         .gly-hero-title {
-          font-family: 'Fraunces', serif;
+          font-family: 'Raleway', sans-serif;
           font-size: clamp(2.2rem, 4.5vw, 3.2rem);
           font-weight: 800;
           color: white;
@@ -237,16 +247,16 @@ function Gallery() {
         }
 
         .gly-submission-card {
-          background: rgba(255,255,255,0.15);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255,255,255,0.3);
-          border-radius: 18px;
-          padding: 24px;
+          background: rgba(255,255,255,0.05);
+          backdrop-filter: blur(15px);
+          -webkit-backdrop-filter: blur(15px);
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 20px;
+          padding: 40px;
           display: grid;
-          grid-template-columns: 1.1fr 1fr;
-          gap: 24px;
-          margin-bottom: 32px;
+          grid-template-columns: 1fr 1.2fr;
+          gap: 40px;
+          margin-bottom: 40px;
           color: white;
         }
 
@@ -443,7 +453,7 @@ function Gallery() {
         }
 
         .gly-title {
-          font-family: 'Fraunces', serif;
+          font-family: 'Raleway', sans-serif;
           font-size: 1.4rem;
           font-weight: 600;
           line-height: 1.28;

@@ -189,7 +189,7 @@ function AdminBlog() {
           </button>
         </div>
         <style>{`
-          .ablg-page { font-family: 'Inter', sans-serif; }
+          .ablg-page { font-family: 'Raleway', sans-serif; }
           .ablg-locked { padding: 60px 24px; text-align: center; }
           .ablg-locked h2 { margin-bottom: 12px; }
           .ablg-locked p { color: #666; margin-bottom: 24px; }
@@ -406,7 +406,7 @@ function AdminBlog() {
           --ablg-olive-dark: #3E4F22;
           --ablg-ink: #2B2A25;
           --ablg-bg: #F7F6F2;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Raleway', sans-serif;
           color: var(--ablg-ink);
           padding: 24px;
         }

@@ -10,12 +10,16 @@ import Gallery from './pages/Gallery';
 import TourDetail from './pages/TourDetail';
 import MyBookings from './pages/MyBookings';
 import AdminDashboard from './pages/AdminDashboard';
+import ReviewsRecommendationsPage from './pages/ReviewsRecommendationsPage';
 import Protected from './components/Protected';
+import WhatsAppFloatingButton from './components/WhatsAppFloatingButton';
+import FAQAssistant from './components/FAQAssistant';
 
 const PublicLayout = () => (
   <>
     <Navbar />
     <Outlet />
+    <FAQAssistant />
     <Footer />
   </>
 );
@@ -28,7 +32,7 @@ function App() {
           <Route
             path="/admin/*"
             element={
-              <Protected>
+              <Protected adminOnly={true}>
                 <AdminDashboard />
               </Protected>
             }
@@ -40,6 +44,7 @@ function App() {
             <Route path="destinations" element={<DestinationsPage />} />
             <Route path="contact" element={<Contact />} />
             <Route path="gallery" element={<Gallery />} />
+            <Route path="reviews" element={<ReviewsRecommendationsPage />} />
             <Route path="tour/:id" element={<TourDetail />} />
             <Route
               path="my-bookings"

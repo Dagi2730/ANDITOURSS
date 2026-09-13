@@ -64,7 +64,6 @@ const TourList = () => {
                         <img src={tour.image} alt={tour.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
                         <p>{tour.description.substring(0, 100)}...</p>
                         <p><strong>Duration:</strong> {tour.duration}</p>
-                        <p className="price"><strong>Price:</strong> ${tour.price}</p>
                     </div>
                 ))}
             </div>

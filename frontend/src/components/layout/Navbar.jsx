@@ -21,7 +21,7 @@ function Navbar() {
 
   return (
     <nav className="navbar-custom">
-      <Link to="/" className="logo-text">DOBI TOURS</Link>
+      <Link to="/" className="logo-text">ANDI TOURS</Link>
 
       <button
         type="button"
@@ -38,18 +38,14 @@ function Navbar() {
         <li><Link to="/" className="nav-item" onClick={handleLinkClick}>Home</Link></li>
         <li><Link to="/destinations" className="nav-item" onClick={handleLinkClick}>Destinations</Link></li>
         <li><Link to="/gallery" className="nav-item" onClick={handleLinkClick}>Gallery</Link></li>
+        <li><Link to="/reviews" className="nav-item" onClick={handleLinkClick}>Reviews</Link></li>
         <li><Link to="/contact" className="nav-item" onClick={handleLinkClick}>Contact</Link></li>
 
         {!user ? (
           <li><Link to="/login" className="nav-item" onClick={handleLinkClick}>Login</Link></li>
         ) : (
           <>
-            <li><Link to="/my-bookings" className="nav-item" onClick={handleLinkClick}>My Bookings</Link></li>
-            <li>
-              <button type="button" onClick={handleLogout} className="nav-item logout-btn">
-                Logout
-              </button>
-            </li>
+            <li><Link to="/my-bookings" className="nav-item" onClick={handleLinkClick}>My Account</Link></li>
           </>
         )}
       </ul>

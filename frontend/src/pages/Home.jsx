@@ -49,16 +49,10 @@ function Home() {
       <div className="welcome-container">
         <div className="welcome-intro">
           <h2 className="welcome-title">
-            Welcome to <span className="highlight">Dobi Tours</span>
+            Welcome to <span className="highlight">Andi Tours</span>
             <br />
             Your Guide to the Roof of Africa
           </h2>
-          <p className="welcome-description">
-            Discover Ethiopia through the eyes of an expert. With over 20 years
-            of experience navigating the hidden paths, ancient history, and
-            vibrant cultures of the "Roof of Africa," Andi brings you closer to
-            the heart of the landscape than any guidebook ever could.
-          </p>
         </div>
 
         <div className="expertise-block">

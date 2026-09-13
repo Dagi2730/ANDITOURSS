@@ -71,7 +71,7 @@ function AdminSidebar({ activeTab, setActiveTab, mobileOpen, setMobileOpen }) {
       
       <div className="admin-sidebar-footer" style={{ padding: '20px', marginTop: 'auto' }}>
         <button
-          className="admin-nav-item logout-btn"
+          className="admin-nav-item admin-sidebar-logout-btn"
           onClick={handleLogout}
           style={{ width: '100%' }}
         >
@@ -169,20 +169,20 @@ function AdminSidebar({ activeTab, setActiveTab, mobileOpen, setMobileOpen }) {
           letter-spacing: 0.3px;
         }
         
-        .logout-btn {
+        .admin-sidebar-logout-btn {
           border-top: 1px solid #e0e0e0;
           margin-top: 20px;
           padding-top: 20px;
           color: #666;
         }
         
-        .logout-btn:hover {
-          background: #f5f5f5;
+        .admin-sidebar-logout-btn:hover {
+          background: #fff5f5;
           color: #e53935;
           border-left: 4px solid #e53935;
         }
         
-        .logout-btn:hover .admin-nav-icon {
+        .admin-sidebar-logout-btn:hover .admin-nav-icon {
           color: #e53935;
         }
 

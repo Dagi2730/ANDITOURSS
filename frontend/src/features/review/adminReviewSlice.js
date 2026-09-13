@@ -31,6 +31,21 @@ export const getAllReviews = createAsyncThunk(
   }
 );
 
+export const updateReviewStatus = createAsyncThunk(
+  'adminReviews/updateStatus',
+  async ({ id, status }, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+      const response = await axios.put(`${baseURL}/api/reviews/${id}/status`, { status }, getConfig(token));
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || 'Failed to update review status'
+      );
+    }
+  }
+);
+
 export const deleteReview = createAsyncThunk(
   'adminReviews/delete',
   async (id, thunkAPI) => {
@@ -70,6 +85,9 @@ export const adminReviewSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
+      })
+      .addCase(updateReviewStatus.fulfilled, (state, action) => {
+        state.reviews = state.reviews.map((r) => r.id === action.payload.id ? action.payload : r);
       })
       .addCase(deleteReview.fulfilled, (state, action) => {
         state.reviews = state.reviews.filter((r) => r.id !== action.payload);
