@@ -188,27 +188,23 @@ const ReviewsRecommendationsPage = () => {
         )}
       </section>
 
-
       {/* ── Write a Review Modal ── */}
       {showModal && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="review-modal-overlay" onClick={closeModal}>
+          <div className="review-modal-card" onClick={(e) => e.stopPropagation()}>
             {submitted ? (
-              <div className="modal-success glass-form" style={{maxWidth: '500px'}}>
-                <span className="success-icon">🎉</span>
-                <h2 style={{ color: '#a8c648' }}>Thank You!</h2>
-                <p>
-                  Your review has been submitted and will appear after admin
-                  approval. We appreciate your feedback!
+              <div className="modal-success">
+                <span className="success-icon" style={{ fontSize: '3rem', display: 'block', textAlign: 'center', marginBottom: '15px' }}>🎉</span>
+                <h2 style={{ color: '#C0CA33', textAlign: 'center', marginBottom: '15px' }}>Thank You!</h2>
+                <p style={{ color: 'rgba(255,255,255,0.9)', textAlign: 'center', lineHeight: '1.6', marginBottom: '25px' }}>
+                  Your review has been submitted and will appear after admin approval. We appreciate your feedback!
                 </p>
-                <div className="modal-actions" style={{ justifyContent: 'center' }}>
-                  <button className="btn-modal-submit" onClick={closeModal}>
-                    Close
-                  </button>
-                </div>
+                <button className="submit-btn" onClick={closeModal}>
+                  Close
+                </button>
               </div>
             ) : (
-              <div className="glass-form" style={{maxWidth: '500px'}}>
+              <div>
                 <h2>Write a Review</h2>
                 <form onSubmit={handleSubmitReview}>
                   <div className="input-group">
@@ -278,7 +274,7 @@ const ReviewsRecommendationsPage = () => {
                       value={reviewForm.comment}
                       onChange={handleFormChange}
                       placeholder="Tell us about your journey..."
-                      rows="5"
+                      rows="4"
                       required
                     />
                   </div>
@@ -291,27 +287,24 @@ const ReviewsRecommendationsPage = () => {
                       name="image"
                       accept="image/*"
                       onChange={handleFormChange}
-                      style={{ padding: '8px 0' }}
+                      style={{ padding: '10px' }}
                     />
                   </div>
 
-                  <div className="modal-actions" style={{display: 'flex', gap: '15px', marginTop: '30px'}}>
-                    <button
-                      type="button"
-                      className="send-btn"
-                      style={{background: 'rgba(255,255,255,0.1)', color: '#fff'}}
-                      onClick={closeModal}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="send-btn"
-                      disabled={submitting}
-                    >
-                      {submitting ? 'Submitting...' : 'Submit'}
-                    </button>
-                  </div>
+                  <button
+                    type="submit"
+                    className="submit-btn"
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Submitting...' : 'SUBMIT REVIEW'}
+                  </button>
+                  <button
+                    type="button"
+                    className="cancel-btn"
+                    onClick={closeModal}
+                  >
+                    Cancel
+                  </button>
                 </form>
               </div>
             )}
