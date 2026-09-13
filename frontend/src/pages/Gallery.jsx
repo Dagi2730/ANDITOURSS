@@ -86,7 +86,6 @@ function Gallery() {
     <div className="gly-page">
       <section className="gly-hero">
         <div className="gly-hero-inner">
-          <span className="gly-hero-eyebrow">Field Notes</span>
           <h1 className="gly-hero-title">Guest Stories &amp; Gallery</h1>
           <p className="gly-hero-subtitle">
             Real moments from Andi Tours journeys across Ethiopia — written and framed by the people who lived them.
@@ -159,7 +158,7 @@ function Gallery() {
             <h2>Have a photo from your trip? Add it to the public gallery.</h2>
             <p>Your submission will appear after an admin approves it.</p>
           </div>
-          <form className="glass-form" onSubmit={handleGuestSubmission} style={{padding: '30px', margin: 0}}>
+          <form className="glass-form" onSubmit={handleGuestSubmission} style={{ padding: '30px', margin: 0 }}>
             <div className="input-group">
               <input type="text" name="title" value={formData.title} onChange={handleInputChange} placeholder="Story title" required />
             </div>
@@ -174,15 +173,15 @@ function Gallery() {
             </div>
             {previewUrl && <img src={previewUrl} alt="Preview" className="gly-upload-preview" />}
             <div className="input-group">
-              <label className="gly-upload-label" style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.4)', borderRadius: '12px', cursor: 'pointer', marginBottom: '20px'}}>
+              <label className="gly-upload-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.4)', borderRadius: '12px', cursor: 'pointer', marginBottom: '20px' }}>
                 <span>{imageFile ? imageFile.name : 'Choose an image'}</span>
-                <input type="file" accept="image/*" onChange={handleImageSelect} style={{display: 'none'}} />
+                <input type="file" accept="image/*" onChange={handleImageSelect} style={{ display: 'none' }} />
               </label>
             </div>
             <button type="submit" className="send-btn" disabled={submitting}>
               {submitting ? 'Submitting...' : 'Submit for Review'}
             </button>
-            {submitMessage && <p className="gly-submit-message" style={{marginTop: '15px'}}>{submitMessage}</p>}
+            {submitMessage && <p className="gly-submit-message" style={{ marginTop: '15px' }}>{submitMessage}</p>}
           </form>
         </div>
       </section>
