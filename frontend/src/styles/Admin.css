@@ -583,7 +583,8 @@
   font-family: inherit;
   background-color: white;
   transition: border-color 0.3s ease;
-  color: #000000 !important; /* Added: Force black text */
+  color: #000000 !important;
+  /* Added: Force black text */
 }
 
 .admin-form-control:focus {
@@ -623,6 +624,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -700,102 +702,93 @@
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 992px) {
   .admin-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 260px;
-    height: 100vh;
-    background-color: var(--admin-olive);
-    z-index: 5000;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-    box-shadow: none;
-  }
-
-  .admin-sidebar.mobile-open,
-  .admin-sidebar.active {
-    transform: translateX(0) !important;
-    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.5) !important;
+    width: 220px;
+    min-width: 220px;
   }
 
   .admin-main-content {
-    margin-left: 0 !important;
-    width: 100% !important;
-    padding-top: 0;
+    margin-left: 220px;
   }
 
-  .admin-header {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    z-index: 100;
-    padding: 14px 20px;
-    flex-wrap: wrap;
-    background-color: var(--admin-white);
-    border-bottom: 1px solid var(--admin-border);
-  }
-
-  .admin-sidebar-toggle {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    background: var(--admin-olive);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    width: 38px;
-    height: 38px;
-    font-size: 1.3rem;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-
+  .admin-header,
   .admin-view-container {
-    padding: 20px 15px;
-    max-width: 100%;
-  }
-
-  .admin-stats-grid,
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-  }
-
-  .admin-table-container,
-  .table-container {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin-bottom: 20px;
-  }
-
-  .admin-plain-table,
-  .admin-table {
-    min-width: 650px;
+    padding: 25px 30px;
   }
 }
 
-@media (max-width: 600px) {
-  .admin-header h1 {
-    font-size: 1.3rem;
+@media (max-width: 768px) {
+  .admin-sidebar {
+    position: fixed;
+    width: 100%;
+    min-width: auto;
+    height: auto;
+    transform: translateY(-110%);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1000;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
   }
 
-  .admin-header p {
-    display: none;
+  .admin-sidebar.mobile-open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    z-index: 1002;
   }
 
-  .admin-header-logout-btn span {
-    display: none;
+  .admin-sidebar-logo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  .admin-header-logout-btn {
-    padding: 8px 10px;
+  .admin-sidebar-toggle {
+    display: block;
+  }
+
+  .admin-sidebar-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .admin-main-content {
+    margin-left: 0;
+    padding-top: 80px;
+  }
+
+  .admin-header {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1001;
   }
 
   .admin-view-container {
-    padding: 15px 10px;
+    padding-top: 110px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-container,
+  .admin-table-container {
+    overflow-x: auto;
+  }
+
+  .admin-header,
+  .admin-view-container,
+  .admin-table-container {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }
 
@@ -896,7 +889,8 @@
 }
 
 /* Card Hover Effects */
-.stat-card, .table-container {
+.stat-card,
+.table-container {
   transition: all 0.3s ease;
 }
 
@@ -959,6 +953,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1122,6 +1117,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1143,6 +1139,7 @@
     opacity: 0;
     transform: translateY(-50px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1280,35 +1277,35 @@
     align-items: flex-start;
     gap: 15px;
   }
-  
+
   .filter-controls {
     width: 100%;
     overflow-x: auto;
     padding-bottom: 10px;
   }
-  
+
   .modal-content {
     width: 95%;
     max-height: 95vh;
   }
-  
+
   .modal-header {
     padding: 15px 20px;
   }
-  
+
   .modal-header h3 {
     font-size: 1.2rem;
   }
-  
+
   .order-details-card {
     padding: 20px;
   }
-  
+
   .details-grid {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .modal-footer {
     padding: 15px 20px;
   }
@@ -1319,7 +1316,7 @@
   overflow: visible !important;
 }
 
-.admin-table-container > div {
+.admin-table-container>div {
   overflow: visible !important;
 }
 
@@ -1336,7 +1333,7 @@
 }
 
 /* Fix for table container overflow */
-.admin-table-container > div {
+.admin-table-container>div {
   position: relative;
 }
 
@@ -1509,11 +1506,15 @@
   gap: 8px;
 }
 
-.view-btn, .delete-btn, .reply-btn, .admin-btn-icon {
+.view-btn,
+.delete-btn,
+.reply-btn,
+.admin-btn-icon {
   white-space: nowrap;
 }
 
-.view-btn, .delete-btn {
+.view-btn,
+.delete-btn {
   padding: 6px 12px;
   border: none;
   border-radius: 6px;
@@ -1558,7 +1559,7 @@
   animation: fadeIn 0.3s ease;
 }
 
-.admin-modal-overlay > * {
+.admin-modal-overlay>* {
   width: 100%;
   max-width: 980px;
   margin: 0 auto;
@@ -1851,6 +1852,7 @@ textarea.admin-form-control {
 
 /* Responsive adjustments for packages modal */
 @media (max-width: 768px) {
+
   .package-detail-card,
   .review-detail-card,
   .user-detail-card,
@@ -1859,17 +1861,17 @@ textarea.admin-form-control {
     width: 95%;
     max-height: 95vh;
   }
-  
+
   .action-btns {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .action-btns button {
     width: 100%;
     margin-bottom: 5px;
   }
-  
+
   .admin-plain-table td .action-btns {
     flex-direction: row;
     flex-wrap: wrap;
@@ -1882,6 +1884,7 @@ textarea.admin-form-control {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1933,7 +1936,9 @@ textarea.admin-form-control {
 }
 
 /* FIX: Ensure all form inputs have black text */
-input, textarea, select {
+input,
+textarea,
+select {
   color: #000000 !important;
 }
 

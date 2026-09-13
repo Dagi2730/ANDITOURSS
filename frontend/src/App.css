@@ -7,7 +7,8 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     width: 100%;
     min-height: 100%;
     margin: 0;
@@ -28,7 +29,8 @@ html, body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    background: 
+    /* Make background cover everything including navbar and footer area */
+    background:
         linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
         url('./assets/images/lalibela.jpg') no-repeat center center fixed;
     background-size: cover;
@@ -41,12 +43,11 @@ html, body {
     top: 0;
     left: 0;
     width: 100%;
-    padding: 1.2rem 5%;
+    padding: 1.5rem 5%;
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     z-index: 2000;
@@ -62,16 +63,16 @@ html, body {
     text-decoration: none;
     letter-spacing: 2px;
     transition: all 0.3s ease;
-    white-space: nowrap;
 }
 
+/* Center the navbar content and keep it constrained */
 .navbar-custom .nav-links {
     margin-left: auto;
 }
 
 .logo-text:hover {
     opacity: 0.9;
-    transform: scale(1.03);
+    transform: scale(1.05);
 }
 
 .nav-links {
@@ -86,7 +87,7 @@ html, body {
 .nav-item {
     background-color: transparent;
     color: white !important;
-    padding: 8px 14px;
+    padding: 8px 12px;
     border-radius: 6px;
     text-decoration: none;
     font-weight: 600;
@@ -94,18 +95,40 @@ html, body {
     transition: all 0.2s ease;
     border: 1px solid transparent;
     cursor: pointer;
-    white-space: nowrap;
+    animation: fadeInUp 0.8s ease-out backwards;
 }
 
 .nav-item:hover {
-    background-color: rgba(107,142,35,0.2);
-    border-color: rgba(255,255,255,0.15);
+    background-color: rgba(107, 142, 35, 0.12);
+    border-color: rgba(255, 255, 255, 0.08);
     transform: translateY(-2px);
 }
 
-/* 4. GLASS EFFECT FOOTER - Compact version */
+/* Set animation delays for nav items */
+.nav-links li:nth-child(1) .nav-item {
+    animation-delay: 0.1s;
+}
+
+.nav-links li:nth-child(2) .nav-item {
+    animation-delay: 0.2s;
+}
+
+.nav-links li:nth-child(3) .nav-item {
+    animation-delay: 0.3s;
+}
+
+.nav-links li:nth-child(4) .nav-item {
+    animation-delay: 0.4s;
+}
+
+.nav-links li:nth-child(5) .nav-item {
+    animation-delay: 0.5s;
+}
+
+
+/* 5. GLASS EFFECT FOOTER - Compact version */
 .footer {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -165,48 +188,115 @@ html, body {
     text-decoration: underline;
 }
 
-/* 5. CLEAN ANIMATIONS */
+@media (max-width: 768px) {
+    .footer-info {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .footer-separator {
+        display: none;
+    }
+}
+
+/* 6. CLEAN ANIMATIONS (removed glow and ripple) */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-100%); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* 6. RESPONSIVE NAVBAR & MOBILE MENU */
+/* Removed glow, ripple, and float animations */
+
+/* 7. RESPONSIVE DESIGN */
 .nav-hamburger {
     display: none;
     flex-direction: column;
     justify-content: space-between;
-    width: 30px;
+    width: 28px;
     height: 22px;
     border: none;
     background: transparent;
     cursor: pointer;
     padding: 0;
-    margin-left: auto;
-    z-index: 3001;
+    gap: 4px;
 }
 
 .nav-hamburger span {
     display: block;
     width: 100%;
     height: 3px;
-    background: #ffffff;
+    background: white;
     border-radius: 999px;
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .nav-hamburger.active span:nth-child(1) {
-    transform: translateY(9.5px) rotate(45deg);
+    transform: translateY(9px) rotate(45deg);
 }
 
 .nav-hamburger.active span:nth-child(2) {
@@ -214,53 +304,44 @@ html, body {
 }
 
 .nav-hamburger.active span:nth-child(3) {
-    transform: translateY(-9.5px) rotate(-45deg);
+    transform: translateY(-9px) rotate(-45deg);
 }
 
-/* Mobile dropdown menu: Opens cleanly from top right without overlapping logo or screen content */
 .nav-links.active {
-    display: flex !important;
+    display: flex;
     position: absolute;
     right: 5%;
-    top: calc(100% + 10px);
-    background: rgba(18, 24, 38, 0.96);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
+    top: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     flex-direction: column;
-    width: min(280px, calc(100vw - 32px));
-    padding: 16px;
-    border-radius: 18px;
-    gap: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+    width: calc(100% - 10%);
+    max-width: 320px;
+    padding: 18px;
+    border-radius: 16px;
+    gap: 10px;
+    margin-top: 12px;
     z-index: 3000;
 }
 
-.nav-links.active li {
-    width: 100%;
-    margin: 0;
-}
-
 .nav-links.active .nav-item {
-    display: block;
     width: 100%;
-    padding: 12px 18px;
+    padding: 12px 16px;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    text-align: center;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #ffffff !important;
-    transition: all 0.2s ease;
-    white-space: nowrap;
 }
 
-.nav-links.active .nav-item:hover,
-.nav-links.active .nav-item:active {
-    background: rgba(107, 142, 35, 0.4);
-    border-color: rgba(192, 202, 51, 0.6);
-    transform: scale(1.02);
+.nav-dropdown .dropdown-menu {
+    position: relative;
+    top: 0;
+    left: 0;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.95);
+    color: #000;
+    border-radius: 12px;
+    margin-top: 10px;
 }
 
 @media (max-width: 1024px) {
@@ -275,166 +356,155 @@ html, body {
 
 @media (max-width: 992px) {
     .navbar-custom {
-        padding: 1rem 5%;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
+        padding: 1.2rem 5%;
     }
 
     .logo-text {
-        font-size: 1.7rem;
-        letter-spacing: 1px;
+        font-size: 1.8rem;
+    }
+
+    .nav-links {
+        gap: 10px;
+    }
+
+    .nav-item {
+        padding: 8px 18px;
+        font-size: 0.9rem;
     }
 
     .home-hero h1 {
-        font-size: clamp(2.2rem, 7vw, 3.5rem);
+        font-size: clamp(2.5rem, 7vw, 4rem);
     }
 
     .hero-subtitle {
-        font-size: clamp(1rem, 2.5vw, 1.3rem);
-        margin-bottom: 30px;
+        font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+        margin-bottom: 40px;
     }
 
     .hero-btn {
-        padding: 16px 40px;
-        font-size: 1.1rem;
+        padding: 18px 50px;
+        font-size: 1.2rem;
     }
 }
 
 @media (max-width: 768px) {
     .navbar-custom {
-        padding: 0.85rem 4%;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .logo-text {
-        font-size: 1.35rem;
-    }
-
-    .footer-info {
         flex-direction: column;
-        gap: 8px;
+        gap: 15px;
+        padding: 1rem 5%;
     }
-    
-    .footer-separator {
+
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .nav-item {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+
+    /* Specific styling for the Book Now CTA */
+    .book-now-btn {
+        background-color: #6B8E23 !important;
+        /* Slightly lighter olive to pop */
+        border: 2px solid white !important;
+        font-weight: 800 !important;
+    }
+
+    .book-now-btn:hover {
+        background-color: white !important;
+        color: #556B2F !important;
+    }
+
+    /* dropdown styling for My Account and Destinations */
+    .nav-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-menu {
         display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        min-width: 160px;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        list-style: none;
+        padding: 10px 0;
+        border-radius: 4px;
+    }
+
+    .nav-dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-menu a,
+    .logout-btn-dropdown {
+        color: white;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        font-size: 0.9rem;
+    }
+
+    .logout-btn-dropdown {
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-family: 'Raleway', sans-serif;
+    }
+
+    .dropdown-menu a:hover,
+    .logout-btn-dropdown:hover {
+        background-color: #556B2F;
+    }
+
+    .home-hero h1 {
+        font-size: clamp(2rem, 6vw, 3rem);
+        margin-bottom: 20px;
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        margin-bottom: 30px;
+        padding: 0 10px;
+    }
+
+    .hero-btn {
+        padding: 15px 40px;
+        font-size: 1.1rem;
     }
 }
 
-/* 7. GLOBAL GLASS FORM STYLES */
-.glass-form {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 40px 25px;
-  border-radius: 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-  margin: 0 auto;
-  max-width: 500px;
-  width: 100%;
-}
+@media (max-width: 480px) {
+    .logo-text {
+        font-size: 1.6rem;
+        letter-spacing: 1px;
+    }
 
-.glass-form h2 {
-  color: white;
-  margin-bottom: 25px;
-  text-align: center;
-  font-size: 1.8rem;
-  font-weight: 700;
-}
+    .home-hero h1 {
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+    }
 
-.input-group {
-  margin-bottom: 20px;
-  text-align: left;
-}
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
 
-.input-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #ffffff !important;
-  font-weight: 600;
-  font-size: 0.95rem;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
+    .hero-btn {
+        padding: 12px 35px;
+        font-size: 1rem;
+    }
 
-.input-group input, 
-.input-group textarea,
-.input-group select,
-.glass-form input,
-.glass-form textarea,
-.glass-form select,
-.booking-form input,
-.booking-form textarea,
-.booking-form select {
-  width: 100%;
-  padding: 14px;
-  background: rgba(0, 0, 0, 0.45) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  border-radius: 12px;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  font-size: 1rem;
-  font-weight: 600 !important;
-  outline: none;
-  transition: 0.3s;
-  caret-color: #ffffff !important;
-}
 
-.input-group input:-webkit-autofill,
-.input-group input:-webkit-autofill:hover,
-.input-group input:-webkit-autofill:focus,
-.glass-form input:-webkit-autofill,
-.glass-form input:-webkit-autofill:hover,
-.glass-form input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #ffffff !important;
-  -webkit-box-shadow: 0 0 0px 1000px rgba(18, 26, 12, 0.95) inset !important;
-  color: #ffffff !important;
-}
-
-.input-group input::placeholder, 
-.input-group textarea::placeholder,
-.glass-form input::placeholder,
-.glass-form textarea::placeholder {
-  color: rgba(255, 255, 255, 0.75) !important;
-  -webkit-text-fill-color: rgba(255, 255, 255, 0.75) !important;
-  font-weight: 400;
-  opacity: 1 !important;
-}
-
-.input-group input:focus, 
-.input-group textarea:focus,
-.input-group select:focus,
-.glass-form input:focus,
-.glass-form textarea:focus,
-.glass-form select:focus {
-  border-color: #C0CA33 !important;
-  background: rgba(0, 0, 0, 0.6) !important;
-  box-shadow: 0 0 0 3px rgba(192, 202, 51, 0.25) !important;
-}
-
-.send-btn {
-  width: 100%;
-  padding: 15px;
-  background: #C0CA33;
-  color: #1a1a1a;
-  border: none;
-  border-radius: 12px;
-  font-weight: 800;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: 0.4s;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
-
-.send-btn:hover {
-  background: #ffffff;
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* 8. SCROLLBAR STYLING */
@@ -449,4 +519,151 @@ html, body {
 ::-webkit-scrollbar-thumb {
     background: linear-gradient(to bottom, #556B2F, #6B8E23);
     border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #6B8E23, #556B2F);
+}
+
+/* 9. FIX WHITE SPACES */
+/* Keep a single global overflow-x rule and avoid forcing max-width on all elements. */
+body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Avoid applying max-width globally to every element; constrain specific elements if needed. */
+
+/* 10. FOCUS STATES */
+.nav-item:focus,
+.hero-btn:focus,
+.logo-text:focus,
+.footer a:focus {
+    outline: 2px solid #6B8E23;
+    outline-offset: 3px;
+    box-shadow: 0 0 15px rgba(107, 142, 35, 0.5);
+}
+
+
+/* 11. GLOBAL GLASS FORM STYLES */
+.glass-form {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 50px 40px;
+    border-radius: 30px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    margin: 0 auto;
+}
+
+.glass-form h2 {
+    color: white;
+    margin-bottom: 35px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.input-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.input-group input,
+.input-group textarea,
+.input-group select,
+.glass-form input,
+.glass-form textarea,
+.glass-form select,
+.booking-form input,
+.booking-form textarea,
+.booking-form select {
+    width: 100%;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 12px;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-size: 1rem;
+    font-weight: 600 !important;
+    outline: none;
+    transition: 0.3s;
+    caret-color: #ffffff !important;
+}
+
+/* FIX WEBKIT AUTOFILL OVERRIDING TEXT COLOR TO BLACK */
+.input-group input:-webkit-autofill,
+.input-group input:-webkit-autofill:hover,
+.input-group input:-webkit-autofill:focus,
+.glass-form input:-webkit-autofill,
+.glass-form input:-webkit-autofill:hover,
+.glass-form input:-webkit-autofill:focus,
+.booking-form input:-webkit-autofill,
+.booking-form input:-webkit-autofill:hover,
+.booking-form input:-webkit-autofill:focus,
+.booking-form textarea:-webkit-autofill,
+.booking-form textarea:-webkit-autofill:hover,
+.booking-form textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(18, 26, 12, 0.95) inset !important;
+    color: #ffffff !important;
+}
+
+.input-group input::placeholder,
+.input-group textarea::placeholder,
+.glass-form input::placeholder,
+.glass-form textarea::placeholder {
+    color: rgba(255, 255, 255, 0.75) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.75) !important;
+    font-weight: 400;
+    opacity: 1 !important;
+}
+
+.input-group input:focus,
+.input-group textarea:focus,
+.input-group select:focus,
+.glass-form input:focus,
+.glass-form textarea:focus,
+.glass-form select:focus {
+    border-color: #C0CA33 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 0 0 3px rgba(192, 202, 51, 0.25) !important;
+}
+
+.send-btn {
+    width: 100%;
+    padding: 16px;
+    background: #C0CA33;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.4s;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.send-btn:hover {
+    background: #ffffff;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.send-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
