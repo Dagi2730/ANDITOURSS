@@ -128,15 +128,30 @@ function AdminPackages() {
   };
 
   const handleFormSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    console.log('--- ADD/SAVE PACKAGE BUTTON CLICKED ---', formData);
 
+    if (!formData.title || !formData.title.trim()) {
+      alert('Please enter a Package Title.');
+      return;
+    }
+    if (!formData.duration || !formData.duration.trim()) {
+      alert('Please enter the Package Duration.');
+      return;
+    }
+    if (!formData.description || !formData.description.trim()) {
+      alert('Please enter a Package Description.');
+      return;
+    }
+
+    setLoading(true);
     const data = new FormData();
-    data.append('title', formData.title);
-    data.append('duration', formData.duration);
-    data.append('location', formData.location || 'Ethiopia');
-    data.append('description', formData.description);
-    data.append('highlights', formData.highlights || '');
-    data.append('travelDetails', formData.travelDetails || '');
+    data.append('title', formData.title.trim());
+    data.append('duration', formData.duration.trim());
+    data.append('location', formData.location?.trim() || 'Ethiopia');
+    data.append('description', formData.description.trim());
+    data.append('highlights', formData.highlights?.trim() || '');
+    data.append('travelDetails', formData.travelDetails?.trim() || '');
     data.append('price', '0');
     data.append('itinerary', JSON.stringify(formData.itinerary || []));
 
@@ -160,6 +175,8 @@ function AdminPackages() {
     } catch (err) {
       console.error("Save error:", err.response?.data || err);
       alert(err.response?.data?.message || "Error saving package. Please check all fields.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -230,7 +247,7 @@ function AdminPackages() {
               <button className="remove-day-btn" onClick={() => setShowForm(false)}>✕ Close</button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="admin-package-form">
+            <form id="tour-package-form" onSubmit={handleFormSubmit} className="admin-package-form" noValidate>
               <div className="form-group">
                 <label className="form-label">Package Images (Up to 5)</label>
                 <div className="image-upload-container">
@@ -315,7 +332,9 @@ function AdminPackages() {
 
               <div className="form-modal-actions">
                 <button type="button" className="btn-cancel" onClick={() => setShowForm(false)}>Cancel</button>
-                <button type="submit" className="btn-save">Add </button>
+                <button type="submit" form="tour-package-form" className="btn-save" disabled={loading}>
+                  {loading ? 'Saving Package...' : editingPackage ? 'Save Package' : 'Add Package'}
+                </button>
               </div>
             </form>
           </div>

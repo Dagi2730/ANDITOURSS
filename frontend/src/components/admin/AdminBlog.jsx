@@ -117,7 +117,8 @@ function AdminBlog() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    console.log('--- STORY FORM SUBMIT CLICKED ---', formData);
 
     if (!formData.tourId) {
       alert('Please select which tour this gallery image belongs to');
@@ -224,7 +225,7 @@ function AdminBlog() {
               <button className="ablg-close-btn" onClick={() => { setShowForm(false); resetForm(); }}>✕</button>
             </div>
 
-            <form onSubmit={handleSubmit} className="ablg-form">
+            <form id="admin-blog-form" onSubmit={handleSubmit} className="ablg-form" noValidate>
               <div className="ablg-field">
                 <label className="ablg-label">Related Tour *</label>
                 <select
@@ -327,7 +328,7 @@ function AdminBlog() {
                 <button type="button" className="ablg-btn ablg-btn-secondary" onClick={() => { setShowForm(false); resetForm(); }}>
                   Cancel
                 </button>
-                <button type="submit" className="ablg-btn ablg-btn-primary" disabled={isLoading}>
+                <button type="submit" form="admin-blog-form" className="ablg-btn ablg-btn-primary" disabled={isLoading}>
                   {isLoading ? 'Saving...' : editingPost ? 'Update Story' : 'Create Story'}
                 </button>
               </div>
