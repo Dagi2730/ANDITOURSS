@@ -73,7 +73,7 @@ const DestinationsPage = () => {
 
         .destinations-hero-transparent {
           text-align: center;
-          padding: 100px 10px 30px;
+          padding: 150px 10px 30px !important;
           width: 100%;
           max-width: 1000px;
           margin: 0 auto;
@@ -155,7 +155,7 @@ const DestinationsPage = () => {
 
         @media (max-width: 600px) {
           .destinations-hero-transparent {
-            padding: 85px 8px 20px;
+            padding: 135px 8px 20px !important;
           }
 
           .destinations-grid {

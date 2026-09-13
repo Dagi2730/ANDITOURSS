@@ -3,10 +3,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
-import './index.css'
-import './App.css'
-import './styles/Admin.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'react-toastify/dist/ReactToastify.css';
+import './index.css';
+import './App.css';
+import './styles/Admin.css';
 
 // Redux Imports
 import { Provider } from 'react-redux'
