@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../lib/api';
 import { toast } from 'react-toastify';
 import '../styles/ReviewsRecommendations.css';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 // Recommendations removed as per user request
 
@@ -62,7 +60,7 @@ const ReviewsRecommendationsPage = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/public-reviews`);
+        const res = await api.get('/public-reviews');
         setReviews(res.data);
       } catch (err) {
         console.error('Failed to fetch reviews:', err);
@@ -99,11 +97,7 @@ const ReviewsRecommendationsPage = () => {
       if (reviewForm.travel_date) formData.append('travel_date', reviewForm.travel_date);
       if (reviewForm.image) formData.append('image', reviewForm.image);
 
-      await axios.post(`${API_BASE}/public-reviews`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await api.post('/public-reviews', formData);
       setSubmitted(true);
       setReviewForm({
         user_name: '',

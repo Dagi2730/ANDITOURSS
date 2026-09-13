@@ -128,7 +128,7 @@ const Contact = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 140px 40px 80px;
+          padding: 145px 20px 60px !important;
         }
 
         .contact-wrapper {
@@ -147,11 +147,13 @@ const Contact = () => {
         }
 
         .contact-info h1 {
-          font-size: 3.8rem;
+          font-size: clamp(1.8rem, 5.5vw, 3.8rem) !important;
           margin-bottom: 20px;
           color: #C0CA33;
           font-weight: 800;
           letter-spacing: -0.5px;
+          word-break: break-word;
+          overflow-wrap: break-word;
         }
 
         .contact-subtitle {

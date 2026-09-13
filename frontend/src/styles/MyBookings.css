@@ -2,7 +2,7 @@
 .my-bookings-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 120px 20px 40px;
+  padding: 145px 20px 40px !important;
   min-height: 100vh;
   color: white;
 }
@@ -13,11 +13,13 @@
 }
 
 .my-bookings-header h1 {
-  font-size: 2.8rem;
+  font-size: clamp(1.8rem, 5.5vw, 2.8rem) !important;
   color: white;
   margin-bottom: 15px;
   font-weight: 800;
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .my-bookings-header p {

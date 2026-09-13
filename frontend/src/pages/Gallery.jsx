@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
+import api, { getImageUrl } from '../lib/api';
 import { getBlogPosts } from '../features/blog/blogSlice';
 
 function Gallery() {
@@ -23,16 +23,12 @@ function Gallery() {
     dispatch(getBlogPosts());
   }, [dispatch]);
 
-  const API_URL = import.meta.env.VITE_API_URL || '';
-  const baseURL = API_URL || 'http://localhost:8000';
-
   const approvedPosts = useMemo(() => {
     return (posts || []).filter((post) => post.status !== 'PENDING');
   }, [posts]);
 
   const resolveImage = (imageUrl) => {
-    if (!imageUrl) return 'https://via.placeholder.com/800x500?text=Andi+Tours';
-    return imageUrl.startsWith('http') ? imageUrl : `${baseURL}${imageUrl}`;
+    return getImageUrl(imageUrl);
   };
 
   const handleInputChange = (e) => {
@@ -66,8 +62,7 @@ function Gallery() {
       payload.append('tags', formData.tags);
       if (imageFile) payload.append('image', imageFile);
 
-      const headers = user?.token ? { Authorization: `Bearer ${user.token}` } : {};
-      await axios.post(`${baseURL}/api/blog/submit`, payload, { headers });
+      await api.post('/blog/submit', payload);
 
       setSubmitMessage('Thank you! Your photo story has been submitted and will be reviewed by the admin.');
       setFormData({ title: '', subtitle: '', location: '', story: '', tags: '' });
@@ -202,7 +197,7 @@ function Gallery() {
         }
 
         .gly-hero {
-          padding: 80px 20px 40px;
+          padding: 140px 20px 40px !important;
           text-align: center;
         }
 
