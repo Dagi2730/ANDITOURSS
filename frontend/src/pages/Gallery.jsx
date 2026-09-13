@@ -86,7 +86,6 @@ function Gallery() {
     <div className="gly-page">
       <section className="gly-hero">
         <div className="gly-hero-inner">
-          <h1 className="gly-hero-title"></h1>
           <h1 className="gly-hero-title">Guest Stories &amp; Gallery</h1>
           <p className="gly-hero-subtitle">
             Real moments from Andi Tours journeys across Ethiopia — written and framed by the people who lived them.
