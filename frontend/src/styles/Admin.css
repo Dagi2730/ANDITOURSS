@@ -1935,33 +1935,19 @@ textarea.admin-form-control {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* FIX: Ensure all form inputs have black text */
-input,
-textarea,
-select {
-  color: #000000 !important;
+/* FIX: Ensure all form inputs have clear readable text */
+.ablg-control,
+.ablg-modal input,
+.ablg-modal textarea,
+.ablg-modal select {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
-/* Specifically target form modals */
-.form-modal input,
-.form-modal textarea,
-.form-modal select,
-.package-form-modal input,
-.package-form-modal textarea,
-.package-form-modal select {
-  color: #000000 !important;
-  background-color: #ffffff !important;
-}
-
-/* Make sure placeholders are visible too */
-::placeholder {
-  color: #666666 !important;
-  opacity: 0.7 !important;
-}
-
-/* Ensure all admin form controls have proper text color */
-.admin-form-control,
-.admin-form-control:focus,
-.admin-form-control:hover {
-  color: #000000 !important;
+.ablg-control::placeholder,
+.ablg-modal input::placeholder,
+.ablg-modal textarea::placeholder {
+  color: rgba(255, 255, 255, 0.75) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.75) !important;
+  opacity: 1 !important;
 }

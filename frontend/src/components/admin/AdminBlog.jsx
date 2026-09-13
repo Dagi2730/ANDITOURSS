@@ -517,13 +517,48 @@ function AdminBlog() {
 
         .ablg-form { display: flex; flex-direction: column; gap: 16px; }
         .ablg-field { display: flex; flex-direction: column; gap: 6px; }
-        .ablg-label { font-size: 0.85rem; font-weight: 600; color: var(--ablg-ink); }
+        .ablg-label { font-size: 0.9rem; font-weight: 700; color: #1e293b; }
 
         .ablg-control {
-          padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;
-          font-family: inherit; font-size: 0.92rem; width: 100%; box-sizing: border-box;
+          padding: 12px 14px !important;
+          border: 1px solid #cbd5e1 !important;
+          border-radius: 8px !important;
+          font-family: inherit !important;
+          font-size: 0.95rem !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+          background-color: #2b2a25 !important;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          caret-color: #ffffff !important;
+          transition: all 0.2s ease !important;
         }
-        .ablg-control:focus { outline: none; border-color: var(--ablg-olive); }
+
+        .ablg-control::placeholder {
+          color: rgba(255, 255, 255, 0.75) !important;
+          -webkit-text-fill-color: rgba(255, 255, 255, 0.75) !important;
+          opacity: 1 !important;
+        }
+
+        .ablg-control:focus {
+          outline: none !important;
+          border-color: #556B2F !important;
+          box-shadow: 0 0 0 3px rgba(85, 107, 47, 0.2) !important;
+          background-color: #24231f !important;
+        }
+
+        .ablg-control option {
+          background-color: #2b2a25 !important;
+          color: #ffffff !important;
+        }
+
+        .ablg-control:-webkit-autofill,
+        .ablg-control:-webkit-autofill:hover,
+        .ablg-control:-webkit-autofill:focus {
+          -webkit-text-fill-color: #ffffff !important;
+          -webkit-box-shadow: 0 0 0px 1000px #2b2a25 inset !important;
+          color: #ffffff !important;
+        }
 
         .ablg-upload-area {
           border: 2px dashed #ddd; border-radius: 10px; padding: 28px 16px;
