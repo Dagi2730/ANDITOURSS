@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../../lib/api';
 
 const initialState = {
   bookings: [],
@@ -9,19 +9,11 @@ const initialState = {
   message: '',
 };
 
-const getConfig = (token) => ({
-  headers: { Authorization: `Bearer ${token}` },
-});
-
-const API_URL = import.meta.env.VITE_API_URL || '';
-const baseURL = API_URL || 'http://localhost:8000';
-
 export const getMyBookings = createAsyncThunk(
   'bookings/getMyBookings',
   async (_, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.get(`${baseURL}/api/bookings/mybookings`, getConfig(token));
+      const response = await api.get('/bookings/mybookings');
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -35,19 +27,7 @@ export const createBooking = createAsyncThunk(
   'bookings/create',
   async (bookingData, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      // bookingData is expected to be a FormData object (so the passport file can be attached).
-      // Content-Type is deliberately NOT set manually — axios/browser sets the correct
-      // multipart boundary automatically when the body is a FormData instance.
-      const response = await axios.post(
-        `${baseURL}/api/bookings`,
-        bookingData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post('/bookings', bookingData);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -61,12 +41,7 @@ export const updateBooking = createAsyncThunk(
   'bookings/update',
   async ({ id, bookingData }, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.put(
-        `${baseURL}/api/bookings/${id}`,
-        bookingData,
-        getConfig(token)
-      );
+      const response = await api.put(`/bookings/${id}`, bookingData);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -80,8 +55,7 @@ export const deleteBooking = createAsyncThunk(
   'bookings/delete',
   async (id, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      await axios.delete(`${baseURL}/api/bookings/${id}`, getConfig(token));
+      await api.delete(`/bookings/${id}`);
       return id;
     } catch (error) {
       return thunkAPI.rejectWithValue(

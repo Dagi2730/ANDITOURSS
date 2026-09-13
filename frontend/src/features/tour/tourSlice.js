@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../../lib/api';
 
 const initialState = {
     tours: [],
@@ -9,19 +9,11 @@ const initialState = {
     message: '',
 };
 
-const API_URL = import.meta.env.VITE_API_URL || '';
-// Default to localhost:8000 if no env var is set (for development)
-const baseURL = API_URL || 'http://localhost:8000';
-
-const getConfig = (token) => ({
-    headers: { Authorization: `Bearer ${token}` },
-});
-
 // --- THUNKS ---
 
 export const getTours = createAsyncThunk('tours/getAll', async (_, thunkAPI) => {
     try {
-        const response = await axios.get(`${baseURL}/api/tours`);
+        const response = await api.get('/tours');
         return response.data;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch tours');
@@ -30,8 +22,7 @@ export const getTours = createAsyncThunk('tours/getAll', async (_, thunkAPI) => 
 
 export const createTour = createAsyncThunk('tours/create', async (tourData, thunkAPI) => {
     try {
-        const token = thunkAPI.getState().auth.user.token;
-        const response = await axios.post(`${baseURL}/api/tours`, tourData, getConfig(token));
+        const response = await api.post('/tours', tourData);
         return response.data;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to create tour');
@@ -40,8 +31,7 @@ export const createTour = createAsyncThunk('tours/create', async (tourData, thun
 
 export const deleteTour = createAsyncThunk('tours/delete', async (id, thunkAPI) => {
     try {
-        const token = thunkAPI.getState().auth.user.token;
-        await axios.delete(`${baseURL}/api/tours/${id}`, getConfig(token));
+        await api.delete(`/tours/${id}`);
         return id;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to delete tour');
@@ -50,8 +40,7 @@ export const deleteTour = createAsyncThunk('tours/delete', async (id, thunkAPI) 
 
 export const updateTour = createAsyncThunk('tours/update', async ({ id, tourData }, thunkAPI) => {
     try {
-        const token = thunkAPI.getState().auth.user.token;
-        const response = await axios.put(`${baseURL}/api/tours/${id}`, tourData, getConfig(token));
+        const response = await api.put(`/tours/${id}`, tourData);
         return response.data;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to update tour');

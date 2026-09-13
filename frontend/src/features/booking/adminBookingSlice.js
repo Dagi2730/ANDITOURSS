@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../../lib/api';
 
 const initialState = {
   bookings: [],
@@ -15,20 +15,12 @@ const initialState = {
   message: '',
 };
 
-const getConfig = (token) => ({
-  headers: { Authorization: `Bearer ${token}` },
-});
-
-const API_URL = import.meta.env.VITE_API_URL || '';
-const baseURL = API_URL || 'http://localhost:8000';
-
 // Get all bookings (Admin)
 export const getBookings = createAsyncThunk(
   'adminBookings/getAll',
   async (_, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.get(`${baseURL}/api/bookings`, getConfig(token));
+      const response = await api.get('/bookings');
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -43,8 +35,7 @@ export const getBookingStats = createAsyncThunk(
   'adminBookings/getStats',
   async (_, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.get(`${baseURL}/api/bookings/stats`, getConfig(token));
+      const response = await api.get('/bookings/stats');
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -59,12 +50,7 @@ export const updateBookingStatus = createAsyncThunk(
   'adminBookings/updateStatus',
   async ({ id, status }, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.put(
-        `${baseURL}/api/bookings/${id}`,
-        { status },
-        getConfig(token)
-      );
+      const response = await api.put(`/bookings/${id}`, { status });
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -79,8 +65,7 @@ export const deleteBooking = createAsyncThunk(
   'adminBookings/delete',
   async (id, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      await axios.delete(`${baseURL}/api/bookings/${id}`, getConfig(token));
+      await api.delete(`/bookings/${id}`);
       return id;
     } catch (error) {
       return thunkAPI.rejectWithValue(

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../../lib/api';
 
 const initialState = {
   posts: [],
@@ -9,21 +9,11 @@ const initialState = {
   message: '',
 };
 
-const API_URL = import.meta.env.VITE_API_URL || '';
-const baseURL = API_URL || 'http://localhost:8000';
-
-const getConfig = (token, isMultipart = false) => ({
-  headers: {
-    Authorization: `Bearer ${token}`,
-    ...(isMultipart ? { 'Content-Type': 'multipart/form-data' } : {}),
-  },
-});
-
 export const getBlogPosts = createAsyncThunk(
   'blog/getAll',
   async (_, thunkAPI) => {
     try {
-      const response = await axios.get(`${baseURL}/api/blog`);
+      const response = await api.get('/blog');
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch stories');
@@ -35,8 +25,7 @@ export const createBlogPost = createAsyncThunk(
   'blog/create',
   async (formData, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.post(`${baseURL}/api/blog`, formData, getConfig(token, true));
+      const response = await api.post('/blog', formData);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to create story');
@@ -48,8 +37,7 @@ export const updateBlogPost = createAsyncThunk(
   'blog/update',
   async ({ id, formData }, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.put(`${baseURL}/api/blog/${id}`, formData, getConfig(token, true));
+      const response = await api.put(`/blog/${id}`, formData);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to update story');
@@ -61,8 +49,7 @@ export const deleteBlogPost = createAsyncThunk(
   'blog/delete',
   async (id, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      await axios.delete(`${baseURL}/api/blog/${id}`, getConfig(token));
+      await api.delete(`/blog/${id}`);
       return id;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to delete story');

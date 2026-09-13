@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../../lib/api';
 
 const initialState = {
   reviews: [],
@@ -15,18 +15,11 @@ const initialState = {
   message: '',
 };
 
-const getConfig = (token) => ({
-  headers: { Authorization: `Bearer ${token}` },
-});
-
-const API_URL = import.meta.env.VITE_API_URL || '';
-const baseURL = API_URL || 'http://localhost:8000';
-
 export const getReviewsByTour = createAsyncThunk(
   'reviews/getByTour',
   async (tourId, thunkAPI) => {
     try {
-      const response = await axios.get(`${baseURL}/api/reviews/tour/${tourId}`);
+      const response = await api.get(`/reviews/tour/${tourId}`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -40,7 +33,7 @@ export const getFeaturedReviews = createAsyncThunk(
   'reviews/getFeatured',
   async (_, thunkAPI) => {
     try {
-      const response = await axios.get(`${baseURL}/api/reviews/featured`);
+      const response = await api.get('/reviews/featured');
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -54,11 +47,7 @@ export const checkEligibility = createAsyncThunk(
   'reviews/checkEligibility',
   async (tourId, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user?.token;
-      const response = await axios.get(
-        `${baseURL}/api/reviews/eligibility/${tourId}`,
-        getConfig(token)
-      );
+      const response = await api.get(`/reviews/eligibility/${tourId}`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -72,12 +61,7 @@ export const createReview = createAsyncThunk(
   'reviews/create',
   async ({ tourId, rating, comment }, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user?.token;
-      const response = await axios.post(
-        `${baseURL}/api/reviews`,
-        { tourId, rating, comment },
-        getConfig(token)
-      );
+      const response = await api.post('/reviews', { tourId, rating, comment });
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(

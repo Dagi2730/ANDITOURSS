@@ -26,9 +26,16 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
-  if (user && user.token) {
-    config.headers.Authorization = `Bearer ${user.token}`;
+  let token = null;
+  try {
+    const stored = JSON.parse(localStorage.getItem('user') || 'null');
+    if (stored) {
+      token = stored.token || stored.user?.token || null;
+    }
+  } catch (e) {}
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });

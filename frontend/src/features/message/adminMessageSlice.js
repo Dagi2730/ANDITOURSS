@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../../lib/api';
 
 const initialState = {
   messages: [],
@@ -9,19 +9,11 @@ const initialState = {
   message: '',
 };
 
-const getConfig = (token) => ({
-  headers: { Authorization: `Bearer ${token}` },
-});
-
-const API_URL = import.meta.env.VITE_API_URL || '';
-const baseURL = API_URL || 'http://localhost:8000';
-
 export const getMessages = createAsyncThunk(
   'adminMessages/getAll',
   async (_, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.get(`${baseURL}/api/messages`, getConfig(token));
+      const response = await api.get('/messages');
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -35,8 +27,7 @@ export const markMessageRead = createAsyncThunk(
   'adminMessages/markRead',
   async (id, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      const response = await axios.put(`${baseURL}/api/messages/${id}/read`, {}, getConfig(token));
+      const response = await api.put(`/messages/${id}/read`, {});
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -50,8 +41,7 @@ export const deleteMessage = createAsyncThunk(
   'adminMessages/delete',
   async (id, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      await axios.delete(`${baseURL}/api/messages/${id}`, getConfig(token));
+      await api.delete(`/messages/${id}`);
       return id;
     } catch (error) {
       return thunkAPI.rejectWithValue(

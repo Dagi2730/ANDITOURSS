@@ -1,31 +1,26 @@
-import axios from 'axios';
-
-const API_URL = '/api/tours/';
+import api from '../../lib/api';
 
 // Create new tour
-const createTour = async (tourData, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.post(API_URL, tourData, config);
+const createTour = async (tourData) => {
+  const response = await api.post('/tours', tourData);
   return response.data;
 };
 
 // Get all tours
 const getTours = async () => {
-  const response = await axios.get(API_URL);
+  const response = await api.get('/tours');
   return response.data;
 };
 
 // Update an existing tour
-const updateTour = async (tourId, tourData, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.put(API_URL + tourId, tourData, config);
+const updateTour = async (tourId, tourData) => {
+  const response = await api.put(`/tours/${tourId}`, tourData);
   return response.data;
 };
 
 // DELETE TOUR
-const deleteTour = async (tourId, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.delete(API_URL + tourId, config);
+const deleteTour = async (tourId) => {
+  const response = await api.delete(`/tours/${tourId}`);
   return response.data;
 };
 
