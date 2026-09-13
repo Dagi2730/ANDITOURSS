@@ -448,18 +448,6 @@
   background: rgba(255, 255, 255, 0.1) !important;
   color: #ffffff !important;
 }
-  color: rgba(255, 255, 255, 0.7);
-  font-family: 'Raleway', sans-serif;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-modal-cancel:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
-}
 
 .modal-success {
   text-align: center;
