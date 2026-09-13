@@ -22,6 +22,7 @@ export const getImageUrl = (url) => {
 
 const api = axios.create({
   baseURL: API_URL,
+  timeout: 60000, // 60 seconds timeout for uploads
 });
 
 api.interceptors.request.use((config) => {
