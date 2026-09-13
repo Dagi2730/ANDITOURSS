@@ -33,9 +33,15 @@ const register = asyncHandler(async (req, res) => {
     },
   });
 
-  res.status(201).json({
+  const token = generateToken(user.id);
+  return res.status(201).json({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    phone: user.phone,
+    role: user.role,
+    token,
     user: { id: user.id, email: user.email, name: user.name, phone: user.phone, role: user.role },
-    token: generateToken(user.id),
   });
 });
 
@@ -54,18 +60,24 @@ const login = asyncHandler(async (req, res) => {
 
   if (!isMatch) {
     res.status(401);
-    throw new Error('Invalid credentials');
+    throw new Error('Invalid email or password');
   }
 
-  res.json({
+  const token = generateToken(user.id);
+  return res.json({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    phone: user.phone,
+    role: user.role,
+    token,
     user: { id: user.id, email: user.email, name: user.name, phone: user.phone, role: user.role },
-    token: generateToken(user.id),
   });
 });
 
 // @desc    Get current user profile
 const getMe = asyncHandler(async (req, res) => {
-  res.json({
+  return res.json({
     id: req.user.id,
     email: req.user.email,
     name: req.user.name,
@@ -105,7 +117,16 @@ const updateMe = asyncHandler(async (req, res) => {
     data: updateData,
   });
 
-  res.json({ id: updated.id, email: updated.email, name: updated.name, phone: updated.phone, role: updated.role });
+  const token = generateToken(updated.id);
+  return res.json({
+    id: updated.id,
+    email: updated.email,
+    name: updated.name,
+    phone: updated.phone,
+    role: updated.role,
+    token,
+    user: { id: updated.id, email: updated.email, name: updated.name, phone: updated.phone, role: updated.role },
+  });
 });
 
 // @desc    Get all users (Admin only)

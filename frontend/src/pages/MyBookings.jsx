@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { getMyBookings, updateBooking, deleteBooking } from '../features/booking/bookingSlice';
-import { logout } from '../features/auth/authSlice';
+import { logout, updateProfile } from '../features/auth/authSlice';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../styles/MyBookings.css';
@@ -112,9 +112,6 @@ const MyBookings = () => {
     setUpdatingProfile(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const token = user?.token;
-
       const updateData = {
         name: profileData.name,
         email: profileData.email,
@@ -125,25 +122,12 @@ const MyBookings = () => {
         updateData.password = profileData.password;
       }
 
-      const response = await axios.put(`${API_URL}/api/users/profile`, updateData, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const updatedUser = {
-        ...storedUser,
-        ...response.data,
-        token: storedUser.token || token,
-      };
-
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      await dispatch(updateProfile(updateData)).unwrap();
       toast.success('Profile updated successfully!');
-      window.location.reload();
+      setProfileData(prev => ({ ...prev, password: '', confirmPassword: '' }));
     } catch (error) {
-      console.error("Profile update error:", error.response);
-      toast.error(error.response?.data?.message || 'Failed to update profile');
+      console.error("Profile update error:", error);
+      toast.error(typeof error === 'string' ? error : error?.message || 'Failed to update profile');
     } finally {
       setUpdatingProfile(false);
     }

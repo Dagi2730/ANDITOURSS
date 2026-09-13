@@ -11,25 +11,42 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { user, isLoading } = useSelector((state) => state.auth);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setError('');
+
+    if (!formData.email || !formData.email.trim()) {
+      setError('Please enter your email address');
+      return;
+    }
+    if (!formData.password) {
+      setError('Please enter your password');
+      return;
+    }
+    if (!isLogin && (!formData.name || !formData.name.trim())) {
+      setError('Please enter your full name');
+      return;
+    }
+
     try {
-      const result = await dispatch(isLogin ? login({ email: formData.email, password: formData.password }) : register(formData)).unwrap();
-      alert(isLogin ? 'Welcome back to Andi Tours!' : 'Account created successfully!');
-      navigate(result?.role?.toUpperCase() === 'ADMIN' ? '/admin' : '/');
+      const result = await dispatch(
+        isLogin ? login({ email: formData.email.trim(), password: formData.password }) : register(formData)
+      ).unwrap();
+      const role = (result?.role || result?.user?.role)?.toString().toUpperCase();
+      navigate(role === 'ADMIN' ? '/admin' : '/');
     } catch (err) {
-      setError(typeof err === 'string' ? err : err?.message || 'Connection refused. Please check the backend.');
+      setError(typeof err === 'string' ? err : err?.message || 'Authentication failed. Please try again.');
     }
   };
 
   useEffect(() => {
     if (user) {
-      navigate(user.role?.toUpperCase() === 'ADMIN' ? '/admin' : '/', { replace: true });
+      const role = user.role?.toString().toUpperCase();
+      navigate(role === 'ADMIN' ? '/admin' : '/', { replace: true });
     }
   }, [user, navigate]);
 
@@ -45,7 +62,7 @@ const Login = () => {
 
         {error && <div className="error-box">{error}</div>}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           {!isLogin && (
             <>
               <div className="input-group">
@@ -108,8 +125,8 @@ const Login = () => {
             </div>
           </div>
           
-          <button type="submit" className="send-btn" style={{marginTop: '15px'}}>
-            {isLogin ? 'Sign In' : 'Create Account'}
+          <button type="submit" className="send-btn" disabled={isLoading} style={{marginTop: '15px'}}>
+            {isLoading ? (isLogin ? 'Signing In...' : 'Creating Account...') : (isLogin ? 'Sign In' : 'Create Account')}
           </button>
         </form>
 

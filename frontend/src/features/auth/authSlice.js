@@ -15,14 +15,18 @@ const initialState = {
 };
 
 // 3. User Helper: Standardizes the user object shape
-const buildUserState = (userData, token) => ({
-  id: userData?.id || userData?.user?.id,
-  email: userData?.email || userData?.user?.email,
-  token: token, // Ensure token is part of the user object
-  name: userData?.name || userData?.user?.name || 'User',
-  phone: userData?.phone || userData?.user?.phone || null,
-  role: normalizeRole(userData?.role || userData?.user?.role),
-});
+const buildUserState = (userData, explicitToken = null) => {
+  const userObj = userData?.user || userData || {};
+  const token = explicitToken || userData?.token || userData?.user?.token;
+  return {
+    id: userObj?.id,
+    email: userObj?.email,
+    token: token,
+    name: userObj?.name || 'User',
+    phone: userObj?.phone || null,
+    role: normalizeRole(userObj?.role),
+  };
+};
 
 // 4. Async Thunks
 export const register = createAsyncThunk(
@@ -30,7 +34,8 @@ export const register = createAsyncThunk(
   async (formData, thunkAPI) => {
     try {
       const response = await api.post('/users/register', formData);
-      const user = buildUserState(response.data, response.data.token);
+      const token = response.data.token || response.data.user?.token;
+      const user = buildUserState(response.data, token);
       localStorage.setItem('user', JSON.stringify(user));
       return user;
     } catch (error) {
@@ -44,7 +49,8 @@ export const login = createAsyncThunk(
   async (formData, thunkAPI) => {
     try {
       const response = await api.post('/users/login', formData);
-      const user = buildUserState(response.data, response.data.token);
+      const token = response.data.token || response.data.user?.token;
+      const user = buildUserState(response.data, token);
       localStorage.setItem('user', JSON.stringify(user));
       return user;
     } catch (error) {
@@ -63,11 +69,14 @@ export const updateProfile = createAsyncThunk(
   async (data, thunkAPI) => {
     try {
       const { user } = thunkAPI.getState().auth;
-      const response = await api.put('/users/me', data, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      // Merge updated data with existing user state
-      const updatedUser = { ...user, ...response.data };
+      const response = await api.put('/users/profile', data);
+      const token = response.data.token || user?.token;
+      const updatedUser = {
+        ...user,
+        ...response.data,
+        role: normalizeRole(response.data.role || user?.role),
+        token: token,
+      };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       return updatedUser;
     } catch (error) {

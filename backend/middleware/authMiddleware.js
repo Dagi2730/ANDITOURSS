@@ -12,32 +12,31 @@ const requireAuth = asyncHandler(async (req, res, next) => {
     token = req.headers.authorization.split(' ')[1];
   }
 
-  if (!token) {
+  if (!token || token === 'undefined' || token === 'null') {
     res.status(401);
-    throw new Error('Not authorized, no token');
+    throw new Error('Not authorized, no token provided');
   }
 
   try {
-    // Ensure the secret exists
     const secret = process.env.JWT_SECRET;
     if (!secret) throw new Error('JWT_SECRET is not defined in environment variables');
 
     const decoded = jwt.verify(token, secret);
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, email: true, name: true, phone: true, role: true } // Don't expose password
+      select: { id: true, email: true, name: true, phone: true, role: true }
     });
 
     if (!user) {
       res.status(401);
-      throw new Error('Not authorized, user not found');
+      throw new Error('Not authorized, user account not found');
     }
 
     req.user = user;
     next();
   } catch (error) {
     res.status(401);
-    throw new Error('Not authorized, token failed');
+    throw new Error('Not authorized, session expired. Please log in again.');
   }
 });
 
