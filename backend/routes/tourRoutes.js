@@ -32,13 +32,24 @@ const uploadFields = upload.fields([
   { name: 'image', maxCount: 5 },
 ]);
 
+const uploadMiddleware = (req, res, next) => {
+  uploadFields(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({ message: `Image upload error: ${err.message}` });
+    } else if (err) {
+      return res.status(400).json({ message: `File upload error: ${err.message}` });
+    }
+    next();
+  });
+};
+
 router.route('/')
   .get(getTours)
-  .post(requireAuth, requireAdmin, uploadFields, createTour);
+  .post(requireAuth, requireAdmin, uploadMiddleware, createTour);
 
 router.route('/:id')
   .get(getTourById)
-  .put(requireAuth, requireAdmin, uploadFields, updateTour)
+  .put(requireAuth, requireAdmin, uploadMiddleware, updateTour)
   .delete(requireAuth, requireAdmin, deleteTour);
 
 export default router;

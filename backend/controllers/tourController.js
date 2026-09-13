@@ -119,7 +119,7 @@ const createTour = asyncHandler(async (req, res) => {
     },
   });
 
-  res.status(201).json(parseTourData(tour));
+  return res.status(201).json(parseTourData(tour));
 });
 
 const updateTour = asyncHandler(async (req, res) => {
@@ -173,7 +173,7 @@ const updateTour = asyncHandler(async (req, res) => {
     data: updateData,
   });
 
-  res.json(parseTourData(updated));
+  return res.json(parseTourData(updated));
 });
 
 const deleteTour = asyncHandler(async (req, res) => {
@@ -187,7 +187,7 @@ const deleteTour = asyncHandler(async (req, res) => {
   }
 
   await prisma.tour.delete({ where: { id: req.params.id } });
-  res.json({ message: 'Tour removed' });
+  return res.json({ message: 'Tour removed' });
 });
 
 export { getTours, getTourById, createTour, updateTour, deleteTour };

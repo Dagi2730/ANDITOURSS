@@ -35,9 +35,9 @@ const DestinationsPage = () => {
       <div className="destinations-hero-transparent">
         <h1 className="hero-title-white">Find Your Next Adventure</h1>
         <div className="search-bar">
-          <input 
-            type="text" 
-            placeholder="Search by destination..." 
+          <input
+            type="text"
+            placeholder="Search by destination..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -52,7 +52,7 @@ const DestinationsPage = () => {
           </div>
         ) : filteredTours.length === 0 ? (
           <div className="loading-placeholder">
-            <p>No tours found matching your search.</p>
+            <p>No tours found.</p>
           </div>
         ) : (
           filteredTours.map((tour) => (
