@@ -46,19 +46,15 @@ const DestinationsPage = () => {
 
       {/* TOURS GRID */}
       <div className="destinations-grid">
-        {loading ? (
-          <div className="loading-placeholder">
-            <p>Connecting to backend...</p>
-          </div>
-        ) : filteredTours.length === 0 ? (
-          <div className="loading-placeholder">
-            <p>No tours found.</p>
-          </div>
-        ) : (
+        {filteredTours.length > 0 ? (
           filteredTours.map((tour) => (
             <TourItem key={tour.id || tour._id} tour={tour} />
           ))
-        )}
+        ) : searchTerm.trim() !== '' ? (
+          <div className="loading-placeholder">
+            <p>No tours found that match your search.</p>
+          </div>
+        ) : null}
       </div>
 
       <style>{`
