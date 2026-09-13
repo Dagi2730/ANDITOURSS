@@ -5,8 +5,8 @@ import { useSelector } from 'react-redux';
 const Protected = ({ children, adminOnly = false }) => {
   const { user } = useSelector((state) => state.auth);
 
-  // 1. If no user is logged in, send them to login
-  if (!user) {
+  // 1. If no user or valid token is logged in, send them to login
+  if (!user || !user.token) {
     return <Navigate to="/login" replace />;
   }
 
