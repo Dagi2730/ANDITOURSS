@@ -22,7 +22,15 @@ const DESTINATIONS_MAP = [
     coords: { top: '21%', left: '33%' },
     tagline: 'Dramatic peaks, deep valleys & Gelada baboons',
     description: 'A UNESCO World Heritage national park featuring Ras Dashen peak and endemic Ethiopian wildlife.',
-    recommendedHotels: ['Limalimo Lodge', 'Simien Lodge', 'Goha Hotel Gondar'],
+    recommendedHotels: [
+      'Limalimo Eco-Lodge',
+      'Simien Lodge (Highest Lodge in Africa)',
+      'Walya Lodge Debark',
+      'Buyit Ras Trekking Camp',
+      'Chennek Alpine Eco-Camp',
+      'Sankaber Wilderness Camp',
+      'Goha Hotel Gondar (Highland Base)'
+    ],
     image: simienImg,
     tourLink: '/destinations'
   },
@@ -33,7 +41,18 @@ const DESTINATIONS_MAP = [
     coords: { top: '30%', left: '44%' },
     tagline: 'World-famous 12th-century Rock-Hewn Churches',
     description: 'Explore eleven ancient monolithic rock churches carved directly into pink volcanic tuff.',
-    recommendedHotels: ['Maribela Hotel', 'Mezena Lodge', 'Roha Hotel'],
+    recommendedHotels: [
+      'Maribela Hotel',
+      'Mezena Lodge',
+      'Roha Hotel Lalibela',
+      'Mountain View Hotel',
+      'Ben Abeba Eco Lodge Stays',
+      'Panoramic View Hotel',
+      'Zan-Seyoum Hotel',
+      'Top Twelve Hotel',
+      'Harbe Hotel Lalibela',
+      'Degosach Community Eco Lodge'
+    ],
     image: lalibelaImg,
     tourLink: '/destinations'
   },
@@ -44,7 +63,15 @@ const DESTINATIONS_MAP = [
     coords: { top: '19%', left: '55%' },
     tagline: 'Vibrant hydrothermal sulfur springs & Erta Ale lava lake',
     description: 'One of the lowest and hottest places on Earth, renowned for Dallol neon sulfur pools and active volcanism.',
-    recommendedHotels: ['Kuriftu Resort Semera', 'Erta Ale Eco Camp', 'Planet Hotel Mekele'],
+    recommendedHotels: [
+      'Kuriftu Resort & Spa Semera',
+      'Erta Ale Volcano Eco Camp',
+      'Planet Hotel Mekele',
+      'Agoro Lodge Adigrat',
+      'Axum Hotel Mekele',
+      'Castle Zayid Lodge',
+      'Hamed Ela Desert Safari Camp'
+    ],
     image: danakilImg,
     tourLink: '/destinations'
   },
@@ -55,7 +82,15 @@ const DESTINATIONS_MAP = [
     coords: { top: '24%', left: '26%' },
     tagline: 'The Camelot of Africa — 17th Century Castles',
     description: 'Ancient royal capital featuring Fasil Ghebbi fortress compound and Debre Berhan Selassie church.',
-    recommendedHotels: ['Goha Hotel', 'Haile Resort Gondar', 'Florida International Hotel'],
+    recommendedHotels: [
+      'Goha Hotel Gondar',
+      'Haile Resort Gondar',
+      'Florida International Hotel',
+      'Gondar Hills Resort',
+      'Grand Resort Hotel Gondar',
+      'Taye Belay Hotel',
+      'Landmark Hotel Gondar'
+    ],
     image: gondarImg,
     tourLink: '/destinations'
   },
@@ -66,7 +101,16 @@ const DESTINATIONS_MAP = [
     coords: { top: '31%', left: '29%' },
     tagline: 'Source of the Blue Nile & Ancient Island Monasteries',
     description: 'Picturesque lake city featuring boat trips to 14th-century monastery churches and Tis Abay Blue Nile Falls.',
-    recommendedHotels: ['Kuriftu Resort & Spa Bahir Dar', 'Haile Resort Bahir Dar', 'Blue Nile Resort'],
+    recommendedHotels: [
+      'Kuriftu Resort & Spa Bahir Dar',
+      'Haile Resort Bahir Dar',
+      'Blue Nile Resort',
+      'Grand Resort and Spa Bahir Dar',
+      'Avanti Blue Nile Hotel',
+      'Tana Hotel Lakefront',
+      'Jacaranda Hotel Bahir Dar',
+      'Unison Hotel & Spa'
+    ],
     image: bahirdarImg,
     tourLink: '/destinations'
   },
@@ -77,7 +121,15 @@ const DESTINATIONS_MAP = [
     coords: { top: '14%', left: '38%' },
     tagline: 'Birthplace of Ethiopian Civilization & Ancient Stelae',
     description: 'UNESCO treasure housing giant 1,700-year-old granite obelisks and St. Mary of Zion church.',
-    recommendedHotels: ['Yeha Hotel Axum', 'Consolar Hotel', 'Sabian International Hotel'],
+    recommendedHotels: [
+      'Yeha Hotel Axum',
+      'Consolar Hotel',
+      'Sabian International Hotel',
+      'Remhai Hotel Axum',
+      'Sabean Hotel',
+      'Yared Zema International Hotel',
+      'Africa Hotel Axum'
+    ],
     image: axumImg,
     tourLink: '/destinations'
   },
@@ -88,7 +140,18 @@ const DESTINATIONS_MAP = [
     coords: { top: '44%', left: '41%' },
     tagline: 'Diplomatic Capital of Africa & Home of "Lucy"',
     description: 'Bustling metropolis with the National Museum of Ethiopia, Entoto Park viewpoints, and rich coffee culture.',
-    recommendedHotels: ['Sheraton Addis', 'Skylight Hotel Addis', 'Radisson Blu Addis'],
+    recommendedHotels: [
+      'Sheraton Addis (Luxury Collection)',
+      'Ethiopian Skylight Hotel',
+      'Radisson Blu Hotel Addis Ababa',
+      'Hyatt Regency Addis Ababa',
+      'Hilton Addis Ababa',
+      'Marriott Executive Apartments',
+      'Elilly International Hotel',
+      'Golden Tulip Addis Ababa',
+      'Haile Grand Addis Ababa',
+      'Capital Hotel & Spa'
+    ],
     image: addisImg,
     tourLink: '/destinations'
   },
@@ -99,7 +162,16 @@ const DESTINATIONS_MAP = [
     coords: { top: '56%', left: '38%' },
     tagline: 'Serene Lakeside Palms & Vibrant Fish Market',
     description: 'Resort town situated on Lake Hawassa, famous for abundant birdlife, colobus monkeys, and fresh tilapia.',
-    recommendedHotels: ['Haile Resort Hawassa', 'Lewi Resort Lake Hawassa', 'Central Hawassa Hotel'],
+    recommendedHotels: [
+      'Haile Resort Hawassa',
+      'Lewi Resort Lake Hawassa',
+      'Central Hawassa Hotel',
+      'Sabana Beach Resort (Lake Langano)',
+      'Hara Langano Eco Lodge',
+      'United Africa Resort Hawassa',
+      'Ker-Awud International Hotel',
+      'Oasis International Hotel Hawassa'
+    ],
     image: hawassaImg,
     tourLink: '/destinations'
   },
@@ -110,7 +182,14 @@ const DESTINATIONS_MAP = [
     coords: { top: '56%', left: '50%' },
     tagline: 'Alpine Sanetti Plateau & Rare Ethiopian Red Wolf',
     description: 'High-altitude wilderness with glacial lakes, Harenna cloud forest, and endemic Ethiopian wolves.',
-    recommendedHotels: ['Bale Mountain Lodge', 'Wabe Shebelle Hotel Robe', 'Bale Eco Camp'],
+    recommendedHotels: [
+      'Bale Mountain Lodge (Rira)',
+      'Wabe Shebelle Hotel Robe',
+      'Bale Alpine Eco Camp (Sanetti Base)',
+      'Tokuma Hotel Dinsho',
+      'Goba Hotel',
+      'Nyala Motel Robe'
+    ],
     image: baleImg,
     tourLink: '/destinations'
   },
@@ -121,7 +200,17 @@ const DESTINATIONS_MAP = [
     coords: { top: '72%', left: '27%' },
     tagline: 'Cultural heritage trails & indigenous tribes',
     description: 'Home to the Mursi, Hamer, and Karo tribes with ancient traditions in the lush Omo basin.',
-    recommendedHotels: ['Buska Lodge Turmi', 'Paradise Lodge Arba Minch', 'Haile Resort Arba Minch'],
+    recommendedHotels: [
+      'Buska Lodge Turmi',
+      'Paradise Lodge Arba Minch',
+      'Haile Resort Arba Minch',
+      'Eco-Omo Safari Lodge Jinka',
+      'Emerald Resort Arba Minch',
+      'Turmi Safari Lodge',
+      'Kanta Lodge Karat-Konso',
+      'Swaynes Hotel Arba Minch',
+      'Mora Heights Lodge'
+    ],
     image: omoImg,
     tourLink: '/destinations'
   }
@@ -410,13 +499,26 @@ function InteractiveMap() {
           margin: 0;
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 6px;
+          max-height: 150px;
+          overflow-y: auto;
+          padding-right: 6px;
+        }
+
+        .info-hotels-box ul::-webkit-scrollbar {
+          width: 5px;
+        }
+
+        .info-hotels-box ul::-webkit-scrollbar-thumb {
+          background: #556B2F;
+          border-radius: 4px;
         }
 
         .info-hotels-box li {
           font-size: 0.85rem;
-          color: #475569;
-          font-weight: 500;
+          color: #334155;
+          font-weight: 600;
+          padding: 2px 0;
         }
 
         .map-card-btn {
