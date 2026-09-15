@@ -1,60 +1,68 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+// Authentic Local Real Destination Photos
+import lalibelaImg from '../assets/images/lalibela.jpg';
+import simienImg from '../assets/images/simien.jpg';
+import danakilImg from '../assets/images/danakil.jpg';
+import gondarImg from '../assets/images/gondar.jpg';
+import omoImg from '../assets/images/omo.jpg';
+import ethiopiaMapImg from '../assets/images/ethiopia_map.jpg';
+
 const DESTINATIONS_MAP = [
+  {
+    id: 'simien',
+    name: 'Simien Mountains',
+    region: 'Gondar & North Highlands',
+    coords: { top: '21%', left: '33%' },
+    tagline: 'Dramatic peaks, deep valleys & Gelada baboons',
+    description: 'A UNESCO World Heritage national park featuring Ras Dashen peak and endemic Ethiopian wildlife.',
+    recommendedHotels: ['Limalimo Lodge', 'Simien Lodge', 'Goha Hotel Gondar'],
+    image: simienImg,
+    tourLink: '/destinations'
+  },
   {
     id: 'lalibela',
     name: 'Lalibela',
     region: 'Amhara Region',
-    coords: { top: '38%', left: '52%' },
+    coords: { top: '30%', left: '42%' },
     tagline: 'World-famous 12th-century Rock-Hewn Churches',
     description: 'Explore eleven ancient monolithic rock churches carved directly into pink volcanic tuff.',
     recommendedHotels: ['Maribela Hotel', 'Mezena Lodge', 'Roha Hotel'],
-    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
-    tourLink: '/destinations'
-  },
-  {
-    id: 'simien',
-    name: 'Simien Mountains',
-    region: 'Gondar & North',
-    coords: { top: '24%', left: '44%' },
-    tagline: 'Dramatic peaks, deep valleys & Gelada baboons',
-    description: 'A UNESCO World Heritage national park featuring Ras Dashen peak and endemic Ethiopian wildlife.',
-    recommendedHotels: ['Limalimo Lodge', 'Simien Lodge', 'Goha Hotel Gondar'],
-    image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=800&q=80',
+    image: lalibelaImg,
     tourLink: '/destinations'
   },
   {
     id: 'danakil',
     name: 'Danakil Depression',
     region: 'Afar Region',
-    coords: { top: '28%', left: '68%' },
+    coords: { top: '19%', left: '55%' },
     tagline: 'Vibrant hydrothermal sulfur springs & Erta Ale lava lake',
     description: 'One of the lowest and hottest places on Earth, renowned for Dallol neon sulfur pools and active volcanism.',
     recommendedHotels: ['Kuriftu Resort Semera', 'Erta Ale Eco Camp', 'Planet Hotel Mekele'],
-    image: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+    image: danakilImg,
     tourLink: '/destinations'
   },
   {
     id: 'gondar',
     name: 'Gondar',
     region: 'Amhara Region',
-    coords: { top: '28%', left: '38%' },
+    coords: { top: '24%', left: '26%' },
     tagline: 'The Camelot of Africa — 17th Century Castles',
     description: 'Ancient royal capital featuring Fasil Ghebbi fortress compound and Debre Berhan Selassie church.',
     recommendedHotels: ['Goha Hotel', 'Haile Resort Gondar', 'Florida International Hotel'],
-    image: 'https://images.unsplash.com/photo-1523805081446-ed9a7bb84eaa?auto=format&fit=crop&w=800&q=80',
+    image: gondarImg,
     tourLink: '/destinations'
   },
   {
     id: 'omo',
     name: 'Omo Valley',
     region: 'Southern Nations',
-    coords: { top: '78%', left: '32%' },
+    coords: { top: '72%', left: '27%' },
     tagline: 'Cultural heritage trails & indigenous tribes',
     description: 'Home to the Mursi, Hamer, and Karo tribes with ancient traditions in the lush Omo basin.',
     recommendedHotels: ['Buska Lodge Turmi', 'Paradise Lodge Arba Minch', 'Haile Resort Arba Minch'],
-    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80',
+    image: omoImg,
     tourLink: '/destinations'
   }
 ];
@@ -68,33 +76,37 @@ function InteractiveMap() {
         <span className="section-eyebrow">Explore Ethiopia</span>
         <h2 className="section-title-light">Interactive Circuit Map &amp; Destinations</h2>
         <p className="section-subtitle-light">
-          Click any destination pin to discover key highlights, tour routes, and recommended regional accommodations.
+          Click any destination pin on the physical map of Ethiopia to discover key highlights, tour routes, and recommended regional accommodations.
         </p>
       </div>
 
       <div className="map-container-grid">
-        {/* Visual Map Canvas */}
+        {/* Real Physical Map Canvas */}
         <div className="map-visual-box">
-          <div className="map-svg-background">
-            <div className="ethiopia-shape-overlay" />
-            {DESTINATIONS_MAP.map((dest) => (
-              <button
-                key={dest.id}
-                type="button"
-                className={`map-pin ${activePin.id === dest.id ? 'active' : ''}`}
-                style={{ top: dest.coords.top, left: dest.coords.left }}
-                onClick={() => setActivePin(dest)}
-                aria-label={`Select ${dest.name}`}
-              >
-                <span className="pin-pulse" />
-                <span className="pin-icon">📍</span>
-                <span className="pin-label">{dest.name}</span>
-              </button>
-            ))}
-          </div>
+          <img
+            src={ethiopiaMapImg}
+            alt="Physical Map of Ethiopia"
+            className="real-ethiopia-map-bg"
+          />
+          <div className="map-overlay-vignette" />
+
+          {DESTINATIONS_MAP.map((dest) => (
+            <button
+              key={dest.id}
+              type="button"
+              className={`map-pin ${activePin.id === dest.id ? 'active' : ''}`}
+              style={{ top: dest.coords.top, left: dest.coords.left }}
+              onClick={() => setActivePin(dest)}
+              aria-label={`Select ${dest.name}`}
+            >
+              <span className="pin-pulse" />
+              <span className="pin-icon">📍</span>
+              <span className="pin-label">{dest.name}</span>
+            </button>
+          ))}
         </div>
 
-        {/* Selected Destination Card Panel */}
+        {/* Selected Destination Card Panel with Authentic Real Photo */}
         <div className="map-info-card">
           <div className="info-card-image-box">
             <img src={activePin.image} alt={activePin.name} className="info-card-img" />
@@ -125,7 +137,7 @@ function InteractiveMap() {
       <style>{`
         .interactive-map-section {
           padding: 60px 20px;
-          max-width: 1200px;
+          max-width: 1240px;
           margin: 0 auto;
         }
 
@@ -167,36 +179,39 @@ function InteractiveMap() {
 
         .map-container-grid {
           display: grid;
-          grid-template-columns: 1.3fr 1fr;
+          grid-template-columns: 1.35fr 1fr;
           gap: 30px;
           align-items: center;
           background: #ffffff;
           border-radius: 20px;
           padding: 24px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
           border: 1px solid #e2e8f0;
         }
 
         .map-visual-box {
           position: relative;
-          min-height: 420px;
-          background: linear-gradient(135deg, #2b2a25 0%, #1e293b 100%);
+          min-height: 480px;
+          height: 100%;
           border-radius: 16px;
           overflow: hidden;
-          box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+          border: 2px solid #cbd5e1;
         }
 
-        .map-svg-background {
-          position: relative;
+        .real-ethiopia-map-bg {
           width: 100%;
           height: 100%;
-          min-height: 420px;
+          min-height: 480px;
+          object-fit: cover;
+          display: block;
         }
 
-        .ethiopia-shape-overlay {
+        .map-overlay-vignette {
           position: absolute;
           inset: 0;
-          background: radial-gradient(circle at 50% 45%, rgba(85, 107, 47, 0.35) 0%, transparent 70%);
+          background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.05) 0%, rgba(15,23,42,0.4) 100%);
+          pointer-events: none;
         }
 
         .map-pin {
@@ -209,50 +224,52 @@ function InteractiveMap() {
           align-items: center;
           gap: 6px;
           z-index: 10;
-          transition: transform 0.2s ease;
+          transition: transform 0.2s ease, z-index 0.2s;
         }
 
         .map-pin:hover {
-          transform: translate(-50%, -50%) scale(1.15);
+          transform: translate(-50%, -50%) scale(1.18);
+          z-index: 20;
         }
 
         .pin-icon {
-          font-size: 1.5rem;
-          filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+          font-size: 1.6rem;
+          filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
         }
 
         .pin-label {
-          background: rgba(15, 23, 42, 0.85);
+          background: rgba(15, 23, 42, 0.9);
           color: #ffffff;
-          padding: 4px 10px;
-          border-radius: 12px;
-          font-size: 0.8rem;
-          font-weight: 700;
+          padding: 5px 12px;
+          border-radius: 14px;
+          font-size: 0.82rem;
+          font-weight: 800;
           white-space: nowrap;
-          backdrop-filter: blur(4px);
-          border: 1px solid rgba(255,255,255,0.2);
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(255,255,255,0.3);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .map-pin.active .pin-label {
           background: #556B2F;
           color: #ffffff;
           border-color: #a8c55a;
-          box-shadow: 0 0 12px rgba(85, 107, 47, 0.6);
+          box-shadow: 0 0 16px rgba(85, 107, 47, 0.8);
         }
 
         .pin-pulse {
           position: absolute;
-          width: 16px;
-          height: 16px;
+          width: 18px;
+          height: 18px;
           border-radius: 50%;
-          background: rgba(168, 197, 90, 0.7);
+          background: rgba(168, 197, 90, 0.8);
           animation: mapPulse 2s infinite;
           left: 6px;
         }
 
         @keyframes mapPulse {
           0% { transform: scale(0.8); opacity: 1; }
-          100% { transform: scale(2.5); opacity: 0; }
+          100% { transform: scale(2.8); opacity: 0; }
         }
 
         .map-info-card {
@@ -265,7 +282,7 @@ function InteractiveMap() {
 
         .info-card-image-box {
           position: relative;
-          height: 180px;
+          height: 220px;
         }
 
         .info-card-img {
@@ -284,6 +301,7 @@ function InteractiveMap() {
           border-radius: 20px;
           font-size: 0.8rem;
           font-weight: 700;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
 
         .info-card-body {
@@ -292,7 +310,7 @@ function InteractiveMap() {
 
         .info-card-body h3 {
           margin: 0 0 6px;
-          font-size: 1.4rem;
+          font-size: 1.45rem;
           color: #0f172a;
           font-weight: 800;
         }
@@ -300,14 +318,14 @@ function InteractiveMap() {
         .info-card-tagline {
           color: #556B2F;
           font-weight: 700;
-          font-size: 0.9rem;
+          font-size: 0.92rem;
           margin-bottom: 10px;
         }
 
         .info-card-desc {
           color: #334155;
           font-size: 0.92rem;
-          line-height: 1.5;
+          line-height: 1.6;
           margin-bottom: 16px;
         }
 
