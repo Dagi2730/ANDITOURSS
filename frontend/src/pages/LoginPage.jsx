@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { login, register } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import lalibelaImg from '../assets/images/lalibela.jpg';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -145,10 +146,9 @@ const Login = () => {
           align-items: center;
           justify-content: center;
           padding: 120px 20px 60px;
-          background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), 
-                      url('https://images.unsplash.com/photo-1523805081446-ed9a7bb84eaa?q=80&w=2070&auto=format&fit=crop');
+          background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), 
+                      url(${lalibelaImg}) no-repeat center center fixed;
           background-size: cover;
-          background-position: center;
           font-family: 'Raleway', sans-serif;
         }
 
@@ -182,7 +182,7 @@ const Login = () => {
         }
 
         .password-toggle-btn:hover {
-          color: #C0CA33;
+          color: #A8C55A;
           transform: translateY(-50%) scale(1.1);
         }
 
@@ -219,9 +219,14 @@ const Login = () => {
         .toggle-text span {
           cursor: pointer;
           font-weight: 700;
-          color: #C0CA33;
+          color: #A8C55A;
           margin-left: 6px;
           transition: 0.2s;
+        }
+
+        .toggle-text span:hover {
+          color: #ffffff;
+          text-decoration: underline;
         }
 
         .toggle-text span:hover {

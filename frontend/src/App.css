@@ -1,4 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700;800&display=swap');
+:root {
+  --olive-primary: #556B2F;
+  --olive-secondary: #6B8E23;
+  --olive-accent: #A8C55A;
+  --olive-dark: #3E4E22;
+  --olive-light: rgba(85, 107, 47, 0.15);
+  --bg-dark: #0f172a;
+  --bg-card: #1e293b;
+  --text-main: #ffffff;
+  --text-muted: #cbd5e1;
+}
 
 /* 1. COMPLETE RESET - Remove ALL margins and padding */
 * {
@@ -14,8 +24,9 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    background-color: #000;
+    background-color: #0f172a;
     font-family: 'Raleway', sans-serif;
+    color: #ffffff;
 }
 
 #root {
@@ -29,9 +40,8 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    /* Make background cover everything including navbar and footer area */
     background:
-        linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.75)),
         url('./assets/images/lalibela.jpg') no-repeat center center fixed;
     background-size: cover;
     background-attachment: fixed;
@@ -690,22 +700,24 @@ body {
 .send-btn {
     width: 100%;
     padding: 16px;
-    background: #C0CA33;
-    color: #1a1a1a;
-    border: none;
+    background: linear-gradient(145deg, #556B2F, #6B8E23);
+    color: #ffffff;
+    border: 1px solid #A8C55A;
     border-radius: 12px;
     font-weight: 800;
     font-size: 1.1rem;
     cursor: pointer;
-    transition: 0.4s;
+    transition: 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 1.5px;
+    box-shadow: 0 6px 16px rgba(85, 107, 47, 0.4);
+    min-height: 48px;
 }
 
 .send-btn:hover {
-    background: #ffffff;
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(145deg, #6B8E23, #556B2F);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(85, 107, 47, 0.6);
 }
 
 .send-btn:disabled {
