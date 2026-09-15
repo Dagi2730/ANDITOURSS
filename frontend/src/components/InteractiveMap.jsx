@@ -7,6 +7,11 @@ import simienImg from '../assets/images/simien.jpg';
 import danakilImg from '../assets/images/danakil.jpg';
 import gondarImg from '../assets/images/gondar.jpg';
 import omoImg from '../assets/images/omo.jpg';
+import bahirdarImg from '../assets/images/bahirdar.jpg';
+import axumImg from '../assets/images/axum.jpg';
+import baleImg from '../assets/images/balemountains.jpg';
+import hawassaImg from '../assets/images/hawassa.jpg';
+import addisImg from '../assets/images/addisababa.jpg';
 import ethiopiaMapImg from '../assets/images/ethiopia_map.jpg';
 
 const DESTINATIONS_MAP = [
@@ -25,7 +30,7 @@ const DESTINATIONS_MAP = [
     id: 'lalibela',
     name: 'Lalibela',
     region: 'Amhara Region',
-    coords: { top: '30%', left: '42%' },
+    coords: { top: '30%', left: '44%' },
     tagline: 'World-famous 12th-century Rock-Hewn Churches',
     description: 'Explore eleven ancient monolithic rock churches carved directly into pink volcanic tuff.',
     recommendedHotels: ['Maribela Hotel', 'Mezena Lodge', 'Roha Hotel'],
@@ -52,6 +57,61 @@ const DESTINATIONS_MAP = [
     description: 'Ancient royal capital featuring Fasil Ghebbi fortress compound and Debre Berhan Selassie church.',
     recommendedHotels: ['Goha Hotel', 'Haile Resort Gondar', 'Florida International Hotel'],
     image: gondarImg,
+    tourLink: '/destinations'
+  },
+  {
+    id: 'bahirdar',
+    name: 'Bahir Dar & Lake Tana',
+    region: 'Amhara / Lake Tana',
+    coords: { top: '31%', left: '29%' },
+    tagline: 'Source of the Blue Nile & Ancient Island Monasteries',
+    description: 'Picturesque lake city featuring boat trips to 14th-century monastery churches and Tis Abay Blue Nile Falls.',
+    recommendedHotels: ['Kuriftu Resort & Spa Bahir Dar', 'Haile Resort Bahir Dar', 'Blue Nile Resort'],
+    image: bahirdarImg,
+    tourLink: '/destinations'
+  },
+  {
+    id: 'axum',
+    name: 'Axum Obelisks',
+    region: 'Tigray Region',
+    coords: { top: '14%', left: '38%' },
+    tagline: 'Birthplace of Ethiopian Civilization & Ancient Stelae',
+    description: 'UNESCO treasure housing giant 1,700-year-old granite obelisks and St. Mary of Zion church.',
+    recommendedHotels: ['Yeha Hotel Axum', 'Consolar Hotel', 'Sabian International Hotel'],
+    image: axumImg,
+    tourLink: '/destinations'
+  },
+  {
+    id: 'addis',
+    name: 'Addis Ababa',
+    region: 'Capital City',
+    coords: { top: '44%', left: '41%' },
+    tagline: 'Diplomatic Capital of Africa & Home of "Lucy"',
+    description: 'Bustling metropolis with the National Museum of Ethiopia, Entoto Park viewpoints, and rich coffee culture.',
+    recommendedHotels: ['Sheraton Addis', 'Skylight Hotel Addis', 'Radisson Blu Addis'],
+    image: addisImg,
+    tourLink: '/destinations'
+  },
+  {
+    id: 'hawassa',
+    name: 'Hawassa & Rift Valley',
+    region: 'Sidama / Rift Valley',
+    coords: { top: '56%', left: '38%' },
+    tagline: 'Serene Lakeside Palms & Vibrant Fish Market',
+    description: 'Resort town situated on Lake Hawassa, famous for abundant birdlife, colobus monkeys, and fresh tilapia.',
+    recommendedHotels: ['Haile Resort Hawassa', 'Lewi Resort Lake Hawassa', 'Central Hawassa Hotel'],
+    image: hawassaImg,
+    tourLink: '/destinations'
+  },
+  {
+    id: 'bale',
+    name: 'Bale Mountains',
+    region: 'Oromia Region',
+    coords: { top: '56%', left: '50%' },
+    tagline: 'Alpine Sanetti Plateau & Rare Ethiopian Red Wolf',
+    description: 'High-altitude wilderness with glacial lakes, Harenna cloud forest, and endemic Ethiopian wolves.',
+    recommendedHotels: ['Bale Mountain Lodge', 'Wabe Shebelle Hotel Robe', 'Bale Eco Camp'],
+    image: baleImg,
     tourLink: '/destinations'
   },
   {
