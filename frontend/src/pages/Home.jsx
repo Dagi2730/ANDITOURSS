@@ -376,27 +376,27 @@ function Home() {
               marginBottom: '1.25rem',
               lineHeight: '1.3'
             }}>
-              Authentic Ethiopian Travel Experiences Crafted by Local Experts
+              About Andi Tours
             </h2>
             <p style={{ color: '#cbd5e1', fontSize: '1.05rem', lineHeight: '1.8', marginBottom: '1.25rem' }}>
-              At <strong>Andi Tours</strong>, we are passionate local storytellers, mountain guides, and heritage guardians dedicated to revealing the true heart of Ethiopia. From the ancient rock-hewn monolithic churches of Lalibela to the volcanic marvels of Danakil, we craft seamless, sustainable, and unforgettable journeys.
+              Welcome to <strong>Andi Tours</strong>! We believe traveling is all about creating real connections and seeing the true beauty of Ethiopia. The company was started by Andi, a friendly local guide with more than 20 years of experience leading trips. Over the years, Andi has traveled across more than 85% of Ethiopia from famous historic spots like Lalibela and the Simien Mountains to beautiful hidden places throughout the country.
             </p>
             <p style={{ color: '#cbd5e1', fontSize: '1.05rem', lineHeight: '1.8', marginBottom: '2rem' }}>
-              Whether you seek high-altitude trekking in the Simien Mountains, wildlife photography, or deep cultural immersion in the Omo Valley, our tailored itineraries guarantee safety, comfort, and authentic connection.
+              Having guided guests from all around the world, Andi knows how to make every trip easy, safe, and truly special. Whether you want a relaxing vacation, a cultural tour, or an exciting adventure, we take care of all the details so you can enjoy every moment of your journey.
             </p>
 
             <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
               <div>
-                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>10+</h4>
+                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>20+</h4>
                 <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Years Experience</span>
               </div>
               <div>
-                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>100%</h4>
-                <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Local Guides</span>
+                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>85%+</h4>
+                <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Ethiopia Covered</span>
               </div>
               <div>
-                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>5,000+</h4>
-                <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Happy Travelers</span>
+                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>100%</h4>
+                <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Tailored Trips</span>
               </div>
             </div>
           </div>
