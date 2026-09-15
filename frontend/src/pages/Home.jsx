@@ -4,36 +4,37 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getFeaturedReviews } from '../features/review/reviewSlice';
 import InteractiveMap from '../components/InteractiveMap';
 import HotelRecommendations from '../components/HotelRecommendations';
+import lalibelaLocalImg from '../assets/images/lalibela.jpg';
 
-// 5 High-Resolution Ethiopian Destination Images with high contrast overlay styling
+// Authentic, Real Destination Photographs from Ethiopia
 const HERO_SLIDES = [
   {
     id: 1,
-    image: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=1920&q=80",
+    image: lalibelaLocalImg || "https://upload.wikimedia.org/wikipedia/commons/1/17/Bete_Giyorgis_Lalibela_Ethiopia.jpg",
     title: "Lalibela Rock-Hewn Churches",
     subtitle: "8th Wonder of the Ancient World",
-    location: "Amhara Region, Ethiopia",
+    location: "Lalibela, Amhara Region, Ethiopia",
     tagline: "Explore 11 monolithic churches carved entirely out of solid volcanic rock in the 12th century."
   },
   {
     id: 2,
-    image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1920&q=80",
+    image: "https://upload.wikimedia.org/wikipedia/commons/2/22/Simien_Mountains_Landscape%2C_Ethiopia_%282466091417%29.jpg",
     title: "Simien Mountains Escarpments",
     subtitle: "The Roof of Africa",
     location: "Gondar Highlands, Ethiopia",
-    tagline: "Trek dramatic peaks over 4,000 meters and encounter endemic Gelada Baboons and Walia Ibex."
+    tagline: "Trek dramatic escarpments over 4,000 meters and encounter endemic Gelada Baboons and Walia Ibex."
   },
   {
     id: 3,
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Dallol_hydrothermal_field.jpg",
     title: "Danakil Depression & Dallol",
-    subtitle: "The Most Surreal Place on Earth",
+    subtitle: "Surreal Volcanic Hydrothermal Fields",
     location: "Afar Region, Ethiopia",
     tagline: "Witness vibrant hydrothermal neon pools, active lava lakes at Erta Ale, and vast salt flats."
   },
   {
     id: 4,
-    image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1920&q=80",
+    image: "https://upload.wikimedia.org/wikipedia/commons/a/a8/The_Ruins_at_Gondar%2C_Ethiopia_-_Fasilides_Castle_%282414812475%29.jpg",
     title: "Gondar Fasil Ghebbi Castles",
     subtitle: "The Camelot of Africa",
     location: "Gondar City, Ethiopia",
@@ -41,11 +42,11 @@ const HERO_SLIDES = [
   },
   {
     id: 5,
-    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80",
-    title: "Omo Valley Heritage & Rift Valley Lakes",
-    subtitle: "Cradle of Living Human History",
-    location: "Southern Ethiopia",
-    tagline: "Experience ancestral cultural traditions, tribal heritage, and pristine Rift Valley lakes."
+    image: "https://upload.wikimedia.org/wikipedia/commons/4/46/Blue_Nile_Falls_Ethiopia.jpg",
+    title: "Blue Nile Falls & Lake Tana",
+    subtitle: "Tis Abay - Great Smoke of the Nile",
+    location: "Bahir Dar, Amhara Region, Ethiopia",
+    tagline: "Experience the roaring cascade of the Blue Nile and ancient island monasteries on Lake Tana."
   }
 ];
 
@@ -397,8 +398,8 @@ function Home() {
 
           <div style={{ position: 'relative' }}>
             <img
-              src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=800&q=80"
-              alt="Ethiopian Heritage Guide"
+              src={lalibelaLocalImg}
+              alt="Ethiopian Heritage Lalibela"
               style={{
                 width: '100%',
                 height: '400px',
