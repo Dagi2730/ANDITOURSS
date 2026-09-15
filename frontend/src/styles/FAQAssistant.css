@@ -18,9 +18,9 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: #556B2F;
-  border: none;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(145deg, #556B2F, #6B8E23);
+  border: 2px solid #a8c55a;
+  box-shadow: 0 6px 20px rgba(85, 107, 47, 0.4);
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -31,17 +31,23 @@
 
 .faq-toggle-btn:hover {
   transform: scale(1.1);
-  background: #6B8E23;
+  background: linear-gradient(145deg, #6B8E23, #556B2F);
+  box-shadow: 0 8px 25px rgba(85, 107, 47, 0.6);
 }
 
 .faq-toggle-btn.active {
   animation: none;
   background: #3E4E22;
+  border-color: #a8c55a;
 }
 
 .faq-icon {
   font-size: 24px;
-  color: white;
+  color: #ffffff;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes pulse-olive {
