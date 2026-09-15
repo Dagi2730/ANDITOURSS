@@ -136,30 +136,33 @@ function InteractiveMap() {
 
         .section-eyebrow {
           display: inline-block;
-          padding: 6px 16px;
+          padding: 6px 18px;
           border-radius: 20px;
-          background: rgba(85, 107, 47, 0.15);
-          color: #556B2F;
-          font-weight: 700;
+          background: rgba(85, 107, 47, 0.25);
+          color: #a8c55a;
+          border: 1px solid rgba(168, 197, 90, 0.4);
+          font-weight: 800;
           font-size: 0.85rem;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
           margin-bottom: 12px;
         }
 
         .section-title-light {
-          font-size: clamp(1.8rem, 4vw, 2.6rem);
-          color: #0f172a;
-          margin: 0 0 12px;
+          font-size: clamp(2rem, 4vw, 2.8rem);
+          color: #ffffff !important;
+          margin: 0 0 14px;
           font-weight: 800;
+          text-shadow: 0 2px 10px rgba(0,0,0,0.6);
         }
 
         .section-subtitle-light {
-          color: #475569;
-          font-size: 1.05rem;
-          max-width: 700px;
+          color: #cbd5e1 !important;
+          font-size: 1.1rem;
+          max-width: 720px;
           margin: 0 auto;
-          line-height: 1.6;
+          line-height: 1.7;
+          font-weight: 500;
         }
 
         .map-container-grid {
@@ -170,7 +173,7 @@ function InteractiveMap() {
           background: #ffffff;
           border-radius: 20px;
           padding: 24px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
           border: 1px solid #e2e8f0;
         }
 
@@ -233,8 +236,8 @@ function InteractiveMap() {
         .map-pin.active .pin-label {
           background: #556B2F;
           color: #ffffff;
-          border-color: #C0CA33;
-          box-shadow: 0 0 12px rgba(192, 202, 51, 0.6);
+          border-color: #a8c55a;
+          box-shadow: 0 0 12px rgba(85, 107, 47, 0.6);
         }
 
         .pin-pulse {
@@ -242,7 +245,7 @@ function InteractiveMap() {
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: rgba(192, 202, 51, 0.7);
+          background: rgba(168, 197, 90, 0.7);
           animation: mapPulse 2s infinite;
           left: 6px;
         }
@@ -341,17 +344,18 @@ function InteractiveMap() {
         .map-card-btn {
           display: block;
           text-align: center;
-          background: #556B2F;
+          background: linear-gradient(145deg, #556B2F, #6B8E23);
           color: #ffffff;
-          padding: 10px;
+          padding: 12px;
           border-radius: 8px;
           font-weight: 700;
           text-decoration: none;
-          transition: background 0.2s;
+          transition: all 0.2s ease;
         }
 
         .map-card-btn:hover {
-          background: #6B8E23;
+          background: linear-gradient(145deg, #6B8E23, #556B2F);
+          transform: translateY(-2px);
         }
 
         @media (max-width: 850px) {

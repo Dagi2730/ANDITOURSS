@@ -89,8 +89,8 @@ export default function HotelRecommendations() {
     }}>
       <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 3rem' }}>
         <span style={{
-          background: 'rgba(234, 179, 8, 0.15)',
-          color: '#facc15',
+          background: 'rgba(85, 107, 47, 0.25)',
+          color: '#A8C55A',
           fontSize: '0.875rem',
           fontWeight: '700',
           textTransform: 'uppercase',
@@ -99,7 +99,7 @@ export default function HotelRecommendations() {
           borderRadius: '50px',
           display: 'inline-block',
           marginBottom: '1rem',
-          border: '1px solid rgba(234, 179, 8, 0.3)'
+          border: '1px solid rgba(168, 197, 90, 0.4)'
         }}>
           Handpicked Accommodations
         </span>
@@ -133,11 +133,11 @@ export default function HotelRecommendations() {
               key={r}
               onClick={() => setSelectedRegion(r)}
               style={{
-                padding: '0.5rem 1.25rem',
+                padding: '0.55rem 1.25rem',
                 borderRadius: '50px',
-                border: selectedRegion === r ? '2px solid #facc15' : '1px solid rgba(255,255,255,0.15)',
-                background: selectedRegion === r ? '#facc15' : 'rgba(255,255,255,0.05)',
-                color: selectedRegion === r ? '#0f172a' : '#f8fafc',
+                border: selectedRegion === r ? '2px solid #A8C55A' : '1px solid rgba(255,255,255,0.15)',
+                background: selectedRegion === r ? 'linear-gradient(145deg, #556B2F, #6B8E23)' : 'rgba(255,255,255,0.05)',
+                color: '#ffffff',
                 fontWeight: selectedRegion === r ? '700' : '500',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease-in-out',
@@ -192,8 +192,8 @@ export default function HotelRecommendations() {
                 borderRadius: '50px',
                 fontSize: '0.8rem',
                 fontWeight: '700',
-                color: '#facc15',
-                border: '1px solid rgba(250, 204, 21, 0.3)'
+                color: '#A8C55A',
+                border: '1px solid rgba(168, 197, 90, 0.4)'
               }}>
                 📍 {hotel.region}
               </div>
@@ -201,7 +201,7 @@ export default function HotelRecommendations() {
                 position: 'absolute',
                 top: '1rem',
                 right: '1rem',
-                background: '#059669',
+                background: '#556B2F',
                 color: '#ffffff',
                 padding: '0.35rem 0.75rem',
                 borderRadius: '50px',
@@ -221,7 +221,7 @@ export default function HotelRecommendations() {
                 <h3 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#ffffff', margin: 0 }}>
                   {hotel.name}
                 </h3>
-                <span style={{ fontSize: '1rem', fontWeight: '800', color: '#10b981' }}>
+                <span style={{ fontSize: '1rem', fontWeight: '800', color: '#A8C55A' }}>
                   {hotel.priceRange}
                 </span>
               </div>

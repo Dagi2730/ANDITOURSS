@@ -163,8 +163,8 @@ const ReviewsRecommendationsPage = () => {
             className="btn-write-review"
             onClick={() => setShowModal(true)}
             style={{
-              background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-              color: '#0f172a',
+              background: 'linear-gradient(145deg, #556B2F, #6B8E23)',
+              color: '#ffffff',
               border: 'none',
               padding: '0.75rem 1.5rem',
               borderRadius: '50px',
@@ -367,8 +367,8 @@ const ReviewsRecommendationsPage = () => {
                       disabled={submitting}
                       style={{
                         flex: 1,
-                        background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-                        color: '#0f172a',
+                        background: 'linear-gradient(145deg, #556B2F, #6B8E23)',
+                        color: '#ffffff',
                         border: 'none',
                         padding: '0.75rem',
                         borderRadius: '50px',

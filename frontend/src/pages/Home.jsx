@@ -57,9 +57,9 @@ const HERO_SLIDES = [
 
 function StarDisplay({ rating }) {
   return (
-    <span style={{ fontSize: '1.1rem', color: '#facc15' }}>
+    <span style={{ fontSize: '1.1rem', color: '#A8C55A' }}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} style={{ color: n <= rating ? '#facc15' : 'rgba(255, 255, 255, 0.25)', marginRight: '2px' }}>
+        <span key={n} style={{ color: n <= rating ? '#A8C55A' : 'rgba(255, 255, 255, 0.25)', marginRight: '2px' }}>
           ★
         </span>
       ))}
@@ -184,15 +184,15 @@ function Home() {
               margin: '0 auto'
             }}>
               <span style={{
-                background: 'rgba(234, 179, 8, 0.25)',
-                color: '#facc15',
+                background: 'rgba(85, 107, 47, 0.25)',
+                color: '#A8C55A',
                 fontSize: '0.85rem',
                 fontWeight: '800',
                 textTransform: 'uppercase',
                 letterSpacing: '2px',
                 padding: '0.4rem 1.25rem',
                 borderRadius: '50px',
-                border: '1px solid rgba(250, 204, 21, 0.4)',
+                border: '1px solid rgba(168, 197, 90, 0.4)',
                 marginBottom: '1.25rem',
                 backdropFilter: 'blur(6px)',
                 textShadow: '0 2px 4px rgba(0,0,0,0.8)'
@@ -228,15 +228,15 @@ function Home() {
                 <button
                   onClick={handleStartExploring}
                   style={{
-                    background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-                    color: '#0f172a',
+                    background: 'linear-gradient(145deg, #556B2F, #6B8E23)',
+                    color: '#ffffff',
                     padding: '1rem 2.25rem',
                     border: 'none',
                     borderRadius: '50px',
                     fontWeight: '800',
                     fontSize: '1.05rem',
                     cursor: 'pointer',
-                    boxShadow: '0 10px 25px rgba(234, 179, 8, 0.4)',
+                    boxShadow: '0 10px 25px rgba(85, 107, 47, 0.4)',
                     transition: 'all 0.3s ease-in-out'
                   }}
                 >
@@ -331,7 +331,7 @@ function Home() {
                 width: idx === currentSlide ? '32px' : '10px',
                 height: '10px',
                 borderRadius: '5px',
-                background: idx === currentSlide ? '#facc15' : 'rgba(255, 255, 255, 0.4)',
+                background: idx === currentSlide ? '#A8C55A' : 'rgba(255, 255, 255, 0.4)',
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease'
@@ -387,15 +387,15 @@ function Home() {
 
             <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
               <div>
-                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>20+</h4>
+                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#A8C55A', margin: 0 }}>20+</h4>
                 <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Years Experience</span>
               </div>
               <div>
-                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>85%+</h4>
+                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#A8C55A', margin: 0 }}>85%+</h4>
                 <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Ethiopia Covered</span>
               </div>
               <div>
-                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>100%</h4>
+                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#A8C55A', margin: 0 }}>100%</h4>
                 <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Tailored Trips</span>
               </div>
             </div>
@@ -442,7 +442,7 @@ function Home() {
               {
                 icon: "⛰️",
                 title: "Customized Itineraries",
-                desc: "Tailor every detail of your expedition — from luxury lodge stays to rugged mountain trekking routes."
+                desc: "Tailor every detail of your expedition from luxury lodge stays to rugged mountain trekking routes."
               },
               {
                 icon: "🛡️",
@@ -493,7 +493,7 @@ function Home() {
         {featuredReviews && featuredReviews.length > 0 && (
           <section style={{ margin: '4rem 0' }}>
             <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-              <span style={{ color: '#facc15', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+              <span style={{ color: '#A8C55A', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
                 Testimonials
               </span>
               <h2 style={{ fontSize: '2.4rem', fontWeight: '800', color: '#ffffff', marginTop: '0.5rem' }}>
@@ -537,7 +537,7 @@ function Home() {
                       {review.user?.name || 'Valued Traveler'}
                     </strong>
                     {review.tour?.title && (
-                      <span style={{ color: '#facc15', fontSize: '0.85rem', fontWeight: '600' }}>
+                      <span style={{ color: '#A8C55A', fontSize: '0.85rem', fontWeight: '600' }}>
                         Tour: {review.tour.title}
                       </span>
                     )}
