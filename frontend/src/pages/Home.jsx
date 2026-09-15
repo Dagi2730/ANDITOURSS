@@ -4,13 +4,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getFeaturedReviews } from '../features/review/reviewSlice';
 import InteractiveMap from '../components/InteractiveMap';
 import HotelRecommendations from '../components/HotelRecommendations';
-import lalibelaLocalImg from '../assets/images/lalibela.jpg';
 
-// Authentic, Real Destination Photographs from Ethiopia
+// 5 Bundled Local Assets for 100% Guaranteed Image Loading (No CORS/Hotlinking Blocks)
+import lalibelaImg from '../assets/images/lalibela.jpg';
+import simienImg from '../assets/images/simien.jpg';
+import danakilImg from '../assets/images/danakil.jpg';
+import gondarImg from '../assets/images/gondar.jpg';
+import bluenileImg from '../assets/images/bluenile.jpg';
+
 const HERO_SLIDES = [
   {
     id: 1,
-    image: lalibelaLocalImg || "https://upload.wikimedia.org/wikipedia/commons/1/17/Bete_Giyorgis_Lalibela_Ethiopia.jpg",
+    image: lalibelaImg,
     title: "Lalibela Rock-Hewn Churches",
     subtitle: "8th Wonder of the Ancient World",
     location: "Lalibela, Amhara Region, Ethiopia",
@@ -18,7 +23,7 @@ const HERO_SLIDES = [
   },
   {
     id: 2,
-    image: "https://upload.wikimedia.org/wikipedia/commons/2/22/Simien_Mountains_Landscape%2C_Ethiopia_%282466091417%29.jpg",
+    image: simienImg,
     title: "Simien Mountains Escarpments",
     subtitle: "The Roof of Africa",
     location: "Gondar Highlands, Ethiopia",
@@ -26,7 +31,7 @@ const HERO_SLIDES = [
   },
   {
     id: 3,
-    image: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Dallol_hydrothermal_field.jpg",
+    image: danakilImg,
     title: "Danakil Depression & Dallol",
     subtitle: "Surreal Volcanic Hydrothermal Fields",
     location: "Afar Region, Ethiopia",
@@ -34,7 +39,7 @@ const HERO_SLIDES = [
   },
   {
     id: 4,
-    image: "https://upload.wikimedia.org/wikipedia/commons/a/a8/The_Ruins_at_Gondar%2C_Ethiopia_-_Fasilides_Castle_%282414812475%29.jpg",
+    image: gondarImg,
     title: "Gondar Fasil Ghebbi Castles",
     subtitle: "The Camelot of Africa",
     location: "Gondar City, Ethiopia",
@@ -42,7 +47,7 @@ const HERO_SLIDES = [
   },
   {
     id: 5,
-    image: "https://upload.wikimedia.org/wikipedia/commons/4/46/Blue_Nile_Falls_Ethiopia.jpg",
+    image: bluenileImg,
     title: "Blue Nile Falls & Lake Tana",
     subtitle: "Tis Abay - Great Smoke of the Nile",
     location: "Bahir Dar, Amhara Region, Ethiopia",
@@ -398,7 +403,7 @@ function Home() {
 
           <div style={{ position: 'relative' }}>
             <img
-              src={lalibelaLocalImg}
+              src={lalibelaImg}
               alt="Ethiopian Heritage Lalibela"
               style={{
                 width: '100%',
