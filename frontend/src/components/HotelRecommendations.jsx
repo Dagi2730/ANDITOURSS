@@ -335,10 +335,9 @@ const HOTELS_DATA = [
 ];
 
 export default function HotelRecommendations() {
-  const [selectedRegion, setSelectedRegion] = useState('All');
+  const [selectedRegion, setSelectedRegion] = useState('Lalibela');
 
   const regions = [
-    'All',
     'Lalibela',
     'Simien Mountains',
     'Bahir Dar & Lake Tana',
@@ -351,9 +350,7 @@ export default function HotelRecommendations() {
     'Danakil & Mekele'
   ];
 
-  const filteredHotels = selectedRegion === 'All'
-    ? HOTELS_DATA
-    : HOTELS_DATA.filter(h => h.region === selectedRegion);
+  const filteredHotels = HOTELS_DATA.filter(h => h.region === selectedRegion);
 
   return (
     <div style={{
