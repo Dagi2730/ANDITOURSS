@@ -40,6 +40,7 @@ function App() {
 
           <Route path="/*" element={<PublicLayout />}>
             <Route index element={<Home />} />
+            <Route path="admin-host" element={<LoginPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="destinations" element={<DestinationsPage />} />
             <Route path="contact" element={<Contact />} />

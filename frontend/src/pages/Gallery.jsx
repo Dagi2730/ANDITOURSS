@@ -3,6 +3,60 @@ import { useDispatch, useSelector } from 'react-redux';
 import api, { getImageUrl } from '../lib/api';
 import { getBlogPosts } from '../features/blog/blogSlice';
 
+const compressImage = (file) => {
+  return new Promise((resolve) => {
+    if (!file || !file.type.startsWith('image/')) {
+      return resolve(file);
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const maxWidth = 1400;
+        const maxHeight = 1400;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.8
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
+
 function Gallery() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
@@ -36,11 +90,12 @@ function Gallery() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageSelect = (e) => {
+  const handleImageSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setImageFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    const compressed = await compressImage(file);
+    setImageFile(compressed);
+    setPreviewUrl(URL.createObjectURL(compressed));
   };
 
   const handleGuestSubmission = async (e) => {
@@ -155,15 +210,30 @@ function Gallery() {
           </div>
           <form className="glass-form" onSubmit={handleGuestSubmission} style={{ padding: '30px', margin: 0 }}>
             <div className="input-group">
+              <label style={{ color: '#ffffff', fontSize: '0.85rem', marginBottom: '4px', display: 'block' }}>
+                Story Title <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+              </label>
               <input type="text" name="title" value={formData.title} onChange={handleInputChange} placeholder="Story title" required />
             </div>
             <div className="input-group">
-              <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="Location" />
+              <label style={{ color: '#ffffff', fontSize: '0.85rem', marginBottom: '4px', display: 'block' }}>
+                Location
+              </label>
+              <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="Location (e.g. Lalibela)" />
             </div>
             <div className="input-group">
-              <textarea name="story" value={formData.story} onChange={handleInputChange} placeholder="Tell us about the moment" rows="3" required />
+              <label style={{ color: '#ffffff', fontSize: '0.85rem', marginBottom: '4px', display: 'block' }}>
+                Story / Experience <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+              </label>
+              <textarea name="story" value={formData.story} onChange={handleInputChange} placeholder="Tell us about the moment" rows="3" maxLength={3000} required />
+              <span style={{ fontSize: '0.75rem', color: '#cbd5e1', display: 'block', textAlign: 'right' }}>
+                {formData.story.length} / 3000 characters
+              </span>
             </div>
             <div className="input-group">
+              <label style={{ color: '#ffffff', fontSize: '0.85rem', marginBottom: '4px', display: 'block' }}>
+                Tags
+              </label>
               <input type="text" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="Tags (e.g. culture, trekking)" />
             </div>
             {previewUrl && <img src={previewUrl} alt="Preview" className="gly-upload-preview" />}
@@ -351,8 +421,10 @@ function Gallery() {
         .gly-state {
           text-align: center;
           padding: 60px 20px;
-          color: #6b6a63;
-          font-size: 1.05rem;
+          color: #ffffff !important;
+          font-size: 1.15rem;
+          font-weight: 600;
+          text-shadow: 0 2px 6px rgba(0,0,0,0.6);
         }
 
         .gly-grid {

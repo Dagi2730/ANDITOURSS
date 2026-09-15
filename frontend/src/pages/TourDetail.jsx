@@ -14,11 +14,11 @@ import '../styles/TourDetail.css';
 
 function StarInput({ value, onChange }) {
   return (
-    <div className="star-input">
+    <div className="star-input" style={{ fontSize: '1.8rem', cursor: 'pointer', display: 'flex', gap: '4px', margin: '8px 0' }}>
       {[1, 2, 3, 4, 5].map((n) => (
         <span
           key={n}
-          className={n <= value ? 'star-filled' : 'star-empty'}
+          style={{ color: n <= value ? '#facc15' : '#cbd5e1', transition: 'color 0.2s' }}
           onClick={() => onChange(n)}
         >
           ★
@@ -30,9 +30,9 @@ function StarInput({ value, onChange }) {
 
 function StarDisplay({ rating }) {
   return (
-    <span className="star-display">
+    <span className="star-display" style={{ color: '#facc15' }}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} className={n <= rating ? 'star-filled' : 'star-empty'}>★</span>
+        <span key={n} style={{ color: n <= rating ? '#facc15' : 'rgba(255,255,255,0.25)', marginRight: '2px' }}>★</span>
       ))}
     </span>
   );
@@ -62,7 +62,7 @@ const TourDetail = () => {
   const [passportPreviewName, setPassportPreviewName] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
@@ -90,6 +90,21 @@ const TourDetail = () => {
       dispatch(resetReviews());
     };
   }, [id, user, dispatch]);
+
+  // Global Keyboard Shortcuts (Esc to close, Left/Right arrow keys for gallery)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      } else if (e.key === 'ArrowLeft') {
+        handlePrevImage();
+      } else if (e.key === 'ArrowRight') {
+        handleNextImage();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleBookingChange = (e) => {
     const { name, value } = e.target;
@@ -147,18 +162,6 @@ const TourDetail = () => {
 
     const dFrom = new Date(bookingData.dateFrom);
     const dTo = new Date(bookingData.dateTo);
-    const yearFrom = dFrom.getFullYear();
-    const yearTo = dTo.getFullYear();
-
-    if (isNaN(dFrom.getTime()) || yearFrom < 2024 || yearFrom > 2035) {
-      alert('Please select a valid Travel Start Date (e.g. year between 2024 and 2035)');
-      return;
-    }
-
-    if (isNaN(dTo.getTime()) || yearTo < 2024 || yearTo > 2035) {
-      alert('Please select a valid Travel End Date (e.g. year between 2024 and 2035)');
-      return;
-    }
 
     if (dTo < dFrom) {
       alert('Travel End Date cannot be earlier than Travel Start Date');
@@ -208,6 +211,10 @@ const TourDetail = () => {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
+    if (reviewForm.rating === 0) {
+      alert('Please click on 1 to 5 stars to select your rating');
+      return;
+    }
     if (!reviewForm.comment.trim()) {
       alert('Please write a comment for your review');
       return;
@@ -215,7 +222,7 @@ const TourDetail = () => {
     setSubmittingReview(true);
     try {
       await dispatch(createReview({ tourId: id, rating: reviewForm.rating, comment: reviewForm.comment })).unwrap();
-      setReviewForm({ rating: 5, comment: '' });
+      setReviewForm({ rating: 0, comment: '' });
       alert('Thank you! Your review has been posted.');
     } catch (err) {
       alert(err || 'Failed to submit review');
@@ -237,7 +244,7 @@ const TourDetail = () => {
       <div className="tour-modal-overlay" onClick={handleClose}>
         <div className="tour-modal-card" style={{ padding: '50px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
           <button className="tour-modal-close-btn" onClick={handleClose}>✕</button>
-          <div className="loading-container">Loading tour details...</div>
+          <div className="loading-container" style={{ color: '#ffffff' }}>Loading tour details...</div>
         </div>
       </div>
     );
@@ -248,7 +255,7 @@ const TourDetail = () => {
       <div className="tour-modal-overlay" onClick={handleClose}>
         <div className="tour-modal-card" style={{ padding: '50px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
           <button className="tour-modal-close-btn" onClick={handleClose}>✕</button>
-          <div className="error-container">Tour not found</div>
+          <div className="error-container" style={{ color: '#ffffff' }}>Tour not found</div>
         </div>
       </div>
     );
@@ -295,6 +302,9 @@ const TourDetail = () => {
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
 
+  const todayStr = new Date().toISOString().split('T')[0];
+  const maxFutureDate = new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0];
+
   return (
     <div className="tour-modal-overlay" onClick={handleClose}>
       <div className="tour-modal-card" onClick={(e) => e.stopPropagation()}>
@@ -313,25 +323,25 @@ const TourDetail = () => {
               )}
             </div>
           </div>
-          <button className="tour-modal-close-btn" onClick={handleClose} title="Close Details">
+          <button className="tour-modal-close-btn" onClick={handleClose} title="Close Details (Esc)">
             ✕
           </button>
         </div>
 
-        {/* --- STANDALONE IMAGE GALLERY (NO DARK GRADIENT OVERLAY) --- */}
+        {/* --- STANDALONE IMAGE GALLERY --- */}
         <div className="tour-gallery-container">
           <div className="main-image-wrapper">
             <img src={currentImage} alt={tour.title} className="tour-standalone-image" />
             {imagesList.length > 1 && (
               <>
-                <button className="gallery-arrow arrow-left" onClick={handlePrevImage} title="Previous Image">‹</button>
-                <button className="gallery-arrow arrow-right" onClick={handleNextImage} title="Next Image">›</button>
+                <button className="gallery-arrow arrow-left" onClick={handlePrevImage} title="Previous Image (Left Arrow)">‹</button>
+                <button className="gallery-arrow arrow-right" onClick={handleNextImage} title="Next Image (Right Arrow)">›</button>
                 <div className="gallery-badge">{activeImageIndex + 1} / {imagesList.length}</div>
               </>
             )}
           </div>
 
-          {/* THUMBNAIL SELECTORS FOR UP TO 5 IMAGES */}
+          {/* THUMBNAIL SELECTORS */}
           {imagesList.length > 1 && (
             <div className="gallery-thumbnails">
               {imagesList.map((imgUrl, idx) => (
@@ -432,17 +442,31 @@ const TourDetail = () => {
                 {user && eligibility.eligible && (
                   <form className="review-form" onSubmit={handleReviewSubmit}>
                     <h3>Share your experience</h3>
+                    <label style={{ display: 'block', fontSize: '0.88rem', color: '#555' }}>
+                      Rating <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span> (Click 1 to 5 stars)
+                    </label>
                     <StarInput
                       value={reviewForm.rating}
                       onChange={(n) => setReviewForm(prev => ({ ...prev, rating: n }))}
                     />
+                    {reviewForm.rating === 0 && (
+                      <span style={{ fontSize: '0.8rem', color: '#e53e3e', display: 'block', marginBottom: '8px' }}>
+                        Please select 1 to 5 stars
+                      </span>
+                    )}
+
                     <textarea
                       value={reviewForm.comment}
                       onChange={handleReviewChange}
                       rows="4"
+                      maxLength={1500}
                       placeholder="Tell other travelers about your trip..."
                       required
                     />
+                    <span style={{ fontSize: '0.75rem', color: '#888', display: 'block', textAlign: 'right', marginTop: '4px' }}>
+                      {reviewForm.comment.length} / 1500 characters
+                    </span>
+
                     <button type="submit" className="btn-submit-review" disabled={submittingReview}>
                       {submittingReview ? 'Submitting...' : 'Post Review'}
                     </button>
@@ -517,7 +541,9 @@ const TourDetail = () => {
             ) : (
               <form className="booking-form" onSubmit={handleBookingSubmit}>
                 <div className="form-group">
-                  <label htmlFor="fullName">Full Name *</label>
+                  <label htmlFor="fullName">
+                    Full Name <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <input
                     type="text"
                     id="fullName"
@@ -530,7 +556,9 @@ const TourDetail = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="phone">Phone Number *</label>
+                  <label htmlFor="phone">
+                    Phone Number <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <input
                     type="tel"
                     id="phone"
@@ -543,7 +571,9 @@ const TourDetail = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="email">Email Address *</label>
+                  <label htmlFor="email">
+                    Email Address <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <input
                     type="email"
                     id="email"
@@ -556,7 +586,9 @@ const TourDetail = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="numberOfTourists">Number of Tourists *</label>
+                  <label htmlFor="numberOfTourists">
+                    Number of Tourists <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <input
                     type="number"
                     id="numberOfTourists"
@@ -564,40 +596,47 @@ const TourDetail = () => {
                     value={bookingData.numberOfTourists}
                     onChange={handleBookingChange}
                     min="1"
+                    max="100"
                     required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="dateFrom">Travel Date From *</label>
+                  <label htmlFor="dateFrom">
+                    Travel Start Date <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <input
                     type="date"
                     id="dateFrom"
                     name="dateFrom"
                     value={bookingData.dateFrom}
                     onChange={handleBookingChange}
-                    min="2024-01-01"
-                    max="2035-12-31"
+                    min={todayStr}
+                    max={maxFutureDate}
                     required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="dateTo">Travel Date To *</label>
+                  <label htmlFor="dateTo">
+                    Travel End Date <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <input
                     type="date"
                     id="dateTo"
                     name="dateTo"
                     value={bookingData.dateTo}
                     onChange={handleBookingChange}
-                    min="2024-01-01"
-                    max="2035-12-31"
+                    min={bookingData.dateFrom || todayStr}
+                    max={maxFutureDate}
                     required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="passport">Passport Copy *</label>
+                  <label htmlFor="passport">
+                    Passport Copy <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                  </label>
                   {passportPreviewName ? (
                     <div className="passport-preview">
                       <span className="passport-file-name">📄 {passportPreviewName}</span>
@@ -636,8 +675,12 @@ const TourDetail = () => {
                     value={bookingData.comments}
                     onChange={handleBookingChange}
                     rows="4"
+                    maxLength={1000}
                     placeholder="Any special requests or additional information..."
                   />
+                  <span style={{ fontSize: '0.75rem', color: '#888', display: 'block', textAlign: 'right', marginTop: '2px' }}>
+                    {bookingData.comments.length} / 1000 characters
+                  </span>
                 </div>
 
                 <div className="booking-form-actions">
@@ -659,112 +702,10 @@ const TourDetail = () => {
                 </div>
               </form>
             )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-
-      <style>{`
-        .passport-upload-area {
-          border: 2px dashed #ccc;
-          border-radius: 10px;
-          padding: 22px 16px;
-          text-align: center;
-          position: relative;
-          cursor: pointer;
-        }
-
-        .passport-upload-label {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          color: #555;
-        }
-
-        .passport-upload-icon {
-          font-size: 1.8rem;
-          margin-bottom: 4px;
-        }
-
-        .passport-upload-hint {
-          font-size: 0.78rem;
-          color: #999;
-        }
-
-        .passport-file-input {
-          position: absolute;
-          inset: 0;
-          opacity: 0;
-          cursor: pointer;
-        }
-
-        .passport-preview {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          background: #f0f4e8;
-          border: 1px solid #d5e2c0;
-          border-radius: 8px;
-          padding: 10px 14px;
-        }
-
-        .passport-file-name {
-          font-size: 0.88rem;
-          color: #556B2F;
-          font-weight: 600;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          max-width: 220px;
-        }
-
-        .passport-remove-btn {
-          border: none;
-          background: #fdeceb;
-          color: #c62828;
-          padding: 5px 12px;
-          border-radius: 6px;
-          font-size: 0.78rem;
-          font-weight: 600;
-          cursor: pointer;
-        }
-
-        .star-input { font-size: 1.6rem; cursor: pointer; margin-bottom: 12px; }
-        .star-display { font-size: 1rem; }
-        .star-filled { color: #f5a623; }
-        .star-empty { color: #ddd; }
-
-        .review-form {
-          background: #f9f9f7; border: 1px solid #eee; border-radius: 10px;
-          padding: 20px; margin-bottom: 24px;
-        }
-        .review-form h3 { margin: 0 0 10px; font-size: 1.05rem; }
-        .review-form textarea {
-          width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;
-          font-family: inherit; font-size: 0.92rem; box-sizing: border-box; resize: vertical;
-        }
-        .btn-submit-review {
-          margin-top: 10px; background: #556B2F; color: #fff; border: none;
-          padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;
-        }
-        .btn-submit-review:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        .review-note { color: #777; font-style: italic; margin-bottom: 20px; }
-        .review-login-link { color: #556B2F; font-weight: 600; cursor: pointer; text-decoration: underline; }
-
-        .reviews-list { display: flex; flex-direction: column; gap: 14px; }
-        .review-card { border-bottom: 1px solid #eee; padding-bottom: 14px; }
-        .review-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-        .review-comment { margin: 4px 0; line-height: 1.6; color: #444; }
-        .review-date { font-size: 0.78rem; color: #999; }
-
-        .tour-rating-large {
-          display: inline-flex; align-items: center; gap: 6px; margin-left: 10px;
-        }
-      `}</style>
     </div>
   );
 };

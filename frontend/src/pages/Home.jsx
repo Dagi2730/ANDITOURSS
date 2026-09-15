@@ -1,13 +1,61 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getFeaturedReviews } from '../features/review/reviewSlice';
+import InteractiveMap from '../components/InteractiveMap';
+import HotelRecommendations from '../components/HotelRecommendations';
+
+// 5 High-Resolution Ethiopian Destination Images with high contrast overlay styling
+const HERO_SLIDES = [
+  {
+    id: 1,
+    image: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=1920&q=80",
+    title: "Lalibela Rock-Hewn Churches",
+    subtitle: "8th Wonder of the Ancient World",
+    location: "Amhara Region, Ethiopia",
+    tagline: "Explore 11 monolithic churches carved entirely out of solid volcanic rock in the 12th century."
+  },
+  {
+    id: 2,
+    image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1920&q=80",
+    title: "Simien Mountains Escarpments",
+    subtitle: "The Roof of Africa",
+    location: "Gondar Highlands, Ethiopia",
+    tagline: "Trek dramatic peaks over 4,000 meters and encounter endemic Gelada Baboons and Walia Ibex."
+  },
+  {
+    id: 3,
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80",
+    title: "Danakil Depression & Dallol",
+    subtitle: "The Most Surreal Place on Earth",
+    location: "Afar Region, Ethiopia",
+    tagline: "Witness vibrant hydrothermal neon pools, active lava lakes at Erta Ale, and vast salt flats."
+  },
+  {
+    id: 4,
+    image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1920&q=80",
+    title: "Gondar Fasil Ghebbi Castles",
+    subtitle: "The Camelot of Africa",
+    location: "Gondar City, Ethiopia",
+    tagline: "Step inside 17th-century royal fortress palaces, banquet halls, and historic bathhouses."
+  },
+  {
+    id: 5,
+    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80",
+    title: "Omo Valley Heritage & Rift Valley Lakes",
+    subtitle: "Cradle of Living Human History",
+    location: "Southern Ethiopia",
+    tagline: "Experience ancestral cultural traditions, tribal heritage, and pristine Rift Valley lakes."
+  }
+];
 
 function StarDisplay({ rating }) {
   return (
-    <span className="fr-stars">
+    <span style={{ fontSize: '1.1rem', color: '#facc15' }}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} className={n <= rating ? 'fr-star-filled' : 'fr-star-empty'}>★</span>
+        <span key={n} style={{ color: n <= rating ? '#facc15' : 'rgba(255, 255, 255, 0.25)', marginRight: '2px' }}>
+          ★
+        </span>
       ))}
     </span>
   );
@@ -18,305 +66,484 @@ function Home() {
   const dispatch = useDispatch();
   const { featuredReviews } = useSelector((state) => state.review);
 
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
   useEffect(() => {
     dispatch(getFeaturedReviews());
   }, [dispatch]);
+
+  // Auto-play slide carousel every 5 seconds
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isPaused]);
+
+  // Global Keyboard Navigation (Left & Right Arrow Keys)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowRight') {
+        setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+      } else if (e.key === 'ArrowLeft') {
+        setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+  };
+
+  const handlePrevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+  };
 
   const handleStartExploring = () => {
     navigate('/destinations');
   };
 
-  const adventures = [
-    {
-      icon: '🏛️',
-      title: 'Historical & Cultural Routes',
-      description: 'Walk through the living history of our ancient empires.',
-    },
-    {
-      icon: '⛰️',
-      title: 'Trekking & Hiking',
-      description: 'Traverse the dramatic escarpments of the Simien and Bale Mountains.',
-    },
-    {
-      icon: '🦅',
-      title: 'Bird Watching & Safari',
-      description: 'Witness the unique biodiversity of the highlands and the wild savannahs.',
-    },
-  ];
+  const handleBookTourClick = () => {
+    navigate('/tours');
+  };
 
   return (
-    <section className="welcome-section">
-      <div className="welcome-container">
-        <div className="welcome-intro">
-          <h2 className="welcome-title">
-            Welcome to <span className="highlight">Andi Tours</span>
-            <br />
-            Your Guide to the Roof of Africa
-          </h2>
-        </div>
+    <div style={{ background: '#0b0f19', color: '#ffffff', minHeight: '100vh' }}>
 
-        <div className="expertise-block">
-          <h3 className="expertise-heading">Expert-Curated Adventures</h3>
-          <div className="expertise-grid">
-            {adventures.map((item) => (
-              <div className="expertise-card" key={item.title}>
-                <div className="expertise-icon">{item.icon}</div>
-                <h4>{item.title}</h4>
-                <p>{item.description}</p>
+      {/* HERO CAROUSEL SECTION */}
+      <div 
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        style={{
+          position: 'relative',
+          height: '85vh',
+          minHeight: '600px',
+          width: '100%',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        {HERO_SLIDES.map((slide, index) => (
+          <div
+            key={slide.id}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              opacity: index === currentSlide ? 1 : 0,
+              transform: index === currentSlide ? 'scale(1)' : 'scale(1.04)',
+              transition: 'opacity 1s ease-in-out, transform 1s ease-in-out',
+              zIndex: index === currentSlide ? 1 : 0,
+              pointerEvents: index === currentSlide ? 'auto' : 'none'
+            }}
+          >
+            {/* Background Image */}
+            <img
+              src={slide.image}
+              alt={slide.title}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
+
+            {/* High Contrast Vignette & Dark Overlay Gradient */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(11, 15, 25, 0.45) 0%, rgba(11, 15, 25, 0.85) 75%, #0b0f19 100%)'
+            }} />
+
+            {/* Slide Content Overlay */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
+              padding: '0 1.5rem',
+              zIndex: 2,
+              maxWidth: '900px',
+              margin: '0 auto'
+            }}>
+              <span style={{
+                background: 'rgba(234, 179, 8, 0.25)',
+                color: '#facc15',
+                fontSize: '0.85rem',
+                fontWeight: '800',
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+                padding: '0.4rem 1.25rem',
+                borderRadius: '50px',
+                border: '1px solid rgba(250, 204, 21, 0.4)',
+                marginBottom: '1.25rem',
+                backdropFilter: 'blur(6px)',
+                textShadow: '0 2px 4px rgba(0,0,0,0.8)'
+              }}>
+                📍 {slide.location} • {slide.subtitle}
+              </span>
+
+              <h1 style={{
+                fontSize: 'clamp(2.2rem, 5vw, 3.8rem)',
+                fontWeight: '900',
+                color: '#ffffff',
+                lineHeight: '1.2',
+                marginBottom: '1.25rem',
+                textShadow: '0 4px 16px rgba(0,0,0,0.9)',
+                letterSpacing: '-0.5px'
+              }}>
+                {slide.title}
+              </h1>
+
+              <p style={{
+                fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+                color: '#f1f5f9',
+                lineHeight: '1.7',
+                marginBottom: '2rem',
+                maxWidth: '750px',
+                textShadow: '0 2px 10px rgba(0,0,0,0.9)',
+                fontWeight: '500'
+              }}>
+                {slide.tagline}
+              </p>
+
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button
+                  onClick={handleStartExploring}
+                  style={{
+                    background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
+                    color: '#0f172a',
+                    padding: '1rem 2.25rem',
+                    border: 'none',
+                    borderRadius: '50px',
+                    fontWeight: '800',
+                    fontSize: '1.05rem',
+                    cursor: 'pointer',
+                    boxShadow: '0 10px 25px rgba(234, 179, 8, 0.4)',
+                    transition: 'all 0.3s ease-in-out'
+                  }}
+                >
+                  Explore Destinations
+                </button>
+                <button
+                  onClick={handleBookTourClick}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    color: '#ffffff',
+                    padding: '1rem 2.25rem',
+                    border: '1px solid rgba(255, 255, 255, 0.35)',
+                    borderRadius: '50px',
+                    fontWeight: '700',
+                    fontSize: '1.05rem',
+                    cursor: 'pointer',
+                    backdropFilter: 'blur(8px)',
+                    transition: 'all 0.3s ease-in-out'
+                  }}
+                >
+                  Book Guided Tour
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Carousel Navigation Arrows */}
+        <button
+          onClick={handlePrevSlide}
+          style={{
+            position: 'absolute',
+            left: '1.5rem',
+            zIndex: 10,
+            background: 'rgba(15, 23, 42, 0.75)',
+            color: '#ffffff',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backdropFilter: 'blur(6px)',
+            transition: 'background 0.2s'
+          }}
+          aria-label="Previous Slide"
+        >
+          ‹
+        </button>
+
+        <button
+          onClick={handleNextSlide}
+          style={{
+            position: 'absolute',
+            right: '1.5rem',
+            zIndex: 10,
+            background: 'rgba(15, 23, 42, 0.75)',
+            color: '#ffffff',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backdropFilter: 'blur(6px)',
+            transition: 'background 0.2s'
+          }}
+          aria-label="Next Slide"
+        >
+          ›
+        </button>
+
+        {/* Carousel Indicators */}
+        <div style={{
+          position: 'absolute',
+          bottom: '2rem',
+          zIndex: 10,
+          display: 'flex',
+          gap: '0.6rem'
+        }}>
+          {HERO_SLIDES.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              style={{
+                width: idx === currentSlide ? '32px' : '10px',
+                height: '10px',
+                borderRadius: '5px',
+                background: idx === currentSlide ? '#facc15' : 'rgba(255, 255, 255, 0.4)',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              aria-label={`Slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* CONTAINER FOR EXPANDED LANDING CONTENT */}
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '3rem 1.5rem' }}>
+
+        {/* ABOUT ANDI TOURS SECTION */}
+        <section style={{
+          background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
+          borderRadius: '24px',
+          padding: '3.5rem 2rem',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          margin: '2rem 0 4rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '3rem',
+          alignItems: 'center'
+        }}>
+          <div>
+            <span style={{
+              color: '#38bdf8',
+              fontSize: '0.85rem',
+              fontWeight: '800',
+              textTransform: 'uppercase',
+              letterSpacing: '1.5px',
+              display: 'block',
+              marginBottom: '0.75rem'
+            }}>
+              Who We Are
+            </span>
+            <h2 style={{
+              fontSize: '2.4rem',
+              fontWeight: '800',
+              color: '#ffffff',
+              marginBottom: '1.25rem',
+              lineHeight: '1.3'
+            }}>
+              Authentic Ethiopian Travel Experiences Crafted by Local Experts
+            </h2>
+            <p style={{ color: '#cbd5e1', fontSize: '1.05rem', lineHeight: '1.8', marginBottom: '1.25rem' }}>
+              At <strong>Andi Tours</strong>, we are passionate local storytellers, mountain guides, and heritage guardians dedicated to revealing the true heart of Ethiopia. From the ancient rock-hewn monolithic churches of Lalibela to the volcanic marvels of Danakil, we craft seamless, sustainable, and unforgettable journeys.
+            </p>
+            <p style={{ color: '#cbd5e1', fontSize: '1.05rem', lineHeight: '1.8', marginBottom: '2rem' }}>
+              Whether you seek high-altitude trekking in the Simien Mountains, wildlife photography, or deep cultural immersion in the Omo Valley, our tailored itineraries guarantee safety, comfort, and authentic connection.
+            </p>
+
+            <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+              <div>
+                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>10+</h4>
+                <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Years Experience</span>
+              </div>
+              <div>
+                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>100%</h4>
+                <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Local Guides</span>
+              </div>
+              <div>
+                <h4 style={{ fontSize: '2rem', fontWeight: '800', color: '#facc15', margin: 0 }}>5,000+</h4>
+                <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Happy Travelers</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ position: 'relative' }}>
+            <img
+              src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=800&q=80"
+              alt="Ethiopian Heritage Guide"
+              style={{
+                width: '100%',
+                height: '400px',
+                objectFit: 'cover',
+                borderRadius: '20px',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                border: '1px solid rgba(255, 255, 255, 0.15)'
+              }}
+            />
+          </div>
+        </section>
+
+        {/* WHY TRAVEL WITH US */}
+        <section style={{ margin: '4rem 0' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 style={{ fontSize: '2.4rem', fontWeight: '800', color: '#ffffff', marginBottom: '0.75rem' }}>
+              Why Travel With Andi Tours?
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: '1.1rem', maxWidth: '650px', margin: '0 auto' }}>
+              We deliver premium, safe, and custom-designed Ethiopian adventures with high standards of service.
+            </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '2rem'
+          }}>
+            {[
+              {
+                icon: "🏛️",
+                title: "Deep Cultural Heritage",
+                desc: "Privileged access to historic monasteries, ancient castles, and authentic tribal ceremonies led by native guides."
+              },
+              {
+                icon: "⛰️",
+                title: "Customized Itineraries",
+                desc: "Tailor every detail of your expedition — from luxury lodge stays to rugged mountain trekking routes."
+              },
+              {
+                icon: "🛡️",
+                title: "Safety & 24/7 Support",
+                desc: "Full ground logistics, private 4x4 vehicles, dedicated tour managers, and seamless assistance throughout your stay."
+              },
+              {
+                icon: "🌱",
+                title: "Sustainable Tourism",
+                desc: "We support local Ethiopian communities, national park conservation, and eco-friendly mountain lodges."
+              }
+            ].map((feature, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: 'rgba(30, 41, 59, 0.7)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '20px',
+                  padding: '2.25rem',
+                  textAlign: 'left',
+                  transition: 'transform 0.3s ease'
+                }}
+              >
+                <div style={{ fontSize: '2.5rem', marginBottom: '1.25rem' }}>{feature.icon}</div>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: '700', color: '#ffffff', marginBottom: '0.75rem' }}>
+                  {feature.title}
+                </h3>
+                <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.7', margin: 0 }}>
+                  {feature.desc}
+                </p>
               </div>
             ))}
           </div>
+        </section>
 
-          <div className="welcome-cta-wrap">
-            <button className="hero-btn" onClick={handleStartExploring}>
-              Start Exploring
-            </button>
-          </div>
-        </div>
+        {/* INTERACTIVE ROUTE MAP COMPONENT */}
+        <section style={{ margin: '4rem 0' }}>
+          <InteractiveMap />
+        </section>
 
-        {featuredReviews.length > 0 && (
-          <div className="fr-block">
-            <h3 className="expertise-heading">What Our Guests Say</h3>
-            <div className="fr-grid">
+        {/* HOTEL RECOMMENDATIONS COMPONENT */}
+        <section style={{ margin: '4rem 0' }}>
+          <HotelRecommendations />
+        </section>
+
+        {/* FEATURED GUEST REVIEWS */}
+        {featuredReviews && featuredReviews.length > 0 && (
+          <section style={{ margin: '4rem 0' }}>
+            <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+              <span style={{ color: '#facc15', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+                Testimonials
+              </span>
+              <h2 style={{ fontSize: '2.4rem', fontWeight: '800', color: '#ffffff', marginTop: '0.5rem' }}>
+                What Our Guests Say
+              </h2>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: '2rem'
+            }}>
               {featuredReviews.map((review) => (
-                <div key={review.id} className="fr-card">
-                  <StarDisplay rating={review.rating} />
-                  <p className="fr-comment">"{review.comment}"</p>
-                  <div className="fr-footer">
-                    <strong>{review.user?.name}</strong>
-                    {review.tour?.title && <span className="fr-tour">{review.tour.title}</span>}
+                <div
+                  key={review.id}
+                  style={{
+                    background: 'rgba(30, 41, 59, 0.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '20px',
+                    padding: '2rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div>
+                    <StarDisplay rating={review.rating} />
+                    <p style={{
+                      color: '#e2e8f0',
+                      fontStyle: 'italic',
+                      fontSize: '1rem',
+                      lineHeight: '1.7',
+                      margin: '1rem 0'
+                    }}>
+                      "{review.comment}"
+                    </p>
+                  </div>
+
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
+                    <strong style={{ color: '#ffffff', display: 'block', fontSize: '1rem' }}>
+                      {review.user?.name || 'Valued Traveler'}
+                    </strong>
+                    {review.tour?.title && (
+                      <span style={{ color: '#facc15', fontSize: '0.85rem', fontWeight: '600' }}>
+                        Tour: {review.tour.title}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
+
       </div>
-
-      <style>{`
-        .welcome-section {
-          background: transparent;
-          padding: 140px 5% 110px;
-          position: relative;
-          min-height: 100vh;
-        }
-
-        .welcome-container {
-          max-width: 1100px;
-          margin: 0 auto;
-          position: relative;
-          z-index: 1;
-        }
-
-        .welcome-intro {
-          text-align: center;
-          margin-bottom: 70px;
-        }
-
-        .welcome-eyebrow {
-          display: inline-block;
-          color: #A8C55A;
-          font-size: 0.85rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 2px;
-          margin-bottom: 16px;
-          text-shadow: 0 1px 4px rgba(0,0,0,0.4);
-        }
-
-        .welcome-title {
-          font-family: 'Raleway', sans-serif;
-          font-size: clamp(1.8rem, 4vw, 2.6rem);
-          font-weight: 800;
-          color: #ffffff;
-          line-height: 1.35;
-          margin: 0 0 24px 0;
-          text-shadow: 2px 2px 12px rgba(0,0,0,0.6);
-        }
-
-        .welcome-title .highlight {
-          color: #A8C55A;
-        }
-
-        .welcome-description {
-          color: rgba(255, 255, 255, 0.85);
-          font-size: 1.25rem;
-          line-height: 1.8;
-          max-width: 720px;
-          margin: 0 auto;
-          text-shadow: 1px 1px 8px rgba(0,0,0,0.5);
-        }
-
-        .welcome-cta-wrap {
-          text-align: center;
-          margin-top: 48px;
-        }
-
-        .hero-btn {
-          background: linear-gradient(145deg, #556B2F, #6B8E23);
-          color: white;
-          padding: 18px 50px;
-          border: none;
-          border-radius: 50px;
-          font-weight: bold;
-          font-size: 1.15rem;
-          cursor: pointer;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-          transition: all 0.4s ease;
-          font-family: 'Raleway', sans-serif;
-          letter-spacing: 1px;
-        }
-
-        .hero-btn:hover {
-          background: linear-gradient(145deg, #6B8E23, #556B2F);
-          transform: translateY(-5px);
-          box-shadow: 0 15px 40px rgba(107, 142, 35, 0.4);
-          letter-spacing: 1.5px;
-        }
-
-        .hero-btn:active {
-          transform: translateY(-2px);
-        }
-
-        .expertise-heading {
-          text-align: center;
-          color: #ffffff;
-          font-size: 1.4rem;
-          font-weight: 700;
-          margin-bottom: 36px;
-          position: relative;
-          text-shadow: 1px 1px 6px rgba(0,0,0,0.5);
-        }
-
-        .expertise-heading::after {
-          content: '';
-          display: block;
-          width: 60px;
-          height: 3px;
-          background: #6B8E23;
-          margin: 14px auto 0;
-          border-radius: 2px;
-        }
-
-        .expertise-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-          gap: 28px;
-        }
-
-        .expertise-card {
-          background: rgba(255, 255, 255, 0.08);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 16px;
-          padding: 34px 28px;
-          text-align: center;
-          transition: all 0.3s ease;
-        }
-
-        .expertise-card:hover {
-          background: rgba(255, 255, 255, 0.13);
-          border-color: rgba(168, 197, 90, 0.4);
-          transform: translateY(-6px);
-        }
-
-        .expertise-icon {
-          font-size: 2.4rem;
-          margin-bottom: 18px;
-        }
-
-        .expertise-card h4 {
-          color: #ffffff;
-          font-size: 1.1rem;
-          font-weight: 700;
-          margin: 0 0 12px 0;
-          text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
-        }
-
-        .expertise-card p {
-          color: rgba(255, 255, 255, 0.75);
-          font-size: 0.92rem;
-          line-height: 1.6;
-          margin: 0;
-        }
-
-        .fr-block {
-          margin-top: 90px;
-        }
-
-        .fr-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-          gap: 28px;
-        }
-
-        .fr-card {
-          background: rgba(255, 255, 255, 0.08);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 16px;
-          padding: 28px 26px;
-          text-align: left;
-          transition: all 0.3s ease;
-        }
-
-        .fr-card:hover {
-          background: rgba(255, 255, 255, 0.13);
-          border-color: rgba(168, 197, 90, 0.4);
-          transform: translateY(-6px);
-        }
-
-        .fr-stars {
-          display: block;
-          margin-bottom: 14px;
-          font-size: 1.1rem;
-        }
-
-        .fr-star-filled { color: #A8C55A; }
-        .fr-star-empty { color: rgba(255, 255, 255, 0.25); }
-
-        .fr-comment {
-          color: rgba(255, 255, 255, 0.88);
-          font-style: italic;
-          line-height: 1.7;
-          font-size: 0.98rem;
-          margin: 0 0 18px 0;
-          text-shadow: 1px 1px 6px rgba(0,0,0,0.4);
-        }
-
-        .fr-footer {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-        }
-
-        .fr-footer strong {
-          color: #ffffff;
-          font-size: 0.95rem;
-          text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
-        }
-
-        .fr-tour {
-          color: #A8C55A;
-          font-size: 0.82rem;
-          font-weight: 700;
-        }
-
-        @media (max-width: 600px) {
-          .welcome-section {
-            padding: 110px 6% 80px;
-          }
-          .welcome-intro {
-            margin-bottom: 50px;
-          }
-          .fr-block {
-            margin-top: 60px;
-          }
-        }
-      `}</style>
-    </section>
+    </div>
   );
 }
 

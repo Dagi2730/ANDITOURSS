@@ -21,7 +21,7 @@ function Navbar() {
 
   return (
     <nav className="navbar-custom">
-      <Link to="/" className="logo-text">ANDI TOURS</Link>
+      <Link to="/" className="logo-text" style={{ WebkitTapHighlightColor: 'transparent', outline: 'none', userSelect: 'none' }}>ANDI TOURS</Link>
 
       <button
         type="button"
@@ -41,13 +41,11 @@ function Navbar() {
         <li><Link to="/reviews" className="nav-item" onClick={handleLinkClick}>Reviews</Link></li>
         <li><Link to="/contact" className="nav-item" onClick={handleLinkClick}>Contact</Link></li>
 
-        {!user ? (
-          <li><Link to="/login" className="nav-item" onClick={handleLinkClick}>Login</Link></li>
-        ) : (
-          <>
-            <li><Link to="/my-bookings" className="nav-item" onClick={handleLinkClick}>My Account</Link></li>
-          </>
-        )}
+        {user && user.role?.toString().toUpperCase() === 'ADMIN' ? (
+          <li><Link to="/admin" className="nav-item" onClick={handleLinkClick}>Admin</Link></li>
+        ) : user ? (
+          <li><Link to="/my-bookings" className="nav-item" onClick={handleLinkClick}>My Account</Link></li>
+        ) : null}
       </ul>
     </nav>
   );

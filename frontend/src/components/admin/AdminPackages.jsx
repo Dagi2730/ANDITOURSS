@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
 
+const ETHIOPIA_DESTINATION_LOCATIONS = [
+  "Lalibela, Amhara Region",
+  "Simien Mountains National Park, Gondar",
+  "Danakil Depression & Dallol, Afar",
+  "Gondar Fasil Ghebbi, Amhara",
+  "Omo Valley, Southern Nations",
+  "Bahir Dar & Lake Tana, Amhara",
+  "Axum Ancient Obelisks, Tigray",
+  "Bale Mountains National Park, Oromia",
+  "Harar Jugol Fortified City, Harari",
+  "Hawassa Lakeside & Great Rift Valley",
+  "Arba Minch & Lake Chamo",
+  "Addis Ababa National Museum & Mount Entoto"
+];
+
 const getImageUrl = (url) => {
   if (!url) return 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80';
   if (url.startsWith('http') || url.startsWith('blob:')) return url;
@@ -99,6 +114,18 @@ function AdminPackages() {
     }
   };
 
+  // Keyboard navigation for closing modals with Esc
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowForm(false);
+        setShowDetailsCard(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // --- HANDLERS ---
   const handleView = (pkg) => {
     setSelectedPackage(pkg);
@@ -110,7 +137,7 @@ function AdminPackages() {
     setFormData({
       title: pkg.title || '',
       duration: pkg.duration || '',
-      location: pkg.location || '',
+      location: pkg.location || 'Lalibela, Amhara Region',
       highlights: pkg.highlights || '',
       description: pkg.description || '',
       travelDetails: pkg.travelDetails || '',
@@ -139,7 +166,7 @@ function AdminPackages() {
   const handleAddNew = () => {
     setEditingPackage(null);
     setFormData({
-      title: '', duration: '', location: '', highlights: '', description: '',
+      title: '', duration: '', location: 'Lalibela, Amhara Region', highlights: '', description: '',
       travelDetails: '', itinerary: [{ day: 1, title: '', description: '' }],
       imageUrl: ''
     });
@@ -184,7 +211,6 @@ function AdminPackages() {
 
   const handleFormSubmit = async (e) => {
     if (e) e.preventDefault();
-    console.log('--- ADD/SAVE PACKAGE BUTTON CLICKED ---', formData);
 
     if (!formData.title || !formData.title.trim()) {
       alert('Please enter a Package Title.');
@@ -192,6 +218,10 @@ function AdminPackages() {
     }
     if (!formData.duration || !formData.duration.trim()) {
       alert('Please enter the Package Duration.');
+      return;
+    }
+    if (!formData.location || !formData.location.trim()) {
+      alert('Please select or specify a Package Location.');
       return;
     }
     if (!formData.description || !formData.description.trim()) {
@@ -203,7 +233,7 @@ function AdminPackages() {
     const data = new FormData();
     data.append('title', formData.title.trim());
     data.append('duration', formData.duration.trim());
-    data.append('location', formData.location?.trim() || 'Ethiopia');
+    data.append('location', formData.location.trim());
     data.append('description', formData.description.trim());
     data.append('highlights', formData.highlights?.trim() || '');
     data.append('travelDetails', formData.travelDetails?.trim() || '');
@@ -230,7 +260,6 @@ function AdminPackages() {
     } catch (err) {
       console.error("Save error:", err.response?.data || err);
 
-      // Verification fallback: If a network timeout or connection reset occurred, check if package was saved
       try {
         const refetch = await api.get('/tours');
         if (Array.isArray(refetch.data)) {
@@ -243,7 +272,7 @@ function AdminPackages() {
           }
         }
       } catch (rErr) {
-        // Silently ignore refetch error and proceed to normal alert
+        // Ignore
       }
 
       alert(err.response?.data?.message || err.message || "Error saving package. Please check all fields.");
@@ -340,34 +369,62 @@ function AdminPackages() {
 
               <div className="form-grid-2">
                 <div className="form-group">
-                  <label className="form-label">Title *</label>
+                  <label className="form-label">
+                    Title <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <input type="text" name="title" placeholder="e.g. Historic Route & Lalibela" className="admin-form-input" value={formData.title} onChange={handleInputChange} required />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Duration *</label>
+                  <label className="form-label">
+                    Duration <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                  </label>
                   <input type="text" name="duration" placeholder="e.g. 5 Days / 4 Nights" className="admin-form-input" value={formData.duration} onChange={handleInputChange} required />
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Location</label>
-                <input type="text" name="location" placeholder="e.g. Lalibela, Ethiopia" className="admin-form-input" value={formData.location} onChange={handleInputChange} />
+                <label className="form-label">
+                  Location <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                </label>
+                <select
+                  name="location"
+                  className="admin-form-input"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select Destination Region...</option>
+                  {ETHIOPIA_DESTINATION_LOCATIONS.map((loc) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Description *</label>
-                <textarea name="description" rows="3" placeholder="Package overview..." className="admin-form-textarea" value={formData.description} onChange={handleInputChange} required />
+                <label className="form-label">
+                  Description <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                </label>
+                <textarea name="description" rows="3" maxLength={2000} placeholder="Package overview..." className="admin-form-textarea" value={formData.description} onChange={handleInputChange} required />
+                <span style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'right' }}>
+                  {formData.description.length} / 2000 characters
+                </span>
               </div>
 
               <div className="form-group">
                 <label className="form-label">Highlights</label>
-                <textarea name="highlights" rows="3" placeholder="Key highlights of the tour..." className="admin-form-textarea" value={formData.highlights} onChange={handleInputChange} />
+                <textarea name="highlights" rows="3" maxLength={1000} placeholder="Key highlights of the tour..." className="admin-form-textarea" value={formData.highlights} onChange={handleInputChange} />
+                <span style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'right' }}>
+                  {formData.highlights.length} / 1000 characters
+                </span>
               </div>
 
               <div className="form-group">
                 <label className="form-label">Travel Details</label>
-                <textarea name="travelDetails" rows="3" placeholder="Important travel & booking details..." className="admin-form-textarea" value={formData.travelDetails} onChange={handleInputChange} />
+                <textarea name="travelDetails" rows="3" maxLength={1000} placeholder="Important travel & booking details..." className="admin-form-textarea" value={formData.travelDetails} onChange={handleInputChange} />
+                <span style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'right' }}>
+                  {formData.travelDetails.length} / 1000 characters
+                </span>
               </div>
 
               {/* --- ITINERARY SECTION --- */}
