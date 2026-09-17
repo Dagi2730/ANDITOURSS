@@ -143,9 +143,15 @@ const TourDetail = () => {
     }
     setSubmittingReview(true);
     try {
-      await dispatch(createReview({ tourId: id, rating: reviewForm.rating, comment: reviewForm.comment })).unwrap();
-      setReviewForm({ rating: 0, comment: '' });
-      alert('Thank you! Your review has been posted.');
+      await dispatch(createReview({
+        tourId: id,
+        name: reviewForm.name,
+        email: reviewForm.email,
+        rating: reviewForm.rating,
+        comment: reviewForm.comment
+      })).unwrap();
+      setReviewForm({ name: '', email: '', rating: 0, comment: '' });
+      alert('Thank you! Your review has been posted and will appear after admin approval.');
     } catch (err) {
       alert(typeof err === 'string' ? err : err?.message || 'Failed to submit review');
     } finally {
@@ -444,55 +450,65 @@ const TourDetail = () => {
               <div className="tab-panel">
                 <h2>Customer Reviews</h2>
 
-                {user && eligibility.eligible && (
-                  <form className="review-form" onSubmit={handleReviewSubmit}>
-                    <h3>Share your experience</h3>
-                    <label style={{ display: 'block', fontSize: '0.88rem', color: '#555' }}>
-                      Rating <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span> (Click 1 to 5 stars)
-                    </label>
-                    <StarInput
-                      value={reviewForm.rating}
-                      onChange={(n) => setReviewForm(prev => ({ ...prev, rating: n }))}
-                    />
-                    {reviewForm.rating === 0 && (
-                      <span style={{ fontSize: '0.8rem', color: '#e53e3e', display: 'block', marginBottom: '8px' }}>
-                        Please select 1 to 5 stars
-                      </span>
-                    )}
-
-                    <textarea
-                      value={reviewForm.comment}
-                      onChange={handleReviewChange}
-                      rows="4"
-                      maxLength={1500}
-                      placeholder="Tell other travelers about your trip..."
-                      required
-                    />
-                    <span style={{ fontSize: '0.75rem', color: '#888', display: 'block', textAlign: 'right', marginTop: '4px' }}>
-                      {reviewForm.comment.length} / 1500 characters
+                <form className="review-form" onSubmit={handleReviewSubmit}>
+                  <h3>Share your experience</h3>
+                  {!user && (
+                    <div className="form-row-dual" style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
+                      <div className="input-group" style={{ flex: 1 }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: '#555', fontWeight: '600' }}>Your Full Name *</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={reviewForm.name || ''}
+                          onChange={(e) => setReviewForm(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="e.g. John Doe"
+                          required
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '0.9rem' }}
+                        />
+                      </div>
+                      <div className="input-group" style={{ flex: 1 }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: '#555', fontWeight: '600' }}>Your Email *</label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={reviewForm.email || ''}
+                          onChange={(e) => setReviewForm(prev => ({ ...prev, email: e.target.value }))}
+                          placeholder="john@example.com"
+                          required
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '0.9rem' }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <label style={{ display: 'block', fontSize: '0.88rem', color: '#555', fontWeight: '600' }}>
+                    Rating <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span> (Click 1 to 5 stars)
+                  </label>
+                  <StarInput
+                    value={reviewForm.rating}
+                    onChange={(n) => setReviewForm(prev => ({ ...prev, rating: n }))}
+                  />
+                  {reviewForm.rating === 0 && (
+                    <span style={{ fontSize: '0.8rem', color: '#e53e3e', display: 'block', marginBottom: '8px' }}>
+                      Please select 1 to 5 stars
                     </span>
+                  )}
 
-                    <button type="submit" className="btn-submit-review" disabled={submittingReview}>
-                      {submittingReview ? 'Submitting...' : 'Post Review'}
-                    </button>
-                  </form>
-                )}
+                  <textarea
+                    value={reviewForm.comment}
+                    onChange={handleReviewChange}
+                    rows="4"
+                    maxLength={1500}
+                    placeholder="Tell other travelers about your trip..."
+                    required
+                  />
+                  <span style={{ fontSize: '0.75rem', color: '#888', display: 'block', textAlign: 'right', marginTop: '4px' }}>
+                    {reviewForm.comment.length} / 1500 characters
+                  </span>
 
-                {user && eligibility.alreadyReviewed && (
-                  <p className="review-note">You've already reviewed this tour. Thank you!</p>
-                )}
-
-                {user && !eligibility.hasConfirmedBooking && !eligibility.alreadyReviewed && (
-                  <p className="review-note">
-                    Only customers with a confirmed booking for this tour can leave a review.
-                  </p>
-                )}
-
-                {!user && (
-                  <p className="review-note">
-                    <span onClick={() => navigate('/login')} className="review-login-link">Log in</span> to leave a review if you've completed this tour.
-                  </p>
-                )}
+                  <button type="submit" className="btn-submit-review" disabled={submittingReview}>
+                    {submittingReview ? 'Submitting...' : 'Post Review'}
+                  </button>
+                </form>
 
                 {reviewsLoading && reviews.length === 0 ? (
                   <p className="no-content">Loading reviews...</p>

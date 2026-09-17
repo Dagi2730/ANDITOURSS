@@ -1,13 +1,13 @@
 import asyncHandler from 'express-async-handler';
 import prisma from '../lib/prisma.js';
 
-// POST /api/reviews - customer creates a review (must have a CONFIRMED booking for the tour)
+// POST /api/reviews - customer creates a review (supports guest and logged-in users)
 const createReview = asyncHandler(async (req, res) => {
-  const { tourId, rating, comment } = req.body;
+  const { tourId, rating, comment, name, email } = req.body;
 
   if (!tourId || !rating || !comment) {
     res.status(400);
-    throw new Error('Please provide a rating and comment');
+    throw new Error('Please select a star rating and enter your comment');
   }
 
   const numericRating = Number(rating);
@@ -16,41 +16,73 @@ const createReview = asyncHandler(async (req, res) => {
     throw new Error('Rating must be between 1 and 5');
   }
 
-  const confirmedBooking = await prisma.booking.findFirst({
-    where: {
-      userId: req.user.id,
-      tourId,
-      status: 'CONFIRMED',
-    },
-  });
+  let targetUserId;
 
-  if (!confirmedBooking) {
-    res.status(403);
-    throw new Error('You can only review tours you have a confirmed booking for');
+  if (req.user) {
+    targetUserId = req.user.id;
+    if (name) {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { name },
+      });
+    }
+  } else {
+    const reviewerName = (name || '').trim() || 'Guest Reviewer';
+    const reviewerEmail = (email || `${reviewerName.toLowerCase().replace(/[^a-z0-9]/g, '')}@guest.com`).trim().toLowerCase();
+
+    let existingUser = await prisma.user.findUnique({ where: { email: reviewerEmail } });
+    if (!existingUser) {
+      existingUser = await prisma.user.create({
+        data: {
+          email: reviewerEmail,
+          name: reviewerName,
+          password: 'guest_pwd_' + Math.random().toString(36).slice(-8),
+          role: 'USER',
+        },
+      });
+    } else {
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: { name: reviewerName },
+      });
+    }
+
+    targetUserId = existingUser.id;
   }
 
   const existingReview = await prisma.review.findUnique({
-    where: { userId_tourId: { userId: req.user.id, tourId } },
+    where: { userId_tourId: { userId: targetUserId, tourId } },
   });
 
+  let review;
   if (existingReview) {
-    res.status(400);
-    throw new Error('You have already reviewed this tour');
+    review = await prisma.review.update({
+      where: { id: existingReview.id },
+      data: {
+        rating: numericRating,
+        comment,
+        status: 'PENDING',
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        tour: { select: { id: true, title: true } },
+      },
+    });
+  } else {
+    review = await prisma.review.create({
+      data: {
+        userId: targetUserId,
+        tourId,
+        rating: numericRating,
+        comment,
+        status: 'PENDING',
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        tour: { select: { id: true, title: true } },
+      },
+    });
   }
-
-  const review = await prisma.review.create({
-    data: {
-      userId: req.user.id,
-      tourId,
-      rating: numericRating,
-      comment,
-      status: 'PENDING', // Requires admin approval
-    },
-    include: {
-      user: { select: { id: true, name: true } },
-      tour: { select: { id: true, title: true } },
-    },
-  });
 
   res.status(201).json(review);
 });
@@ -59,7 +91,7 @@ const createReview = asyncHandler(async (req, res) => {
 const getReviewsByTour = asyncHandler(async (req, res) => {
   const reviews = await prisma.review.findMany({
     where: { tourId: req.params.tourId, status: 'APPROVED' },
-    include: { user: { select: { id: true, name: true } } },
+    include: { user: { select: { id: true, name: true, email: true } } },
     orderBy: { createdAt: 'desc' },
   });
 
@@ -81,22 +113,12 @@ const getFeaturedReviews = asyncHandler(async (req, res) => {
   res.json(reviews);
 });
 
-// GET /api/reviews/eligibility/:tourId - logged-in user only
+// GET /api/reviews/eligibility/:tourId - guest and logged in users can write reviews
 const checkEligibility = asyncHandler(async (req, res) => {
-  const { tourId } = req.params;
-
-  const confirmedBooking = await prisma.booking.findFirst({
-    where: { userId: req.user.id, tourId, status: 'CONFIRMED' },
-  });
-
-  const existingReview = await prisma.review.findUnique({
-    where: { userId_tourId: { userId: req.user.id, tourId } },
-  });
-
   res.json({
-    hasConfirmedBooking: !!confirmedBooking,
-    alreadyReviewed: !!existingReview,
-    eligible: !!confirmedBooking && !existingReview,
+    hasConfirmedBooking: true,
+    alreadyReviewed: false,
+    eligible: true,
   });
 });
 

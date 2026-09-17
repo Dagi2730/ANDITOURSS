@@ -8,7 +8,7 @@ import {
   updateReviewStatus,
   deleteReview,
 } from '../controllers/reviewController.js';
-import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
+import { requireAuth, optionalAuth, requireAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -16,9 +16,9 @@ const router = express.Router();
 router.get('/featured', getFeaturedReviews);
 router.get('/tour/:tourId', getReviewsByTour);
 
-// Logged-in customer
-router.get('/eligibility/:tourId', requireAuth, checkEligibility);
-router.post('/', requireAuth, createReview);
+// Guest & Logged-in customer
+router.get('/eligibility/:tourId', optionalAuth, checkEligibility);
+router.post('/', optionalAuth, createReview);
 
 // Admin only
 router.get('/', requireAuth, requireAdmin, getAllReviews);

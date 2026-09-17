@@ -50,6 +50,7 @@ const ReviewsRecommendationsPage = () => {
 
   const [reviewForm, setReviewForm] = useState({
     user_name: '',
+    user_email: '',
     user_country: 'United States',
     tour_name: '',
     rating: 0,
@@ -97,8 +98,8 @@ const ReviewsRecommendationsPage = () => {
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    if (!reviewForm.user_name || !reviewForm.tour_name || !reviewForm.comment) {
-      toast.error('Please fill in all required fields');
+    if (!reviewForm.user_name || !reviewForm.user_email || !reviewForm.tour_name || !reviewForm.comment) {
+      toast.error('Please fill in all required fields including your email');
       return;
     }
 
@@ -111,6 +112,7 @@ const ReviewsRecommendationsPage = () => {
     try {
       const formData = new FormData();
       formData.append('user_name', reviewForm.user_name);
+      formData.append('user_email', reviewForm.user_email);
       formData.append('user_country', reviewForm.user_country);
       formData.append('tour_name', reviewForm.tour_name);
       formData.append('rating', reviewForm.rating);
@@ -122,6 +124,7 @@ const ReviewsRecommendationsPage = () => {
       setSubmitted(true);
       setReviewForm({
         user_name: '',
+        user_email: '',
         user_country: 'United States',
         tour_name: '',
         rating: 0,
@@ -268,6 +271,22 @@ const ReviewsRecommendationsPage = () => {
                       value={reviewForm.user_name}
                       onChange={handleFormChange}
                       placeholder="e.g. Sarah Johnson"
+                      required
+                      style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.2)', background: '#0f172a', color: '#ffffff', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div className="input-group" style={{ marginBottom: '1rem' }}>
+                    <label htmlFor="review-email" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', color: '#cbd5e1' }}>
+                      Your Email Address <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="review-email"
+                      name="user_email"
+                      value={reviewForm.user_email}
+                      onChange={handleFormChange}
+                      placeholder="sarah@example.com"
                       required
                       style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.2)', background: '#0f172a', color: '#ffffff', boxSizing: 'border-box' }}
                     />

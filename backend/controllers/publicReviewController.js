@@ -57,12 +57,27 @@ const submitReview = asyncHandler(async (req, res) => {
     tour = await prisma.tour.findFirst();
   }
 
-  let user = await prisma.user.findFirst({ where: { role: 'USER' } });
+  const reviewerName = (user_name || '').trim() || 'Guest Traveler';
+  const reviewerEmail = (req.body.email || req.body.user_email || `${reviewerName.toLowerCase().replace(/[^a-z0-9]/g, '')}@guest.com`).trim().toLowerCase();
+
+  let user = await prisma.user.findUnique({ where: { email: reviewerEmail } });
   if (!user) {
-    user = await prisma.user.findFirst();
+    user = await prisma.user.create({
+      data: {
+        email: reviewerEmail,
+        name: reviewerName,
+        password: 'guest_pwd_' + Math.random().toString(36).slice(-8),
+        role: 'USER',
+      },
+    });
+  } else {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { name: reviewerName },
+    });
   }
 
-  if (tour && user) {
+  if (tour) {
     try {
       const existing = await prisma.review.findUnique({
         where: { userId_tourId: { userId: user.id, tourId: tour.id } },
