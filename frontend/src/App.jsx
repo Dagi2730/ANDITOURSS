@@ -47,14 +47,7 @@ function App() {
             <Route path="gallery" element={<Gallery />} />
             <Route path="reviews" element={<ReviewsRecommendationsPage />} />
             <Route path="tour/:id" element={<TourDetail />} />
-            <Route
-              path="my-bookings"
-              element={
-                <Protected>
-                  <MyBookings />
-                </Protected>
-              }
-            />
+            <Route path="my-bookings" element={<MyBookings />} />
           </Route>
         </Routes>
       </div>

@@ -127,14 +127,56 @@ const TourDetail = () => {
     setPassportPreviewName('');
   };
 
-  const handleBookingSubmit = async (e) => {
-    e.preventDefault();
+  const handleReviewChange = (e) => {
+    setReviewForm(prev => ({ ...prev, comment: e.target.value }));
+  };
 
-    if (!user) {
-      alert('Please login to book a tour');
-      navigate('/login');
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (reviewForm.rating === 0) {
+      alert('Please click on 1 to 5 stars to select your rating');
       return;
     }
+    if (!reviewForm.comment.trim()) {
+      alert('Please write a comment for your review');
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      await dispatch(createReview({ tourId: id, rating: reviewForm.rating, comment: reviewForm.comment })).unwrap();
+      setReviewForm({ rating: 0, comment: '' });
+      alert('Thank you! Your review has been posted.');
+    } catch (err) {
+      alert(typeof err === 'string' ? err : err?.message || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const activeTag = document.activeElement?.tagName;
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') {
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        handleClose();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevImage();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNextImage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  });
+
+  const handleBookingSubmit = async (e) => {
+    e.preventDefault();
 
     if (!bookingData.fullName || !bookingData.phone || !bookingData.email ||
         !bookingData.dateFrom || !bookingData.dateTo || !bookingData.numberOfTourists) {
@@ -171,7 +213,6 @@ const TourDetail = () => {
 
       await dispatch(createBooking(formData)).unwrap();
 
-      alert('Booking submitted successfully! We will contact you soon.');
       setShowBookingForm(false);
       setBookingData({
         fullName: '',
@@ -186,35 +227,9 @@ const TourDetail = () => {
       alert('Thank you! Your booking request has been submitted successfully. Andi Tours will reach out to you shortly.');
     } catch (error) {
       console.error('Error submitting booking:', error);
-      alert(error || 'Error submitting booking. Please try again.');
+      alert(typeof error === 'string' ? error : error?.message || 'Error submitting booking. Please try again.');
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleReviewChange = (e) => {
-    setReviewForm(prev => ({ ...prev, comment: e.target.value }));
-  };
-
-  const handleReviewSubmit = async (e) => {
-    e.preventDefault();
-    if (reviewForm.rating === 0) {
-      alert('Please click on 1 to 5 stars to select your rating');
-      return;
-    }
-    if (!reviewForm.comment.trim()) {
-      alert('Please write a comment for your review');
-      return;
-    }
-    setSubmittingReview(true);
-    try {
-      await dispatch(createReview({ tourId: id, rating: reviewForm.rating, comment: reviewForm.comment })).unwrap();
-      setReviewForm({ rating: 0, comment: '' });
-      alert('Thank you! Your review has been posted.');
-    } catch (err) {
-      alert(err || 'Failed to submit review');
-    } finally {
-      setSubmittingReview(false);
     }
   };
 
@@ -226,28 +241,6 @@ const TourDetail = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="tour-modal-overlay" onClick={handleClose}>
-        <div className="tour-modal-card" style={{ padding: '50px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-          <button className="tour-modal-close-btn" onClick={handleClose}>✕</button>
-          <div className="loading-container" style={{ color: '#ffffff' }}>Loading tour details...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!tour) {
-    return (
-      <div className="tour-modal-overlay" onClick={handleClose}>
-        <div className="tour-modal-card" style={{ padding: '50px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-          <button className="tour-modal-close-btn" onClick={handleClose}>✕</button>
-          <div className="error-container" style={{ color: '#ffffff' }}>Tour not found</div>
-        </div>
-      </div>
-    );
-  }
-
   const getImageUrl = (url) => {
     if (!url) return 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80';
     if (url.startsWith('http') || url.startsWith('blob:')) return url;
@@ -256,6 +249,7 @@ const TourDetail = () => {
   };
 
   const getImagesList = () => {
+    if (!tour) return ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80'];
     let list = [];
     if (tour.images && Array.isArray(tour.images) && tour.images.length > 0) {
       list = tour.images;
@@ -287,29 +281,27 @@ const TourDetail = () => {
     setActiveImageIndex(prev => (prev === imagesList.length - 1 ? 0 : prev + 1));
   };
 
-  // Global Keyboard Shortcuts (Esc to close, Left/Right arrow keys for gallery carousel)
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Don't intercept arrow keys if user is typing in a form input/textarea/select
-      const activeTag = document.activeElement?.tagName;
-      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') {
-        return;
-      }
+  if (loading) {
+    return (
+      <div className="tour-modal-overlay" onClick={handleClose}>
+        <div className="tour-modal-card" style={{ padding: '50px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+          <button className="tour-modal-close-btn" onClick={handleClose}>✕</button>
+          <div className="loading-container" style={{ color: '#ffffff' }}>Loading tour details...</div>
+        </div>
+      </div>
+    );
+  }
 
-      if (e.key === 'Escape') {
-        handleClose();
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        handlePrevImage();
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        handleNextImage();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [imagesList, activeImageIndex]);
+  if (!tour) {
+    return (
+      <div className="tour-modal-overlay" onClick={handleClose}>
+        <div className="tour-modal-card" style={{ padding: '50px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+          <button className="tour-modal-close-btn" onClick={handleClose}>✕</button>
+          <div className="error-container" style={{ color: '#ffffff' }}>Tour not found</div>
+        </div>
+      </div>
+    );
+  }
 
   const averageRating = reviews.length > 0
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)

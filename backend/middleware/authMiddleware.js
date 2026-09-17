@@ -37,6 +37,30 @@ const requireAuth = asyncHandler(async (req, res, next) => {
   }
 });
 
+const optionalAuth = asyncHandler(async (req, res, next) => {
+  let token;
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+
+  if (authHeader && authHeader.startsWith('Bearer')) {
+    token = authHeader.split(' ')[1];
+  }
+
+  if (token && token !== 'undefined' && token !== 'null') {
+    try {
+      const secret = process.env.JWT_SECRET || 'anditours_secure_jwt_secret_key_2026';
+      const decoded = jwt.verify(token, secret);
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: { id: true, email: true, name: true, phone: true, role: true }
+      });
+      if (user) req.user = user;
+    } catch (error) {
+      // Token invalid or expired, continue as guest
+    }
+  }
+  next();
+});
+
 const requireAdmin = asyncHandler(async (req, res, next) => {
   if (req.user && req.user.role === 'ADMIN') {
     next();
@@ -46,4 +70,4 @@ const requireAdmin = asyncHandler(async (req, res, next) => {
   }
 });
 
-export { requireAuth, requireAdmin };
+export { requireAuth, optionalAuth, requireAdmin };

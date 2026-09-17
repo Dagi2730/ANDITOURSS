@@ -48,6 +48,9 @@ const createBooking = asyncHandler(async (req, res) => {
     guests,
     numberOfTourists,
     comments,
+    fullName,
+    email,
+    phone,
   } = req.body;
 
   const resolvedTourId = tourId;
@@ -66,12 +69,7 @@ const createBooking = asyncHandler(async (req, res) => {
 
   if (!startDate) {
     res.status(400);
-    throw new Error('Please provide a valid travel start date (e.g. 2026-09-20)');
-  }
-
-  if (resolvedTravelDateEnd && !endDate) {
-    res.status(400);
-    throw new Error('Please provide a valid travel end date (e.g. 2026-09-25)');
+    throw new Error('Please provide a valid travel start date');
   }
 
   const tour = await prisma.tour.findUnique({ where: { id: resolvedTourId } });
@@ -80,21 +78,74 @@ const createBooking = asyncHandler(async (req, res) => {
     throw new Error('Tour not found');
   }
 
+  let targetUserId;
+
+  if (req.user) {
+    targetUserId = req.user.id;
+    if (fullName || phone) {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: {
+          name: fullName || req.user.name,
+          phone: phone || req.user.phone,
+        },
+      });
+    }
+  } else {
+    const targetEmail = (email || '').trim().toLowerCase();
+    const targetName = (fullName || '').trim() || 'Guest Customer';
+    const targetPhone = (phone || '').trim();
+
+    if (!targetEmail) {
+      res.status(400);
+      throw new Error('Please provide your email address to complete your booking');
+    }
+
+    let existingUser = await prisma.user.findUnique({ where: { email: targetEmail } });
+    if (!existingUser) {
+      existingUser = await prisma.user.create({
+        data: {
+          email: targetEmail,
+          name: targetName,
+          phone: targetPhone,
+          password: 'guest_pwd_' + Math.random().toString(36).slice(-8),
+          role: 'USER',
+        },
+      });
+    } else {
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          name: targetName || existingUser.name,
+          phone: targetPhone || existingUser.phone,
+        },
+      });
+    }
+
+    targetUserId = existingUser.id;
+  }
+
+  let passportUrl = null;
+  if (req.file) {
+    passportUrl = `/uploads/passports/${req.file.filename}`;
+  }
+
   const booking = await prisma.booking.create({
     data: {
-      userId: req.user.id,
+      userId: targetUserId,
       tourId: resolvedTourId,
       travelDate: startDate,
       travelDateEnd: endDate,
       guests: parsedGuests,
       comments: comments || '',
+      passportUrl,
       status: 'PENDING',
     },
     include: {
       tour: {
         select: { id: true, title: true, price: true, duration: true, imageUrl: true },
       },
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, name: true, email: true, phone: true } },
     },
   });
 
@@ -116,8 +167,22 @@ const getBookings = asyncHandler(async (req, res) => {
 });
 
 const getMyBookings = asyncHandler(async (req, res) => {
+  let userId = req.user?.id;
+  const emailQuery = req.query.email ? req.query.email.trim().toLowerCase() : null;
+
+  if (!userId && emailQuery) {
+    const userObj = await prisma.user.findUnique({ where: { email: emailQuery } });
+    if (userObj) {
+      userId = userObj.id;
+    }
+  }
+
+  if (!userId) {
+    return res.json([]);
+  }
+
   const bookings = await prisma.booking.findMany({
-    where: { userId: req.user.id },
+    where: { userId },
     include: {
       tour: {
         select: {
@@ -129,6 +194,7 @@ const getMyBookings = asyncHandler(async (req, res) => {
           description: true,
         },
       },
+      user: { select: { id: true, name: true, email: true, phone: true } },
     },
     orderBy: { createdAt: 'desc' },
   });

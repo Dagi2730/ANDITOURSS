@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getMyBookings, updateBooking, deleteBooking } from '../features/booking/bookingSlice';
+import { updateBooking, deleteBooking } from '../features/booking/bookingSlice';
+import api from '../lib/api';
 import { toast } from 'react-toastify';
 import '../styles/MyBookings.css';
 
 const MyBookings = () => {
   const { user } = useSelector((state) => state.auth);
-  const { bookings, isLoading } = useSelector((state) => state.booking);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [bookingsList, setBookingsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [lookupEmail, setLookupEmail] = useState('');
+  const [searching, setSearching] = useState(false);
 
   const [editingBooking, setEditingBooking] = useState(null);
   const [bookingFormData, setBookingFormData] = useState({
@@ -19,14 +24,41 @@ const MyBookings = () => {
     comments: ''
   });
 
+  const fetchBookings = async (emailToSearch = '') => {
+    setLoading(true);
+    try {
+      let url = '/bookings/mybookings';
+      const search = emailToSearch || lookupEmail || localStorage.getItem('guestBookingEmail');
+      if (!user && search) {
+        url += `?email=${encodeURIComponent(search)}`;
+      }
+      const res = await api.get(url);
+      setBookingsList(res.data || []);
+    } catch (err) {
+      console.error('Error fetching bookings:', err);
+      setBookingsList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
+    const savedEmail = localStorage.getItem('guestBookingEmail') || '';
+    if (savedEmail && !user) {
+      setLookupEmail(savedEmail);
+    }
+    fetchBookings(savedEmail);
+  }, [user]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!lookupEmail.trim()) {
+      toast.error('Please enter your email address to search bookings');
       return;
     }
-
-    dispatch(getMyBookings());
-  }, [user, dispatch, navigate]);
+    localStorage.setItem('guestBookingEmail', lookupEmail.trim());
+    fetchBookings(lookupEmail.trim());
+  };
 
   const handleEditBooking = (booking) => {
     setEditingBooking(booking.id);
@@ -56,7 +88,7 @@ const MyBookings = () => {
       await dispatch(updateBooking({ id: bookingId, bookingData: bookingFormData })).unwrap();
       toast.success('Booking updated successfully!');
       setEditingBooking(null);
-      dispatch(getMyBookings());
+      fetchBookings();
     } catch (error) {
       toast.error(error || 'Failed to update booking');
     }
@@ -67,7 +99,7 @@ const MyBookings = () => {
       try {
         await dispatch(deleteBooking(bookingId)).unwrap();
         toast.success('Booking cancelled successfully');
-        dispatch(getMyBookings());
+        fetchBookings();
       } catch (error) {
         toast.error(error || 'Failed to cancel booking');
       }
@@ -82,8 +114,6 @@ const MyBookings = () => {
     );
   };
 
-  if (!user) return null;
-
   return (
     <div className="my-bookings-container mb-page">
       <div className="my-bookings-header mb-header">
@@ -91,12 +121,29 @@ const MyBookings = () => {
         <p>Track and manage your Ethiopian tour bookings</p>
       </div>
 
+      {!user && (
+        <div className="email-lookup-card glass-form mb-lookup">
+          <h3>Lookup Your Bookings</h3>
+          <p className="lookup-hint">Enter the email address you used when booking your tour:</p>
+          <form onSubmit={handleSearchSubmit} className="lookup-form">
+            <input
+              type="email"
+              placeholder="your.email@example.com"
+              value={lookupEmail}
+              onChange={(e) => setLookupEmail(e.target.value)}
+              required
+            />
+            <button type="submit" className="lookup-btn">View My Bookings</button>
+          </form>
+        </div>
+      )}
+
       <div className="bookings-section mb-section">
-        {isLoading ? (
+        {loading ? (
           <div className="loading-message mb-loading">Loading bookings...</div>
-        ) : bookings && bookings.length > 0 ? (
+        ) : bookingsList && bookingsList.length > 0 ? (
           <div className="bookings-list mb-list">
-            {bookings.map((booking) => (
+            {bookingsList.map((booking) => (
               <div key={booking.id} className="booking-card mb-card">
                 <div className="booking-card-header mb-card-header">
                   <div>
@@ -139,7 +186,11 @@ const MyBookings = () => {
                   <>
                     <div className="booking-details mb-details">
                       <div className="detail-item mb-detail-item">
-                        <span className="detail-label mb-detail-label">Travelers</span>
+                        <span className="detail-label mb-detail-label">Traveler Name</span>
+                        <span>{booking.user?.name || user?.name || 'Guest Customer'}</span>
+                      </div>
+                      <div className="detail-item mb-detail-item">
+                        <span className="detail-label mb-detail-label">Travelers Count</span>
                         <span>{booking.guests} Person(s)</span>
                       </div>
                       <div className="detail-item mb-detail-item">
@@ -148,7 +199,7 @@ const MyBookings = () => {
                       </div>
                       <div className="detail-item mb-detail-item">
                         <span className="detail-label mb-detail-label">Contact</span>
-                        <span>{user.email} | {user.phone || 'N/A'}</span>
+                        <span>{booking.user?.email || user?.email || 'N/A'} | {booking.user?.phone || user?.phone || 'N/A'}</span>
                       </div>
                       {booking.comments && (
                         <div className="detail-item mb-detail-item full">
@@ -168,7 +219,7 @@ const MyBookings = () => {
           </div>
         ) : (
           <div className="no-bookings mb-empty">
-            <p>You don't have any tour bookings yet.</p>
+            <p>No tour bookings found.</p>
             <button className="btn-primary mb-btn-primary" onClick={() => navigate('/destinations')}>Browse Tours</button>
           </div>
         )}
@@ -199,6 +250,59 @@ const MyBookings = () => {
           font-size: 1.05rem;
           margin: 0;
           text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+        }
+
+        .mb-lookup {
+          background: rgba(18, 26, 12, 0.72) !important;
+          backdrop-filter: blur(15px);
+          padding: 24px 28px !important;
+          border-radius: 16px !important;
+          margin-bottom: 30px !important;
+          border: 1px solid rgba(255,255,255,0.2) !important;
+        }
+
+        .mb-lookup h3 {
+          font-size: 1.2rem;
+          color: #ffffff;
+          margin: 0 0 6px 0;
+          font-weight: 700;
+        }
+
+        .lookup-hint {
+          font-size: 0.9rem;
+          color: rgba(255,255,255,0.85);
+          margin-bottom: 14px;
+        }
+
+        .lookup-form {
+          display: flex;
+          gap: 12px;
+        }
+
+        .lookup-form input {
+          flex: 1;
+          padding: 12px 16px;
+          border-radius: 10px;
+          border: 1px solid rgba(255,255,255,0.3);
+          background: rgba(0,0,0,0.45);
+          color: #fff;
+          font-size: 0.95rem;
+        }
+
+        .lookup-btn {
+          padding: 12px 24px;
+          background: linear-gradient(145deg, #556B2F, #6B8E23);
+          color: white;
+          border: 1px solid #A8C55A;
+          border-radius: 10px;
+          font-weight: 700;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.2s ease;
+        }
+
+        .lookup-btn:hover {
+          background: #6B8E23;
         }
 
         .mb-section h2 {
@@ -364,6 +468,9 @@ const MyBookings = () => {
         .mb-btn-primary:hover { background: #445924; }
 
         @media (max-width: 600px) {
+          .lookup-form {
+            flex-direction: column;
+          }
           .mb-details, .mb-form-row {
             grid-template-columns: 1fr;
           }

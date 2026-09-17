@@ -10,7 +10,7 @@ import {
   cancelBooking,
   getBookingStats,
 } from '../controllers/bookingController.js';
-import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
+import { requireAuth, optionalAuth, requireAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -23,14 +23,14 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
-router.get('/mybookings', requireAuth, getMyBookings);
+router.get('/mybookings', optionalAuth, getMyBookings);
 router.get('/stats', requireAuth, requireAdmin, getBookingStats);
 router.route('/')
   .get(requireAuth, requireAdmin, getBookings)
-  .post(requireAuth, upload.single('passport'), createBooking);
+  .post(optionalAuth, upload.single('passport'), createBooking);
 router.route('/:id')
-  .get(requireAuth, getBookingById)
-  .put(requireAuth, upload.single('passport'), updateBooking)
-  .delete(requireAuth, cancelBooking);
+  .get(optionalAuth, getBookingById)
+  .put(optionalAuth, upload.single('passport'), updateBooking)
+  .delete(optionalAuth, cancelBooking);
 
 export default router;
