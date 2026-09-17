@@ -79,28 +79,11 @@ const createBooking = asyncHandler(async (req, res) => {
   }
 
   let targetUserId;
+  const targetEmail = (email || '').trim().toLowerCase();
+  const targetName = (fullName || '').trim() || 'Guest Customer';
+  const targetPhone = (phone || '').trim();
 
-  if (req.user) {
-    targetUserId = req.user.id;
-    if (fullName || phone) {
-      await prisma.user.update({
-        where: { id: req.user.id },
-        data: {
-          name: fullName || req.user.name,
-          phone: phone || req.user.phone,
-        },
-      });
-    }
-  } else {
-    const targetEmail = (email || '').trim().toLowerCase();
-    const targetName = (fullName || '').trim() || 'Guest Customer';
-    const targetPhone = (phone || '').trim();
-
-    if (!targetEmail) {
-      res.status(400);
-      throw new Error('Please provide your email address to complete your booking');
-    }
-
+  if (targetEmail) {
     let existingUser = await prisma.user.findUnique({ where: { email: targetEmail } });
     if (!existingUser) {
       existingUser = await prisma.user.create({
@@ -121,8 +104,12 @@ const createBooking = asyncHandler(async (req, res) => {
         },
       });
     }
-
     targetUserId = existingUser.id;
+  } else if (req.user) {
+    targetUserId = req.user.id;
+  } else {
+    res.status(400);
+    throw new Error('Please provide your email address to complete your booking');
   }
 
   let passportUrl = null;
