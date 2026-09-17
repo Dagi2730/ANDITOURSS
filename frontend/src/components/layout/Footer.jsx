@@ -9,9 +9,9 @@ function Footer() {
           <span className="footer-separator">·</span>
           <span>📍 Addis Ababa, Ethiopia</span>
           <span className="footer-separator">·</span>
-          <span>📞 +251 911 661 377</span>
+          <span>📞 <a href="tel:+251911661377" className="footer-contact-link">+251 911 661 377</a></span>
           <span className="footer-separator">·</span>
-          <span>✉️ dobitoursethiopia@gmail.com</span>
+          <span>✉️ <a href="mailto:dobitoursethiopia@gmail.com" className="footer-contact-link">dobitoursethiopia@gmail.com</a></span>
         </div>
         <div className="credit">
           Created by{' '}

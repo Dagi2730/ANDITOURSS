@@ -186,6 +186,21 @@ body {
     color: rgba(255, 255, 255, 0.6);
 }
 
+.footer-contact-link,
+.contact-info-link {
+    color: rgba(255, 255, 255, 0.95);
+    text-decoration: none;
+    transition: all 0.25s ease;
+    user-select: all;
+    -webkit-user-select: all;
+}
+
+.footer-contact-link:hover,
+.contact-info-link:hover {
+    color: #A8C55A;
+    text-decoration: underline;
+}
+
 .credit-link {
     color: #6B8E23;
     font-weight: 600;

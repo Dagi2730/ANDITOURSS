@@ -53,8 +53,8 @@ const Contact = () => {
             <div className="icon">📞</div>
             <div>
               <h3>Phone</h3>
-              <p>+251 911 661377</p>
-              <p>+251 901 592929</p>
+              <p><a href="tel:+251911661377" className="contact-info-link">+251 911 661 377</a></p>
+              <p><a href="tel:+251901592929" className="contact-info-link">+251 901 592 929</a></p>
             </div>
           </div>
 
@@ -62,7 +62,7 @@ const Contact = () => {
             <div className="icon">✉️</div>
             <div>
               <h3>Email</h3>
-              <p>dobitoursethiopia@gmail.com</p>
+              <p><a href="mailto:dobitoursethiopia@gmail.com" className="contact-info-link">dobitoursethiopia@gmail.com</a></p>
             </div>
           </div>
         </div>
