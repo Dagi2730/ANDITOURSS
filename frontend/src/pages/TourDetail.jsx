@@ -183,7 +183,7 @@ const TourDetail = () => {
         comments: ''
       });
       removePassport();
-      navigate('/my-bookings');
+      alert('Thank you! Your booking request has been submitted successfully. Andi Tours will reach out to you shortly.');
     } catch (error) {
       console.error('Error submitting booking:', error);
       alert(error || 'Error submitting booking. Please try again.');
