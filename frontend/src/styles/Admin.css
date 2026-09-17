@@ -2019,3 +2019,36 @@ textarea.admin-form-control {
   -webkit-text-fill-color: rgba(255, 255, 255, 0.75) !important;
   opacity: 1 !important;
 }
+
+/* --- Global Admin Headings & Table Headers Dark Text Override --- */
+.admin-layout h1,
+.admin-layout h2,
+.admin-layout h3,
+.admin-layout h4,
+.admin-view-container h1,
+.admin-view-container h2,
+.admin-view-container h3,
+.admin-view-container h4,
+.itinerary-header-section h2,
+.admin-section-header h2,
+.table-header h3 {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+.admin-table-container th,
+.admin-plain-table th,
+.table-container th,
+table th {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+.admin-table-container td,
+.admin-plain-table td,
+.table-container td,
+table td {
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
+}

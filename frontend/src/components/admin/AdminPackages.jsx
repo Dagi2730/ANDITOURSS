@@ -323,7 +323,7 @@ function AdminPackages() {
   return (
     <div className="admin-packages-wrapper">
       <div className="itinerary-header-section">
-        <h2>Travel Packages</h2>
+        <h2 style={{ color: '#0f172a', fontSize: '1.8rem', fontWeight: '800', margin: 0 }}>Travel Packages</h2>
         <button className="add-itinerary-btn" onClick={handleAddNew}>+ Add New Package</button>
       </div>
 
@@ -533,26 +533,25 @@ function AdminPackages() {
         </div>
       )}
 
-      {/* --- LIST TABLE --- */}
       <div className="admin-table-container" style={{ marginTop: '20px' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '8px', overflow: 'hidden' }}>
-          <thead style={{ background: '#f8f9fa', borderBottom: '2px solid #eee' }}>
+          <thead style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
             <tr>
-              <th style={{ padding: '15px' }}>Image</th>
-              <th>Name</th>
-              <th>Duration</th>
-              <th>Actions</th>
+              <th style={{ padding: '14px 18px', color: '#0f172a', fontWeight: '700', fontSize: '0.95rem', textAlign: 'left' }}>Image</th>
+              <th style={{ padding: '14px 18px', color: '#0f172a', fontWeight: '700', fontSize: '0.95rem', textAlign: 'left' }}>Name</th>
+              <th style={{ padding: '14px 18px', color: '#0f172a', fontWeight: '700', fontSize: '0.95rem', textAlign: 'left' }}>Duration</th>
+              <th style={{ padding: '14px 18px', color: '#0f172a', fontWeight: '700', fontSize: '0.95rem', textAlign: 'left' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {packages.map((pkg) => (
-              <tr key={pkg.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td className="package-table-image" style={{ padding: '10px' }}>
+              <tr key={pkg.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                <td className="package-table-image" style={{ padding: '12px 18px' }}>
                   <img src={getImageUrl(pkg.imageUrl)} className="package-thumbnail" alt="" />
                 </td>
-                <td style={{ padding: '10px' }}><strong>{pkg.title}</strong></td>
-                <td>{pkg.duration}</td>
-                <td className="action-btns">
+                <td style={{ padding: '12px 18px', color: '#0f172a', fontWeight: '700', fontSize: '0.95rem' }}>{pkg.title}</td>
+                <td style={{ padding: '12px 18px', color: '#334155', fontWeight: '600', fontSize: '0.92rem' }}>{pkg.duration}</td>
+                <td className="action-btns" style={{ padding: '12px 18px' }}>
                   <button className="view-btn" onClick={() => handleView(pkg)}>View</button>
                   <button className="add-itinerary-btn" style={{ background: '#556B2F' }} onClick={() => handleEdit(pkg)}>Edit</button>
                   <button className="remove-day-btn" onClick={() => handleDelete(pkg.id, pkg.title)}>Delete</button>
