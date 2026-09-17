@@ -187,8 +187,17 @@ body {
 }
 
 .footer-contact-link,
-.contact-info-link {
+.contact-info-link,
+.footer-contact-copy-btn,
+.contact-copy-btn {
+    background: transparent;
+    border: none;
     color: rgba(255, 255, 255, 0.95);
+    font: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
     text-decoration: none;
     transition: all 0.25s ease;
     user-select: all;
@@ -196,7 +205,9 @@ body {
 }
 
 .footer-contact-link:hover,
-.contact-info-link:hover {
+.contact-info-link:hover,
+.footer-contact-copy-btn:hover,
+.contact-copy-btn:hover {
     color: #A8C55A;
     text-decoration: underline;
 }

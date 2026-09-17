@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import api from '../lib/api';
 import WhatsAppFloatingButton from '../components/WhatsAppFloatingButton';
 
@@ -11,6 +12,13 @@ const Contact = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  const handleCopyPhone = (number) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(number);
+    }
+    toast.success(`Copied ${number} to clipboard!`);
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -20,10 +28,10 @@ const Contact = () => {
     setSubmitting(true);
     try {
       await api.post('/messages', formData);
-      alert("Message sent! Andi Tours will get back to you shortly.");
+      toast.success("Message sent! Andi Tours will get back to you shortly.");
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to send message. Please try again.');
+      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -52,9 +60,27 @@ const Contact = () => {
           <div className="info-item">
             <div className="icon">📞</div>
             <div>
-              <h3>Phone</h3>
-              <p><a href="tel:+251911661377" className="contact-info-link">+251 911 661 377</a></p>
-              <p><a href="tel:+251901592929" className="contact-info-link">+251 901 592 929</a></p>
+              <h3>Phone (Click to Copy)</h3>
+              <p>
+                <button
+                  type="button"
+                  onClick={() => handleCopyPhone('+251 911 661 377')}
+                  className="contact-copy-btn"
+                  title="Click to copy phone number"
+                >
+                  +251 911 661 377
+                </button>
+              </p>
+              <p>
+                <button
+                  type="button"
+                  onClick={() => handleCopyPhone('+251 901 592 929')}
+                  className="contact-copy-btn"
+                  title="Click to copy phone number"
+                >
+                  +251 901 592 929
+                </button>
+              </p>
             </div>
           </div>
 

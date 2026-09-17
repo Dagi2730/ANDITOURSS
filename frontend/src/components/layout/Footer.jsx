@@ -1,6 +1,15 @@
 import React from 'react';
+import { toast } from 'react-toastify';
 
 function Footer() {
+  const handleCopyPhone = (number, e) => {
+    if (e) e.preventDefault();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(number);
+    }
+    toast.success(`Copied ${number} to clipboard!`);
+  };
+
   return (
     <footer className="footer">
       <div className="footer-compact">
@@ -9,9 +18,24 @@ function Footer() {
           <span className="footer-separator">·</span>
           <span>📍 Addis Ababa, Ethiopia</span>
           <span className="footer-separator">·</span>
-          <span>📞 <a href="tel:+251911661377" className="footer-contact-link">+251 911 661 377</a></span>
+          <span>
+            📞{' '}
+            <button
+              type="button"
+              onClick={(e) => handleCopyPhone('+251 911 661 377', e)}
+              className="footer-contact-copy-btn"
+              title="Click to copy phone number"
+            >
+              +251 911 661 377
+            </button>
+          </span>
           <span className="footer-separator">·</span>
-          <span>✉️ <a href="mailto:dobitoursethiopia@gmail.com" className="footer-contact-link">dobitoursethiopia@gmail.com</a></span>
+          <span>
+            ✉️{' '}
+            <a href="mailto:dobitoursethiopia@gmail.com" className="footer-contact-link">
+              dobitoursethiopia@gmail.com
+            </a>
+          </span>
         </div>
         <div className="credit">
           Created by{' '}
