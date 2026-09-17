@@ -93,10 +93,6 @@ function Home() {
     navigate('/destinations');
   };
 
-  const handleBookTourClick = () => {
-    navigate('/tours');
-  };
-
   return (
     <div style={{ background: '#0b0f19', color: '#ffffff', minHeight: '100vh' }}>
 
@@ -221,23 +217,6 @@ function Home() {
                   }}
                 >
                   Explore Destinations
-                </button>
-                <button
-                  onClick={handleBookTourClick}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    color: '#ffffff',
-                    padding: '1rem 2.25rem',
-                    border: '1px solid rgba(255, 255, 255, 0.35)',
-                    borderRadius: '50px',
-                    fontWeight: '700',
-                    fontSize: '1.05rem',
-                    cursor: 'pointer',
-                    backdropFilter: 'blur(8px)',
-                    transition: 'all 0.3s ease-in-out'
-                  }}
-                >
-                  Book Guided Tour
                 </button>
               </div>
             </div>
