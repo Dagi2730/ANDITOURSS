@@ -159,23 +159,6 @@ function Home() {
               maxWidth: '900px',
               margin: '0 auto'
             }}>
-              <span style={{
-                background: 'rgba(85, 107, 47, 0.25)',
-                color: '#A8C55A',
-                fontSize: '0.85rem',
-                fontWeight: '800',
-                textTransform: 'uppercase',
-                letterSpacing: '2px',
-                padding: '0.4rem 1.25rem',
-                borderRadius: '50px',
-                border: '1px solid rgba(168, 197, 90, 0.4)',
-                marginBottom: '1.25rem',
-                backdropFilter: 'blur(6px)',
-                textShadow: '0 2px 4px rgba(0,0,0,0.8)'
-              }}>
-                📍 {slide.location} • {slide.subtitle}
-              </span>
-
               <h1 style={{
                 fontSize: 'clamp(2.2rem, 5vw, 3.8rem)',
                 fontWeight: '900',
