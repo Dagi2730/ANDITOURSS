@@ -91,20 +91,7 @@ const TourDetail = () => {
     };
   }, [id, user, dispatch]);
 
-  // Global Keyboard Shortcuts (Esc to close, Left/Right arrow keys for gallery)
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        handleClose();
-      } else if (e.key === 'ArrowLeft') {
-        handlePrevImage();
-      } else if (e.key === 'ArrowRight') {
-        handleNextImage();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+
 
   const handleBookingChange = (e) => {
     const { name, value } = e.target;
@@ -291,12 +278,38 @@ const TourDetail = () => {
   const currentImage = imagesList[activeImageIndex] || imagesList[0];
 
   const handlePrevImage = () => {
+    if (!imagesList || imagesList.length <= 1) return;
     setActiveImageIndex(prev => (prev === 0 ? imagesList.length - 1 : prev - 1));
   };
 
   const handleNextImage = () => {
+    if (!imagesList || imagesList.length <= 1) return;
     setActiveImageIndex(prev => (prev === imagesList.length - 1 ? 0 : prev + 1));
   };
+
+  // Global Keyboard Shortcuts (Esc to close, Left/Right arrow keys for gallery carousel)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't intercept arrow keys if user is typing in a form input/textarea/select
+      const activeTag = document.activeElement?.tagName;
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') {
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        handleClose();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevImage();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNextImage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [imagesList, activeImageIndex]);
 
   const averageRating = reviews.length > 0
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
