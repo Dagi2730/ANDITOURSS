@@ -154,17 +154,21 @@ const getBookings = asyncHandler(async (req, res) => {
 });
 
 const getMyBookings = asyncHandler(async (req, res) => {
-  let userId = req.user?.id;
   const emailQuery = req.query.email ? req.query.email.trim().toLowerCase() : null;
+  let targetUserId = null;
 
-  if (!userId && emailQuery) {
+  if (emailQuery) {
     const userObj = await prisma.user.findUnique({ where: { email: emailQuery } });
     if (userObj) {
-      userId = userObj.id;
+      targetUserId = userObj.id;
+    } else {
+      return res.json([]);
     }
+  } else if (req.user?.id) {
+    targetUserId = req.user.id;
   }
 
-  if (!userId) {
+  if (!targetUserId) {
     return res.json([]);
   }
 

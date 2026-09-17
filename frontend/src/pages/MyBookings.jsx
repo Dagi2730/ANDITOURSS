@@ -28,9 +28,9 @@ const MyBookings = () => {
     setLoading(true);
     try {
       let url = '/bookings/mybookings';
-      const search = emailToSearch || lookupEmail || localStorage.getItem('guestBookingEmail');
-      if (!user && search) {
-        url += `?email=${encodeURIComponent(search)}`;
+      const search = emailToSearch || lookupEmail || localStorage.getItem('guestBookingEmail') || (user?.email || '');
+      if (search) {
+        url += `?email=${encodeURIComponent(search.trim())}`;
       }
       const res = await api.get(url);
       setBookingsList(res.data || []);
@@ -43,8 +43,8 @@ const MyBookings = () => {
   };
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem('guestBookingEmail') || '';
-    if (savedEmail && !user) {
+    const savedEmail = localStorage.getItem('guestBookingEmail') || (user?.email || '');
+    if (savedEmail) {
       setLookupEmail(savedEmail);
     }
     fetchBookings(savedEmail);
@@ -121,22 +121,20 @@ const MyBookings = () => {
         <p>Track and manage your Ethiopian tour bookings</p>
       </div>
 
-      {!user && (
-        <div className="email-lookup-card glass-form mb-lookup">
-          <h3>Lookup Your Bookings</h3>
-          <p className="lookup-hint">Enter the email address you used when booking your tour:</p>
-          <form onSubmit={handleSearchSubmit} className="lookup-form">
-            <input
-              type="email"
-              placeholder="your.email@example.com"
-              value={lookupEmail}
-              onChange={(e) => setLookupEmail(e.target.value)}
-              required
-            />
-            <button type="submit" className="lookup-btn">View My Bookings</button>
-          </form>
-        </div>
-      )}
+      <div className="email-lookup-card glass-form mb-lookup">
+        <h3>Lookup Your Bookings</h3>
+        <p className="lookup-hint">Enter the email address you used when booking your tour:</p>
+        <form onSubmit={handleSearchSubmit} className="lookup-form">
+          <input
+            type="email"
+            placeholder="your.email@example.com"
+            value={lookupEmail}
+            onChange={(e) => setLookupEmail(e.target.value)}
+            required
+          />
+          <button type="submit" className="lookup-btn">View My Bookings</button>
+        </form>
+      </div>
 
       <div className="bookings-section mb-section">
         {loading ? (

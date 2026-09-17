@@ -215,8 +215,9 @@ const TourDetail = () => {
       formData.append('dateFrom', bookingData.dateFrom);
       formData.append('dateTo', bookingData.dateTo);
       formData.append('comments', bookingData.comments);
-      formData.append('passport', passportFile);
-
+      if (bookingData.email) {
+        localStorage.setItem('guestBookingEmail', bookingData.email.trim());
+      }
       await dispatch(createBooking(formData)).unwrap();
 
       setShowBookingForm(false);
