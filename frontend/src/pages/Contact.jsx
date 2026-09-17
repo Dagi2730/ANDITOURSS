@@ -1,38 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import api from '../lib/api';
 import WhatsAppFloatingButton from '../components/WhatsAppFloatingButton';
 
 const Contact = () => {
-  const [tours, setTours] = useState([]);
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     phone: '',
-    tourId: '',
-    numberOfTourists: 1,
-    dateFrom: '',
-    dateTo: '',
-    comments: ''
+    subject: '',
+    message: ''
   });
-  const [passportFile, setPassportFile] = useState(null);
-  const [passportPreviewName, setPassportPreviewName] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    const fetchTours = async () => {
-      try {
-        const res = await api.get('/tours');
-        setTours(res.data || []);
-        if (res.data && res.data.length > 0) {
-          setFormData(prev => ({ ...prev, tourId: res.data[0].id }));
-        }
-      } catch (err) {
-        console.error('Failed to load tours in contact form:', err);
-      }
-    };
-    fetchTours();
-  }, []);
 
   const handleCopyPhone = (number) => {
     if (navigator.clipboard) {
@@ -45,111 +24,46 @@ const Contact = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'numberOfTourists' ? Number(value) : value
+      [name]: value
     }));
-  };
-
-  const handlePassportChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Passport copy must be less than 5MB');
-      e.target.value = '';
-      return;
-    }
-
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error('Please upload a JPG, PNG, WebP, or PDF file');
-      e.target.value = '';
-      return;
-    }
-
-    setPassportFile(file);
-    setPassportPreviewName(file.name);
-  };
-
-  const removePassport = () => {
-    setPassportFile(null);
-    setPassportPreviewName('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.dateFrom || !formData.dateTo) {
-      toast.error('Please fill in all required booking fields');
-      return;
-    }
-
-    const dFrom = new Date(formData.dateFrom);
-    const dTo = new Date(formData.dateTo);
-    if (dTo < dFrom) {
-      toast.error('Travel End Date cannot be earlier than Travel Start Date');
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
     setSubmitting(true);
     try {
-      const data = new FormData();
-      data.append('fullName', formData.fullName);
-      data.append('email', formData.email);
-      data.append('phone', formData.phone);
-      data.append('tourId', formData.tourId || (tours[0]?.id || ''));
-      data.append('numberOfTourists', formData.numberOfTourists);
-      data.append('dateFrom', formData.dateFrom);
-      data.append('dateTo', formData.dateTo);
-      data.append('comments', formData.comments);
-      if (passportFile) {
-        data.append('passport', passportFile);
-      }
+      const fullMessage = formData.phone
+        ? `${formData.message}\n\nPhone Number: ${formData.phone}`
+        : formData.message;
 
-      // 1. Submit Booking
-      await api.post('/bookings', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      await api.post('/messages', {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim(),
+        message: fullMessage
       });
 
-      // 2. Also Submit Contact Message so request appears in Admin Messages tab
-      const selectedTour = tours.find(t => t.id === formData.tourId) || tours[0];
-      const tourTitle = selectedTour ? selectedTour.title : 'Tour Package';
-      const msgText = `Tour Package: ${tourTitle}\nTourists: ${formData.numberOfTourists}\nTravel Start: ${formData.dateFrom}\nTravel End: ${formData.dateTo}\nPhone: ${formData.phone}\nComments: ${formData.comments || 'No extra comments'}`;
-
-      try {
-        await api.post('/messages', {
-          name: formData.fullName,
-          email: formData.email,
-          subject: `Tour Booking Request: ${tourTitle}`,
-          message: msgText
-        });
-      } catch (msgErr) {
-        console.warn('Message sync notice:', msgErr);
-      }
-
-      // Save email locally for instant "My Bookings" lookup without login
-      localStorage.setItem('guestBookingEmail', formData.email.trim());
-
-      toast.success("Tour Booking submitted successfully! Check 'My Bookings' tab to view status.");
+      toast.success('Thank you! Your message has been sent to Andi Tours. We will respond shortly.');
       setFormData({
-        fullName: '',
+        name: '',
         email: '',
         phone: '',
-        tourId: tours[0]?.id || '',
-        numberOfTourists: 1,
-        dateFrom: '',
-        dateTo: '',
-        comments: ''
+        subject: '',
+        message: ''
       });
-      removePassport();
     } catch (error) {
-      console.error('Booking submission error:', error);
-      toast.error(error.response?.data?.message || 'Failed to submit tour booking. Please try again.');
+      console.error('Contact submission error:', error);
+      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
-
-  const todayStr = new Date().toISOString().split('T')[0];
 
   return (
     <div className="contact-page">
@@ -157,10 +71,10 @@ const Contact = () => {
         
         {/* Column 1: Contact Details */}
         <div className="contact-info">
-          <h1>Get in Touch & Book</h1>
+          <h1>Get in Touch</h1>
           <p className="contact-subtitle">
-            Planning your Ethiopian adventure?<br />
-            Fill in your tour booking details directly below or reach out to us.
+            Have questions about our Ethiopian tours or need a custom travel itinerary?<br />
+            Send us a message below or reach out directly to our team.
           </p>
           
           <div className="info-item">
@@ -207,18 +121,18 @@ const Contact = () => {
           </div>
         </div>
 
-        {/* Column 2: Tour Booking Form */}
+        {/* Column 2: Send Message Form */}
         <div className="contact-form-container">
           <div className="glass-form">
-            <h2>Book Your Tour</h2>
+            <h2>Send Us a Message</h2>
             <form onSubmit={handleSubmit}>
               <div className="input-group">
                 <label>Full Name *</label>
                 <input 
                   type="text" 
-                  name="fullName" 
+                  name="name" 
                   placeholder="Your Full Name" 
-                  value={formData.fullName}
+                  value={formData.name}
                   onChange={handleChange} 
                   required 
                 />
@@ -237,104 +151,42 @@ const Contact = () => {
               </div>
 
               <div className="input-group">
-                <label>Phone Number *</label>
+                <label>Phone Number (Optional)</label>
                 <input 
                   type="tel" 
                   name="phone" 
                   placeholder="+251 911 223344" 
                   value={formData.phone}
                   onChange={handleChange} 
-                  required 
                 />
               </div>
 
-              {tours.length > 0 && (
-                <div className="input-group">
-                  <label>Select Tour Package *</label>
-                  <select
-                    name="tourId"
-                    value={formData.tourId}
-                    onChange={handleChange}
-                    className="contact-select"
-                    required
-                  >
-                    {tours.map(t => (
-                      <option key={t.id} value={t.id}>
-                        {t.title} ({t.duration})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
               <div className="input-group">
-                <label>Number of Tourists *</label>
+                <label>Subject *</label>
                 <input 
-                  type="number" 
-                  name="numberOfTourists" 
-                  min="1"
-                  max="100"
-                  value={formData.numberOfTourists}
+                  type="text" 
+                  name="subject" 
+                  placeholder="What is your message about?" 
+                  value={formData.subject}
                   onChange={handleChange} 
                   required 
                 />
               </div>
 
-              <div className="form-row-dual" style={{ display: 'flex', gap: '16px' }}>
-                <div className="input-group" style={{ flex: 1 }}>
-                  <label>Start Date *</label>
-                  <input 
-                    type="date" 
-                    name="dateFrom" 
-                    min={todayStr}
-                    value={formData.dateFrom}
-                    onChange={handleChange} 
-                    required 
-                  />
-                </div>
-                <div className="input-group" style={{ flex: 1 }}>
-                  <label>End Date *</label>
-                  <input 
-                    type="date" 
-                    name="dateTo" 
-                    min={formData.dateFrom || todayStr}
-                    value={formData.dateTo}
-                    onChange={handleChange} 
-                    required 
-                  />
-                </div>
-              </div>
-
               <div className="input-group">
-                <label>Passport Copy (Optional)</label>
-                {passportPreviewName ? (
-                  <div className="passport-preview" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.3)', padding: '10px 14px', borderRadius: '10px' }}>
-                    <span style={{ color: '#fff', fontSize: '0.9rem' }}>📄 {passportPreviewName}</span>
-                    <button type="button" onClick={removePassport} style={{ background: '#c62828', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer' }}>Remove</button>
-                  </div>
-                ) : (
-                  <input 
-                    type="file" 
-                    accept="image/jpeg,image/png,image/webp,application/pdf"
-                    onChange={handlePassportChange}
-                    style={{ padding: '10px' }}
-                  />
-                )}
-              </div>
-
-              <div className="input-group">
-                <label>Comments / Special Requests</label>
+                <label>Your Message *</label>
                 <textarea 
-                  name="comments" 
-                  rows="3" 
-                  placeholder="Any special requests or details..." 
-                  value={formData.comments}
+                  name="message" 
+                  rows="5" 
+                  placeholder="Write your message or inquiry here..." 
+                  value={formData.message}
                   onChange={handleChange} 
+                  required
                 ></textarea>
               </div>
 
               <button type="submit" className="send-btn" disabled={submitting}>
-                {submitting ? 'Submitting Booking...' : 'Submit Tour Booking'}
+                {submitting ? 'Sending Message...' : 'Send Message'}
               </button>
             </form>
           </div>
@@ -453,8 +305,7 @@ const Contact = () => {
         }
 
         .contact-form-container .input-group input, 
-        .contact-form-container .input-group textarea,
-        .contact-select {
+        .contact-form-container .input-group textarea {
           width: 100%;
           padding: 14px 18px;
           background: rgba(0, 0, 0, 0.45);
@@ -467,14 +318,8 @@ const Contact = () => {
           transition: all 0.3s ease;
         }
 
-        .contact-select option {
-          background: #1f2913;
-          color: #ffffff;
-        }
-
         .contact-form-container .input-group input:focus, 
-        .contact-form-container .input-group textarea:focus,
-        .contact-select:focus {
+        .contact-form-container .input-group textarea:focus {
           border-color: #A8C55A;
           background: rgba(0, 0, 0, 0.65);
           box-shadow: 0 0 0 4px rgba(168, 197, 90, 0.25);
@@ -500,6 +345,30 @@ const Contact = () => {
           background: #6B8E23;
           transform: translateY(-2px);
           box-shadow: 0 10px 25px rgba(107, 142, 35, 0.4);
+        }
+
+        .contact-copy-btn {
+          background: none;
+          border: none;
+          color: #ffffff;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          padding: 0;
+          text-decoration: underline;
+        }
+
+        .contact-copy-btn:hover {
+          color: #A8C55A;
+        }
+
+        .contact-info-link {
+          color: #ffffff;
+          text-decoration: underline;
+        }
+
+        .contact-info-link:hover {
+          color: #A8C55A;
         }
 
         @media (max-width: 1024px) {
