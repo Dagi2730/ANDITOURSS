@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { getMyBookings, updateBooking, deleteBooking } from '../features/booking/bookingSlice';
-import { logout, updateProfile } from '../features/auth/authSlice';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../styles/MyBookings.css';
 
@@ -14,25 +11,13 @@ const MyBookings = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [activeSection, setActiveSection] = useState('bookings');
   const [editingBooking, setEditingBooking] = useState(null);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [bookingFormData, setBookingFormData] = useState({
     guests: 1,
     travelDate: '',
     travelDateEnd: '',
     comments: ''
   });
-
-  const [profileData, setProfileData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: ''
-  });
-  const [updatingProfile, setUpdatingProfile] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -41,13 +26,6 @@ const MyBookings = () => {
     }
 
     dispatch(getMyBookings());
-    setProfileData({
-      name: user.name || '',
-      email: user.email || '',
-      phone: user.phone || '',
-      password: '',
-      confirmPassword: ''
-    });
   }, [user, dispatch, navigate]);
 
   const handleEditBooking = (booking) => {
@@ -96,48 +74,6 @@ const MyBookings = () => {
     }
   };
 
-  const handleProfileChange = (e) => {
-    const { name, value } = e.target;
-    setProfileData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
-
-    if (profileData.password && profileData.password !== profileData.confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
-    setUpdatingProfile(true);
-
-    try {
-      const updateData = {
-        name: profileData.name,
-        email: profileData.email,
-        phone: profileData.phone
-      };
-
-      if (profileData.password) {
-        updateData.password = profileData.password;
-      }
-
-      await dispatch(updateProfile(updateData)).unwrap();
-      toast.success('Profile updated successfully!');
-      setProfileData(prev => ({ ...prev, password: '', confirmPassword: '' }));
-    } catch (error) {
-      console.error("Profile update error:", error);
-      toast.error(typeof error === 'string' ? error : error?.message || 'Failed to update profile');
-    } finally {
-      setUpdatingProfile(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await dispatch(logout());
-    navigate('/');
-  };
-
   const getStatusBadge = (status) => {
     return (
       <span className={`booking-status-badge status-${status?.toLowerCase()}`}>
@@ -151,186 +87,94 @@ const MyBookings = () => {
   return (
     <div className="my-bookings-container mb-page">
       <div className="my-bookings-header mb-header">
-        <h1>My Account</h1>
-        <p>Manage your bookings and account information</p>
+        <h1>My Bookings</h1>
+        <p>Track and manage your Ethiopian tour bookings</p>
       </div>
 
-      <div className="my-bookings-tabs mb-tabs">
-        <button
-          className={`tab-btn mb-tab ${activeSection === 'bookings' ? 'active' : ''}`}
-          onClick={() => setActiveSection('bookings')}
-        >
-          My Bookings
-        </button>
-        <button
-          className={`tab-btn mb-tab ${activeSection === 'account' ? 'active' : ''}`}
-          onClick={() => setActiveSection('account')}
-        >
-          Manage Account
-        </button>
-      </div>
-
-      {activeSection === 'bookings' && (
-        <div className="bookings-section mb-section">
-          <h2>My Bookings</h2>
-          {isLoading ? (
-            <div className="loading-message mb-loading">Loading bookings...</div>
-          ) : bookings && bookings.length > 0 ? (
-            <div className="bookings-list mb-list">
-              {bookings.map((booking) => (
-                <div key={booking.id} className="booking-card mb-card">
-                  <div className="booking-card-header mb-card-header">
-                    <div>
-                      <h3>{booking.tour?.title || 'Tour Package'}</h3>
-                      <p className="booking-id mb-booking-id">
-                        Booking ID: {booking.orderNumber || `#${String(booking.id).slice(-5)}`}
-                      </p>
-                    </div>
-                    {getStatusBadge(booking.status)}
+      <div className="bookings-section mb-section">
+        {isLoading ? (
+          <div className="loading-message mb-loading">Loading bookings...</div>
+        ) : bookings && bookings.length > 0 ? (
+          <div className="bookings-list mb-list">
+            {bookings.map((booking) => (
+              <div key={booking.id} className="booking-card mb-card">
+                <div className="booking-card-header mb-card-header">
+                  <div>
+                    <h3>{booking.tour?.title || 'Tour Package'}</h3>
+                    <p className="booking-id mb-booking-id">
+                      Booking ID: {booking.orderNumber || `#${String(booking.id).slice(-5)}`}
+                    </p>
                   </div>
+                  {getStatusBadge(booking.status)}
+                </div>
 
-                  {editingBooking === booking.id ? (
-                    <div className="booking-edit-form glass-form" style={{maxWidth: '100%', padding: '30px', marginTop: '20px'}}>
-                      <div className="form-row mb-form-row">
-                        <div className="input-group">
-                          <label>Number of Tourists *</label>
-                          <input type="number" name="guests" value={bookingFormData.guests} onChange={handleBookingChange} min="1" required />
-                        </div>
-                      </div>
-                      <div className="form-row mb-form-row" style={{display: 'flex', gap: '20px'}}>
-                        <div className="input-group" style={{flex: 1}}>
-                          <label>Date From *</label>
-                          <input type="date" name="travelDate" value={bookingFormData.travelDate} onChange={handleBookingChange} required />
-                        </div>
-                        <div className="input-group" style={{flex: 1}}>
-                          <label>Date To *</label>
-                          <input type="date" name="travelDateEnd" value={bookingFormData.travelDateEnd} onChange={handleBookingChange} required />
-                        </div>
-                      </div>
+                {editingBooking === booking.id ? (
+                  <div className="booking-edit-form glass-form" style={{maxWidth: '100%', padding: '24px', marginTop: '16px'}}>
+                    <div className="form-row mb-form-row">
                       <div className="input-group">
-                        <label>Comments</label>
-                        <textarea name="comments" value={bookingFormData.comments} onChange={handleBookingChange} rows="3" />
-                      </div>
-                      <div className="form-actions mb-form-actions" style={{display: 'flex', gap: '15px'}}>
-                        <button className="send-btn" style={{background: 'rgba(255,255,255,0.1)', color: '#fff'}} onClick={() => setEditingBooking(null)}>Cancel</button>
-                        <button className="send-btn" onClick={() => handleUpdateBooking(booking.id)}>Save Changes</button>
+                        <label>Number of Tourists *</label>
+                        <input type="number" name="guests" value={bookingFormData.guests} onChange={handleBookingChange} min="1" required />
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      <div className="booking-details mb-details">
-                        <div className="detail-item mb-detail-item">
-                          <span className="detail-label mb-detail-label">Travelers</span>
-                          <span>{booking.guests} Person(s)</span>
-                        </div>
-                        <div className="detail-item mb-detail-item">
-                          <span className="detail-label mb-detail-label">Travel Dates</span>
-                          <span>{booking.travelDate ? new Date(booking.travelDate).toLocaleDateString() : 'N/A'} — {booking.travelDateEnd ? new Date(booking.travelDateEnd).toLocaleDateString() : 'N/A'}</span>
-                        </div>
-                        <div className="detail-item mb-detail-item">
-                          <span className="detail-label mb-detail-label">Contact</span>
-                          <span>{user.email} | {user.phone || 'N/A'}</span>
-                        </div>
-                        {booking.comments && (
-                          <div className="detail-item mb-detail-item full">
-                            <span className="detail-label mb-detail-label">Comments</span>
-                            <span>{booking.comments}</span>
-                          </div>
-                        )}
+                    <div className="form-row mb-form-row" style={{display: 'flex', gap: '20px'}}>
+                      <div className="input-group" style={{flex: 1}}>
+                        <label>Date From *</label>
+                        <input type="date" name="travelDate" value={bookingFormData.travelDate} onChange={handleBookingChange} required />
                       </div>
-                      <div className="booking-actions mb-actions">
-                        <button className="btn-edit mb-btn-edit" onClick={() => handleEditBooking(booking)}>Edit Booking</button>
-                        <button className="btn-delete mb-btn-delete" onClick={() => handleDeleteBooking(booking.id)}>Cancel Booking</button>
+                      <div className="input-group" style={{flex: 1}}>
+                        <label>Date To *</label>
+                        <input type="date" name="travelDateEnd" value={bookingFormData.travelDateEnd} onChange={handleBookingChange} required />
                       </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="no-bookings mb-empty">
-              <p>You don't have any bookings yet.</p>
-              <button className="btn-primary mb-btn-primary" onClick={() => navigate('/destinations')}>Browse Tours</button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeSection === 'account' && (
-        <div className="account-section mb-section">
-          <div className="glass-form" style={{maxWidth: '600px', width: '100%', margin: '0 auto'}}>
-            <h2>Manage Account</h2>
-            <form className="profile-form" onSubmit={handleUpdateProfile}>
-              <div className="input-group">
-                <label htmlFor="name">Full Name *</label>
-                <input type="text" id="name" name="name" value={profileData.name} onChange={handleProfileChange} required />
+                    </div>
+                    <div className="input-group">
+                      <label>Comments / Special Requests</label>
+                      <textarea name="comments" value={bookingFormData.comments} onChange={handleBookingChange} rows="3" />
+                    </div>
+                    <div className="form-actions mb-form-actions" style={{display: 'flex', gap: '15px', marginTop: '15px'}}>
+                      <button type="button" className="send-btn" style={{background: 'rgba(255,255,255,0.1)', color: '#fff'}} onClick={() => setEditingBooking(null)}>Cancel</button>
+                      <button type="button" className="send-btn" onClick={() => handleUpdateBooking(booking.id)}>Save Changes</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="booking-details mb-details">
+                      <div className="detail-item mb-detail-item">
+                        <span className="detail-label mb-detail-label">Travelers</span>
+                        <span>{booking.guests} Person(s)</span>
+                      </div>
+                      <div className="detail-item mb-detail-item">
+                        <span className="detail-label mb-detail-label">Travel Dates</span>
+                        <span>{booking.travelDate ? new Date(booking.travelDate).toLocaleDateString() : 'N/A'} — {booking.travelDateEnd ? new Date(booking.travelDateEnd).toLocaleDateString() : 'N/A'}</span>
+                      </div>
+                      <div className="detail-item mb-detail-item">
+                        <span className="detail-label mb-detail-label">Contact</span>
+                        <span>{user.email} | {user.phone || 'N/A'}</span>
+                      </div>
+                      {booking.comments && (
+                        <div className="detail-item mb-detail-item full">
+                          <span className="detail-label mb-detail-label">Comments</span>
+                          <span>{booking.comments}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="booking-actions mb-actions">
+                      <button className="btn-edit mb-btn-edit" onClick={() => handleEditBooking(booking)}>Edit Booking</button>
+                      <button className="btn-delete mb-btn-delete" onClick={() => handleDeleteBooking(booking.id)}>Cancel Booking</button>
+                    </div>
+                  </>
+                )}
               </div>
-              <div className="input-group">
-                <label htmlFor="email">Email Address *</label>
-                <input type="email" id="email" name="email" value={profileData.email} onChange={handleProfileChange} required />
-              </div>
-              <div className="input-group">
-                <label htmlFor="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" value={profileData.phone} onChange={handleProfileChange} placeholder="Enter phone number" />
-              </div>
-              <div className="input-group">
-                <label htmlFor="password">New Password (leave blank to keep current)</label>
-                <div className="password-input-container">
-                  <input 
-                    type={showNewPassword ? 'text' : 'password'} 
-                    id="password" 
-                    name="password" 
-                    value={profileData.password} 
-                    onChange={handleProfileChange} 
-                    placeholder="Enter new password"
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    title={showNewPassword ? 'Hide Password' : 'Show Password'}
-                    aria-label={showNewPassword ? 'Hide Password' : 'Show Password'}
-                  >
-                    {showNewPassword ? <FaEyeSlash /> : <FaEye />}
-                  </button>
-                </div>
-              </div>
-              <div className="input-group">
-                <label htmlFor="confirmPassword">Confirm New Password</label>
-                <div className="password-input-container">
-                  <input 
-                    type={showConfirmPassword ? 'text' : 'password'} 
-                    id="confirmPassword" 
-                    name="confirmPassword" 
-                    value={profileData.confirmPassword} 
-                    onChange={handleProfileChange} 
-                    placeholder="Confirm new password"
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    title={showConfirmPassword ? 'Hide Password' : 'Show Password'}
-                    aria-label={showConfirmPassword ? 'Hide Password' : 'Show Password'}
-                  >
-                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                  </button>
-                </div>
-              </div>
-              <div className="account-actions" style={{display: 'flex', gap: '15px', marginTop: '30px'}}>
-                <button type="button" className="send-btn" style={{background: 'rgba(255,255,255,0.1)', color: '#fff'}} onClick={handleLogout}>
-                  Logout
-                </button>
-                <button type="submit" className="send-btn" disabled={updatingProfile}>
-                  {updatingProfile ? 'Updating...' : 'Update Profile'}
-                </button>
-              </div>
-            </form>
+            ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="no-bookings mb-empty">
+            <p>You don't have any tour bookings yet.</p>
+            <button className="btn-primary mb-btn-primary" onClick={() => navigate('/destinations')}>Browse Tours</button>
+          </div>
+        )}
+      </div>
 
-<style>{`
+      <style>{`
         .mb-page {
           max-width: 900px;
           margin: 0 auto;
@@ -339,61 +183,26 @@ const MyBookings = () => {
 
         .mb-header {
           margin-bottom: 28px;
+          text-align: center;
         }
 
         .mb-header h1 {
-          font-size: 1.9rem;
+          font-size: 2.2rem;
           color: #ffffff;
-          margin: 0 0 6px 0;
+          margin: 0 0 8px 0;
           font-weight: 800;
-          text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+          text-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
         .mb-header p {
-          color: rgba(255, 255, 255, 0.85);
-          font-size: 0.95rem;
+          color: rgba(255, 255, 255, 0.88);
+          font-size: 1.05rem;
           margin: 0;
           text-shadow: 0 1px 3px rgba(0,0,0,0.35);
         }
 
-        .mb-tabs {
-          display: flex;
-          gap: 8px;
-          background: #fff;
-          border: 1px solid #ececec;
-          border-radius: 12px;
-          padding: 6px;
-          margin-bottom: 28px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-
-        .mb-tab {
-          flex: 1;
-          padding: 12px 20px;
-          background: none;
-          border: none;
-          border-radius: 8px;
-          font-size: 0.95rem;
-          font-weight: 700;
-          color: #6b6a63;
-          cursor: pointer;
-          transition: all 0.15s ease;
-          letter-spacing: 0.01em;
-        }
-
-        .mb-tab.active {
-          color: #ffffff;
-          background: #556B2F;
-          box-shadow: 0 2px 8px rgba(85, 107, 47, 0.3);
-        }
-
-        .mb-tab:not(.active):hover {
-          background: #f5f5f0;
-          color: #333;
-        }
-
         .mb-section h2 {
-          font-size: 1.15rem;
+          font-size: 1.25rem;
           color: #ffffff;
           margin-bottom: 18px;
           font-weight: 700;
@@ -404,25 +213,29 @@ const MyBookings = () => {
           text-align: center;
           padding: 60px 20px;
           color: #f0f0f0;
+          background: rgba(0, 0, 0, 0.35);
+          backdrop-filter: blur(8px);
+          border-radius: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .mb-empty p {
           margin-bottom: 16px;
-          font-size: 1rem;
+          font-size: 1.1rem;
         }
 
         .mb-list {
           display: flex;
           flex-direction: column;
-          gap: 18px;
+          gap: 20px;
         }
 
         .mb-card {
           background: white;
           border: 1px solid #ececec;
           border-radius: 14px;
-          padding: 22px 24px;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+          padding: 24px 28px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
         .mb-card-header {
@@ -435,25 +248,26 @@ const MyBookings = () => {
         }
 
         .mb-card-header h3 {
-          font-size: 1.1rem;
-          color: #222;
+          font-size: 1.2rem;
+          color: #1a1a1a;
           margin: 0 0 4px 0;
+          font-weight: 700;
         }
 
         .mb-booking-id {
-          font-size: 0.8rem;
-          color: #999;
+          font-size: 0.82rem;
+          color: #777;
           font-family: monospace;
           margin: 0;
         }
 
         .booking-status-badge {
-          padding: 5px 14px;
+          padding: 6px 16px;
           border-radius: 20px;
-          font-size: 0.75rem;
+          font-size: 0.78rem;
           font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.03em;
+          letter-spacing: 0.04em;
           white-space: nowrap;
         }
 
@@ -479,27 +293,28 @@ const MyBookings = () => {
         }
 
         .mb-detail-item span:last-child {
-          font-size: 0.92rem;
+          font-size: 0.95rem;
           color: #333;
+          font-weight: 500;
         }
 
         .mb-detail-label {
           font-size: 0.75rem;
           text-transform: uppercase;
-          letter-spacing: 0.03em;
-          color: #999;
-          font-weight: 600;
+          letter-spacing: 0.04em;
+          color: #888;
+          font-weight: 700;
         }
 
         .mb-actions {
           display: flex;
-          gap: 10px;
+          gap: 12px;
           padding-top: 16px;
           border-top: 1px solid #f0f0f0;
         }
 
         .mb-btn-edit, .mb-btn-delete {
-          padding: 9px 18px;
+          padding: 9px 20px;
           border-radius: 8px;
           font-size: 0.88rem;
           font-weight: 600;
@@ -513,155 +328,6 @@ const MyBookings = () => {
         .mb-btn-delete { background: #fdeceb; color: #c62828; }
         .mb-btn-delete:hover { background: #fadbd8; }
 
-        .mb-edit-form {
-          background: #fafaf8;
-          border-radius: 10px;
-          padding: 18px;
-        }
-
-        .mb-form-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 16px;
-          margin-bottom: 14px;
-        }
-
-        .mb-form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          margin-bottom: 14px;
-        }
-
-        .mb-form-group label {
-          font-size: 0.82rem;
-          font-weight: 600;
-          color: #555;
-        }
-
-        .mb-form-group input,
-        .mb-form-group textarea {
-          padding: 10px 12px;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          font-size: 0.9rem;
-          font-weight: 500;
-          color: #1f1f1f;
-          background: #fff;
-          font-family: inherit;
-        }
-
-        .mb-form-group input:focus,
-        .mb-form-group textarea:focus {
-          outline: none;
-          border-color: #556B2F;
-        }
-
-        .mb-form-actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 10px;
-          margin-top: 6px;
-        }
-
-        .mb-btn-cancel {
-          padding: 9px 18px;
-          border-radius: 8px;
-          background: #f0f0f0;
-          color: #555;
-          border: none;
-          cursor: pointer;
-          font-size: 0.88rem;
-          font-weight: 600;
-        }
-
-        .mb-btn-save {
-          padding: 9px 18px;
-          border-radius: 8px;
-          background: #556B2F;
-          color: white;
-          border: none;
-          cursor: pointer;
-          font-size: 0.88rem;
-          font-weight: 600;
-        }
-
-        .mb-btn-save:hover { background: #445924; }
-
-        .mb-profile-form {
-          background: white;
-          border: 1px solid #ececec;
-          border-radius: 14px;
-          padding: 28px;
-          max-width: 480px;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-        }
-
-        .mb-btn-primary {
-          padding: 11px 26px;
-          border-radius: 8px;
-          background: #556B2F;
-          color: white;
-          border: none;
-          cursor: pointer;
-          font-size: 0.92rem;
-          font-weight: 600;
-          margin-top: 6px;
-        }
-
-        .mb-btn-primary:hover { background: #445924; }
-        .mb-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        @media (max-width: 600px) {
-          .mb-details, .mb-form-row {
-            grid-template-columns: 1fr;
-          }
-          .mb-actions {
-            flex-direction: column;
-          }
-          .mb-actions button {
-            width: 100%;
-          }
-          .mb-tabs {
-            flex-direction: column;
-          }
-        }
-
-        .password-input-container {
-          position: relative;
-          width: 100%;
-          display: flex;
-          align-items: center;
-        }
-
-        .password-input-container input {
-          padding-right: 48px !important;
-        }
-
-        .password-toggle-btn {
-          position: absolute;
-          right: 14px;
-          top: 50%;
-          transform: translateY(-50%);
-          background: transparent;
-          border: none;
-          color: rgba(255, 255, 255, 0.85);
-          cursor: pointer;
-          font-size: 1.15rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 4px;
-          transition: color 0.2s ease, transform 0.2s ease;
-          z-index: 10;
-        }
-
-        .password-toggle-btn:hover {
-          color: #A8C55A;
-          transform: translateY(-50%) scale(1.1);
-        }
-
-        .profile-form input,
         .glass-form input,
         .glass-form textarea,
         .input-group input,
@@ -675,21 +341,6 @@ const MyBookings = () => {
           font-size: 1rem !important;
         }
 
-        .profile-form input:-webkit-autofill,
-        .profile-form input:-webkit-autofill:hover,
-        .profile-form input:-webkit-autofill:focus,
-        .glass-form input:-webkit-autofill,
-        .glass-form input:-webkit-autofill:hover,
-        .glass-form input:-webkit-autofill:focus,
-        .input-group input:-webkit-autofill,
-        .input-group input:-webkit-autofill:hover,
-        .input-group input:-webkit-autofill:focus {
-          -webkit-text-fill-color: #ffffff !important;
-          -webkit-box-shadow: 0 0 0px 1000px rgba(20, 25, 15, 0.95) inset !important;
-          color: #ffffff !important;
-        }
-
-        .profile-form label,
         .glass-form label,
         .input-group label {
           color: #ffffff !important;
@@ -697,35 +348,31 @@ const MyBookings = () => {
           text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
         }
 
-        .profile-form input::placeholder,
-        .glass-form input::placeholder,
-        .input-group input::placeholder {
-          color: rgba(255, 255, 255, 0.75) !important;
-          -webkit-text-fill-color: rgba(255, 255, 255, 0.75) !important;
-          opacity: 1 !important;
-        }
-
-        .account-actions {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 20px;
-        }
-
-        .mb-btn-logout {
+        .mb-btn-primary {
           padding: 11px 26px;
           border-radius: 8px;
-          background: transparent;
-          color: #c62828;
-          border: 1px solid #c62828;
+          background: #556B2F;
+          color: white;
+          border: none;
           cursor: pointer;
-          font-size: 0.92rem;
-          font-weight: 600;
-          transition: all 0.2s ease;
+          font-size: 0.95rem;
+          font-weight: 700;
+          margin-top: 6px;
+          transition: background 0.2s ease;
         }
 
-        .mb-btn-logout:hover {
-          background: #fdeceb;
+        .mb-btn-primary:hover { background: #445924; }
+
+        @media (max-width: 600px) {
+          .mb-details, .mb-form-row {
+            grid-template-columns: 1fr;
+          }
+          .mb-actions {
+            flex-direction: column;
+          }
+          .mb-actions button {
+            width: 100%;
+          }
         }
       `}</style>
     </div>

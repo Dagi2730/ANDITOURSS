@@ -40,6 +40,7 @@ function Navbar() {
         <li><Link to="/gallery" className="nav-item" onClick={handleLinkClick}>Gallery</Link></li>
         <li><Link to="/reviews" className="nav-item" onClick={handleLinkClick}>Reviews</Link></li>
         <li><Link to="/contact" className="nav-item" onClick={handleLinkClick}>Contact</Link></li>
+        <li><Link to="/my-bookings" className="nav-item" onClick={handleLinkClick}>My Bookings</Link></li>
       </ul>
     </nav>
   );
