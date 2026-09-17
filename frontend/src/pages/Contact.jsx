@@ -105,9 +105,26 @@ const Contact = () => {
         data.append('passport', passportFile);
       }
 
+      // 1. Submit Booking
       await api.post('/bookings', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+
+      // 2. Also Submit Contact Message so request appears in Admin Messages tab
+      const selectedTour = tours.find(t => t.id === formData.tourId) || tours[0];
+      const tourTitle = selectedTour ? selectedTour.title : 'Tour Package';
+      const msgText = `Tour Package: ${tourTitle}\nTourists: ${formData.numberOfTourists}\nTravel Start: ${formData.dateFrom}\nTravel End: ${formData.dateTo}\nPhone: ${formData.phone}\nComments: ${formData.comments || 'No extra comments'}`;
+
+      try {
+        await api.post('/messages', {
+          name: formData.fullName,
+          email: formData.email,
+          subject: `Tour Booking Request: ${tourTitle}`,
+          message: msgText
+        });
+      } catch (msgErr) {
+        console.warn('Message sync notice:', msgErr);
+      }
 
       // Save email locally for instant "My Bookings" lookup without login
       localStorage.setItem('guestBookingEmail', formData.email.trim());

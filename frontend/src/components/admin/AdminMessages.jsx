@@ -63,15 +63,15 @@ function AdminMessages() {
               <div className="amsg-row-main" onClick={() => handleExpand(msg)}>
                 <div className="amsg-row-top">
                   {!msg.isRead && <span className="amsg-dot" />}
-                  <span className="amsg-name">{msg.name}</span>
-                  <span className="amsg-email">{msg.email}</span>
+                  <span className="amsg-name">{msg.name || 'Customer'}</span>
+                  <span className="amsg-email">({msg.email})</span>
                   <span className="amsg-date">
                     {new Date(msg.createdAt).toLocaleDateString(undefined, {
                       year: 'numeric', month: 'short', day: 'numeric',
                     })}
                   </span>
                 </div>
-                <div className="amsg-subject">{msg.subject}</div>
+                <div className="amsg-subject">📍 {msg.subject}</div>
 
                 {expandedId === msg.id && (
                   <div className="amsg-body">{msg.message}</div>
@@ -98,41 +98,42 @@ function AdminMessages() {
       </div>
 
       <style>{`
-        .amsg-wrapper { padding: 20px; font-family: 'Raleway', sans-serif; }
+        .amsg-wrapper { padding: 20px; font-family: sans-serif; }
 
         .amsg-header {
           display: flex; justify-content: space-between; align-items: flex-start;
           flex-wrap: wrap; gap: 12px; margin-bottom: 24px;
         }
-        .amsg-heading { margin: 0 0 4px; font-size: 1.4rem; font-weight: 700; }
-        .amsg-subheading { margin: 0; color: #6b6a63; font-size: 0.9rem; }
+        .amsg-heading { margin: 0 0 4px; font-size: 1.4rem; font-weight: 800; color: #0f172a; }
+        .amsg-subheading { margin: 0; color: #475569; font-size: 0.9rem; }
 
         .amsg-unread-pill {
           background: #B5651D; color: #fff; font-weight: 700; font-size: 0.8rem;
           padding: 6px 14px; border-radius: 999px;
         }
 
-        .amsg-list { display: flex; flex-direction: column; gap: 10px; }
+        .amsg-list { display: flex; flex-direction: column; gap: 12px; }
 
         .amsg-row {
           display: flex; justify-content: space-between; align-items: flex-start;
-          background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 14px 16px;
+          background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px 20px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
-        .amsg-unread { background: #fbf8f2; border-color: #eee0c8; }
+        .amsg-unread { background: #fdfbf7; border-color: #fcd34d; }
 
         .amsg-row-main { flex: 1; cursor: pointer; min-width: 0; }
 
-        .amsg-row-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
-        .amsg-dot { width: 8px; height: 8px; border-radius: 50%; background: #B5651D; flex-shrink: 0; }
-        .amsg-name { font-weight: 700; font-size: 0.92rem; }
-        .amsg-email { font-size: 0.82rem; color: #8a8878; }
-        .amsg-date { font-size: 0.78rem; color: #aaa; margin-left: auto; }
+        .amsg-row-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+        .amsg-dot { width: 10px; height: 10px; border-radius: 50%; background: #d97706; flex-shrink: 0; }
+        .amsg-name { font-weight: 800; font-size: 1rem; color: #0f172a; }
+        .amsg-email { font-size: 0.88rem; color: #475569; font-weight: 600; }
+        .amsg-date { font-size: 0.8rem; color: #64748b; font-weight: 600; margin-left: auto; }
 
-        .amsg-subject { font-size: 0.9rem; font-weight: 600; color: #556B2F; }
+        .amsg-subject { font-size: 0.95rem; font-weight: 700; color: #334155; margin-top: 4px; }
 
         .amsg-body {
-          margin-top: 10px; padding: 12px; background: #f9f9f7; border-radius: 8px;
-          font-size: 0.88rem; line-height: 1.6; color: #444; white-space: pre-wrap;
+          margin-top: 12px; padding: 16px; background: #f8fafc; border-radius: 10px;
+          border: 1px solid #e2e8f0; font-size: 0.92rem; line-height: 1.6; color: #0f172a; font-weight: 500; white-space: pre-wrap;
         }
 
         .amsg-actions { display: flex; flex-direction: column; gap: 6px; margin-left: 12px; }
