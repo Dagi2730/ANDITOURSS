@@ -2,18 +2,47 @@ import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
 
 const ETHIOPIA_DESTINATION_LOCATIONS = [
-  "Lalibela, Amhara Region",
-  "Simien Mountains National Park, Gondar",
-  "Danakil Depression & Dallol, Afar",
-  "Gondar Fasil Ghebbi, Amhara",
-  "Omo Valley, Southern Nations",
-  "Bahir Dar & Lake Tana, Amhara",
-  "Axum Ancient Obelisks, Tigray",
-  "Bale Mountains National Park, Oromia",
-  "Harar Jugol Fortified City, Harari",
+  "Addis Ababa (Capital & Entoto Highlands)",
+  "Adama / Nazret (Oromia)",
+  "Arba Minch & Lake Chamo / Nechisar",
+  "Asosa (Benishangul-Gumuz)",
+  "Awash National Park & Awash River Falls",
+  "Axum Ancient Obelisks & Tigray Historical Monuments",
+  "Bahir Dar, Lake Tana & Blue Nile Falls",
+  "Bale Mountains National Park & Sanetti Plateau",
+  "Bishoftu / Debre Zeyit Crater Lakes",
+  "Bonga & Kaffa Coffee Biosphere Reserve",
+  "Chencha & Dorze Highland Village",
+  "Danakil Depression, Dallol & Erta Ale Volcano",
+  "Debre Birhan & Ankober Palace Escarpment",
+  "Debre Libanos Monastery & Jemma River Gorge",
+  "Debre Markos (East Gojjam)",
+  "Dessie & Kombolcha (South Wollo)",
+  "Dilla & Gedeo Megalithic Cultural Landscape",
+  "Dire Dawa Historic Railway City",
+  "Gambela National Park & Baro River",
+  "Goba & Robe (Bale Zone)",
+  "Gondar Fasil Ghebbi Castles & Royal Baths",
+  "Gurage Zone (Wolkite, Butajira, Agena & Tiya)",
+  "Harar Jugol Fortified Historic City",
   "Hawassa Lakeside & Great Rift Valley",
-  "Arba Minch & Lake Chamo",
-  "Addis Ababa National Museum & Mount Entoto"
+  "Jigjiga (Somali Region)",
+  "Jimma & Abba Jifar Royal Palace",
+  "Jinka & Omo Valley Expeditions",
+  "Lalibela Rock-Hewn Monolithic Churches",
+  "Mekelle & Gheralta Rock Churches",
+  "Metu & Sor Waterfalls (Illubabor)",
+  "Moyale & Borena Pastoralist Zone",
+  "Nekemte (East Welega)",
+  "Omo Valley Cultural Circuits (Turmi, Karo, Mursi)",
+  "Semera & Lake Abbe (Afar Region)",
+  "Simien Mountains National Park & Ras Dashen",
+  "Tiya World Heritage Megalithic Site (Gurage)",
+  "Wolaita Sodo (Wolaita Zone)",
+  "Woldiya & Lasta Highlands (North Wollo)",
+  "Yabelo Wildlife Sanctuary (Borena)",
+  "Yirgalem & Sidama Coffee Forests",
+  "Ziway / Batu Lake & Bird Sanctuary"
 ];
 
 const getImageUrl = (url) => {
@@ -86,6 +115,7 @@ function AdminPackages() {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [imageFiles, setImageFiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isCustomLocation, setIsCustomLocation] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -109,7 +139,7 @@ function AdminPackages() {
       setPackages(response.data);
       setLoading(false);
     } catch (error) {
-      console.error("Fetch error:", error);
+      console.error('Error fetching tours:', error);
       setLoading(false);
     }
   };
@@ -134,10 +164,13 @@ function AdminPackages() {
 
   const handleEdit = (pkg) => {
     setEditingPackage(pkg);
+    const loc = pkg.location || '';
+    const isKnown = ETHIOPIA_DESTINATION_LOCATIONS.includes(loc);
+    setIsCustomLocation(!isKnown && loc !== '');
     setFormData({
       title: pkg.title || '',
       duration: pkg.duration || '',
-      location: pkg.location || 'Lalibela, Amhara Region',
+      location: loc,
       highlights: pkg.highlights || '',
       description: pkg.description || '',
       travelDetails: pkg.travelDetails || '',
@@ -165,9 +198,15 @@ function AdminPackages() {
 
   const handleAddNew = () => {
     setEditingPackage(null);
+    setIsCustomLocation(false);
     setFormData({
-      title: '', duration: '', location: 'Lalibela, Amhara Region', highlights: '', description: '',
-      travelDetails: '', itinerary: [{ day: 1, title: '', description: '' }],
+      title: '',
+      duration: '',
+      location: '',
+      highlights: '',
+      description: '',
+      travelDetails: '',
+      itinerary: [{ day: 1, title: '', description: '' }],
       imageUrl: ''
     });
     setImageFiles([]);
@@ -388,17 +427,41 @@ function AdminPackages() {
                   Location <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>*</span>
                 </label>
                 <select
-                  name="location"
+                  name="locationSelect"
                   className="admin-form-input"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  required
+                  value={isCustomLocation ? 'OTHER' : (ETHIOPIA_DESTINATION_LOCATIONS.includes(formData.location) ? formData.location : (formData.location ? 'OTHER' : ''))}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'OTHER') {
+                      setIsCustomLocation(true);
+                      setFormData(prev => ({ ...prev, location: ETHIOPIA_DESTINATION_LOCATIONS.includes(prev.location) ? '' : prev.location }));
+                    } else {
+                      setIsCustomLocation(false);
+                      setFormData(prev => ({ ...prev, location: val }));
+                    }
+                  }}
+                  required={!isCustomLocation && !formData.location}
                 >
-                  <option value="">Select Destination Region...</option>
+                  <option value="">Select Destination City / Region...</option>
                   {ETHIOPIA_DESTINATION_LOCATIONS.map((loc) => (
                     <option key={loc} value={loc}>{loc}</option>
                   ))}
+                  <option value="OTHER">➕ Other / Type Custom Location...</option>
                 </select>
+
+                {isCustomLocation && (
+                  <div style={{ marginTop: '8px' }}>
+                    <input
+                      type="text"
+                      name="location"
+                      className="admin-form-input"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                      placeholder="Type custom location (e.g. Gurage Zone, Hawassa, Butajira)"
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
