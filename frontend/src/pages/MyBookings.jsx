@@ -657,7 +657,7 @@ const MyBookings = () => {
         }
 
         .password-toggle-btn:hover {
-          color: #C0CA33;
+          color: #A8C55A;
           transform: translateY(-50%) scale(1.1);
         }
 

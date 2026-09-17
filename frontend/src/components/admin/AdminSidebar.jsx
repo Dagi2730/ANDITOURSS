@@ -199,17 +199,24 @@ function AdminSidebar({ activeTab, setActiveTab, mobileOpen, setMobileOpen }) {
 
         @media (max-width: 768px) {
           .admin-sidebar {
-            width: 100%;
-            min-width: auto;
-            height: auto;
-            transform: translateY(-110%);
+            width: 280px;
+            max-width: 85vw;
+            height: 100vh;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 2005;
+            transform: translateX(-100%);
             opacity: 0;
             visibility: hidden;
-            transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, visibility 0.3s ease;
+            box-shadow: 4px 0 25px rgba(0, 0, 0, 0.25);
+            background: #ffffff;
           }
 
           .admin-sidebar.mobile-open {
-            transform: translateY(0);
+            transform: translateX(0);
             opacity: 1;
             visibility: visible;
           }

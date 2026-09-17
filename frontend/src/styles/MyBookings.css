@@ -53,9 +53,9 @@
 }
 
 .tab-btn.active {
-  background: #C0CA33;
-  color: #1a1a1a;
-  border-color: #C0CA33;
+  background: linear-gradient(145deg, #556B2F, #6B8E23);
+  color: #ffffff;
+  border-color: #A8C55A;
 }
 
 .bookings-section h2,
@@ -219,11 +219,13 @@
 }
 
 .no-bookings .btn-primary {
-  background: #C0CA33;
-  color: #1a1a1a;
+  background: linear-gradient(145deg, #556B2F, #6B8E23);
+  color: #ffffff;
+  border: 1px solid #A8C55A;
   padding: 16px 32px;
   display: inline-block;
   flex: none;
+  border-radius: 50px;
 }
 
 .no-bookings .btn-primary:hover {

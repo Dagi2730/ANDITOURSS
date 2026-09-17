@@ -3,81 +3,10 @@ import api from '../lib/api';
 import { toast } from 'react-toastify';
 import '../styles/ReviewsRecommendations.css';
 
-// Authentic local image imports
-import lalibelaImg from '../assets/images/lalibela.jpg';
-import simienImg from '../assets/images/simien.jpg';
-import danakilImg from '../assets/images/danakil.jpg';
-import omoImg from '../assets/images/omo.jpg';
-import bahirdarImg from '../assets/images/bahirdar.jpg';
-import baleImg from '../assets/images/balemountains.jpg';
-
 const COUNTRIES_LIST = [
   "United States", "United Kingdom", "Canada", "Australia", "Germany", "France",
   "Italy", "Spain", "Netherlands", "Switzerland", "Sweden", "Norway", "Denmark",
   "Japan", "China", "India", "Brazil", "South Africa", "Ethiopia", "Kenya", "Other"
-];
-
-const DEFAULT_REVIEWS = [
-  {
-    id: 'default-1',
-    user_name: 'Sarah & Mark Thompson',
-    user_country: 'United Kingdom',
-    tour_name: 'Historic North Circuit & Lalibela (8 Days)',
-    rating: 5,
-    comment: 'Our trip to Lalibela, Gondar, and Bahir Dar with Andi Tours was simply unforgettable! Andi’s 20+ years of experience showed in every detail — seamless logistics, authentic local food stops, and insightful historical context at Bete Giyorgis.',
-    travel_date: '2026-02-14',
-    image_url: lalibelaImg
-  },
-  {
-    id: 'default-2',
-    user_name: 'Dr. Michael Chen',
-    user_country: 'United States',
-    tour_name: 'Simien Mountains Wildlife Trekking (5 Days)',
-    rating: 5,
-    comment: 'Trekking through the Simien Mountains with Andi’s team was the highlight of our African adventures. We got up close with Gelada baboon troops at Jinbar Waterfall and stayed at Limalimo Lodge. Truly world-class guiding!',
-    travel_date: '2026-01-20',
-    image_url: simienImg
-  },
-  {
-    id: 'default-3',
-    user_name: 'Elena & Lucas Weber',
-    user_country: 'Germany',
-    tour_name: 'Danakil Depression & Erta Ale Volcano (4 Days)',
-    rating: 5,
-    comment: 'An out-of-this-world experience! Dallol neon sulfur springs and watching the glowing lava lake at Erta Ale under the stars was breathtaking. Safety and hospitality were top-notch throughout.',
-    travel_date: '2025-12-10',
-    image_url: danakilImg
-  },
-  {
-    id: 'default-4',
-    user_name: 'Claire Dubois',
-    user_country: 'France',
-    tour_name: 'Omo Valley Cultural Expedition (7 Days)',
-    rating: 5,
-    comment: 'A deeply moving and respectful cultural experience with the Mursi, Hamer, and Karo communities. Andi Tours made sure our visits were respectful and beneficial to local villagers. Highly recommended!',
-    travel_date: '2026-03-05',
-    image_url: omoImg
-  },
-  {
-    id: 'default-5',
-    user_name: 'James & Fiona O\'Connor',
-    user_country: 'Australia',
-    tour_name: 'Lake Tana Monasteries & Blue Nile Falls (3 Days)',
-    rating: 5,
-    comment: 'The boat trip across Lake Tana to 14th-century island monasteries and seeing the roaring Blue Nile Falls was sheer magic. The local hospitality in Bahir Dar was warm and genuine.',
-    travel_date: '2026-01-08',
-    image_url: bahirdarImg
-  },
-  {
-    id: 'default-6',
-    user_name: 'Johan & Astrid Lindqvist',
-    user_country: 'Sweden',
-    tour_name: 'Bale Mountains Alpine Wildlife Safari (4 Days)',
-    rating: 5,
-    comment: 'We were fortunate to spot rare Ethiopian Red Wolves on the Sanetti Plateau! Staying at Bale Mountain Lodge nestled in the Harenna cloud forest was magical.',
-    travel_date: '2025-11-28',
-    image_url: baleImg
-  }
 ];
 
 // StarDisplay helper
@@ -129,12 +58,12 @@ const ReviewsRecommendationsPage = () => {
     image: null,
   });
 
-  // Fetch approved reviews
+  // Fetch approved reviews from database
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         const res = await api.get('/public-reviews');
-        if (Array.isArray(res.data) && res.data.length > 0) {
+        if (Array.isArray(res.data)) {
           setReviews(res.data);
         }
       } catch (err) {
@@ -213,24 +142,23 @@ const ReviewsRecommendationsPage = () => {
   };
 
   const today = new Date().toISOString().split('T')[0];
-  const displayReviews = reviews.length > 0 ? reviews : DEFAULT_REVIEWS;
 
   return (
-    <div className="reviews-page" style={{ background: '#0f172a', color: '#ffffff', minHeight: '100vh' }}>
-      {/* Hero */}
-      <div className="reviews-hero" style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', padding: '4rem 1.5rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.8rem', fontWeight: '800', color: '#ffffff', marginBottom: '1rem' }}>
+    <div className="reviews-page" style={{ background: 'transparent', color: '#ffffff', minHeight: '100vh' }}>
+      {/* Hero Header */}
+      <div className="reviews-hero" style={{ background: 'transparent', padding: '140px 1.5rem 2rem', textAlign: 'center' }}>
+        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: '800', color: '#ffffff', marginBottom: '1rem', textShadow: '0 4px 12px rgba(0,0,0,0.6)' }}>
           Traveler Reviews & Testimonials
         </h1>
-        <p style={{ color: '#cbd5e1', fontSize: '1.15rem', maxWidth: '700px', margin: '0 auto' }}>
+        <p style={{ color: '#cbd5e1', fontSize: '1.1rem', maxWidth: '700px', margin: '0 auto', lineHeight: '1.6', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
           Read authentic stories and verified feedback from travelers around the globe who experienced Ethiopia with Andi Tours.
         </p>
       </div>
 
-      {/* Reviews Feed */}
-      <section className="reviews-section" style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      {/* Reviews Feed Section */}
+      <section className="reviews-section" style={{ maxWidth: '1100px', margin: '0 auto', padding: '1rem 1.5rem 4rem' }}>
         <div className="reviews-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-          <h2 className="section-title" style={{ color: '#ffffff', fontSize: '1.8rem', fontWeight: '700' }}>
+          <h2 className="section-title" style={{ color: '#ffffff', fontSize: '1.8rem', fontWeight: '800', margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.6)' }}>
             Verified Traveler Reviews
           </h2>
           <button
@@ -239,13 +167,14 @@ const ReviewsRecommendationsPage = () => {
             style={{
               background: 'linear-gradient(145deg, #556B2F, #6B8E23)',
               color: '#ffffff',
-              border: 'none',
-              padding: '0.75rem 1.5rem',
+              border: '1px solid #A8C55A',
+              padding: '0.75rem 1.6rem',
               borderRadius: '50px',
               fontWeight: '800',
-              fontSize: '1rem',
+              fontSize: '0.98rem',
               cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(85, 107, 47, 0.4)'
+              boxShadow: '0 6px 18px rgba(85, 107, 47, 0.4)',
+              transition: 'all 0.3s ease'
             }}
           >
             ✍️ Write a Review
@@ -256,10 +185,17 @@ const ReviewsRecommendationsPage = () => {
           <div className="no-reviews-message" style={{ color: '#ffffff', fontSize: '1.1rem', textAlign: 'center', padding: '3rem' }}>
             Loading reviews...
           </div>
-        ) : (
+        ) : reviews.length > 0 ? (
           <div className="reviews-feed" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-            {displayReviews.map((review) => (
-              <div key={review.id} className="review-feed-card" style={{ background: '#1e293b', padding: '1.75rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            {reviews.map((review) => (
+              <div key={review.id || review._id} className="review-feed-card" style={{
+                background: 'rgba(15, 23, 42, 0.8)',
+                backdropFilter: 'blur(16px)',
+                padding: '1.75rem',
+                borderRadius: '16px',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
+              }}>
                 <div className="review-feed-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                   <div className="review-author-info">
                     <span className="review-author-name" style={{ fontWeight: '700', fontSize: '1.1rem', color: '#ffffff', display: 'block' }}>{review.user_name}</span>
@@ -295,7 +231,7 @@ const ReviewsRecommendationsPage = () => {
               </div>
             ))}
           </div>
-        )}
+        ) : null}
       </section>
 
       {/* Write a Review Modal */}

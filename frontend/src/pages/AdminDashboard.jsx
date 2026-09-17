@@ -47,6 +47,13 @@ function AdminDashboard() {
 
   return (
     <div className="admin-layout">
+      {sidebarOpen && (
+        <div
+          className="admin-mobile-backdrop"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       <AdminSidebar
         activeTab={activeTab}
         setActiveTab={(tab) => {

@@ -3,6 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import api, { getImageUrl } from '../lib/api';
 import { getBlogPosts } from '../features/blog/blogSlice';
 
+// Authentic local image import for fallback guest stories
+import lalibelaImg from '../assets/images/lalibela.jpg';
+
 const compressImage = (file) => {
   return new Promise((resolve) => {
     if (!file || !file.type.startsWith('image/')) {
@@ -81,7 +84,13 @@ function Gallery() {
     return (posts || []).filter((post) => post.status !== 'PENDING');
   }, [posts]);
 
+  const displayPosts = approvedPosts;
+
   const resolveImage = (imageUrl) => {
+    if (!imageUrl) return lalibelaImg;
+    if (typeof imageUrl === 'string' && (imageUrl.startsWith('data:') || imageUrl.startsWith('blob:') || imageUrl.startsWith('/src/assets/'))) {
+      return imageUrl;
+    }
     return getImageUrl(imageUrl);
   };
 
@@ -146,13 +155,9 @@ function Gallery() {
       <section className="gly-body">
         {isLoading && approvedPosts.length === 0 ? (
           <div className="gly-state">Loading stories...</div>
-        ) : approvedPosts.length === 0 ? (
-          <div className="gly-state">
-            <p>No stories have been published yet. Check back soon!</p>
-          </div>
         ) : (
           <div className="gly-grid">
-            {approvedPosts.map((post) => (
+            {displayPosts.map((post) => (
               <article key={post.id} className="gly-card">
                 <div className="gly-image-frame">
                   <img
@@ -190,9 +195,9 @@ function Gallery() {
                     </span>
                     {post.tags && post.tags.length > 0 && (
                       <div className="gly-tags">
-                        {post.tags.slice(0, 3).map((tag) => (
+                        {Array.isArray(post.tags) ? post.tags.slice(0, 3).map((tag) => (
                           <span key={tag} className="gly-tag">{tag}</span>
-                        ))}
+                        )) : null}
                       </div>
                     )}
                   </div>
@@ -341,7 +346,7 @@ function Gallery() {
           font-size: 0.72rem;
           letter-spacing: 0.16em;
           text-transform: uppercase;
-          color: #C0CA33;
+          color: #A8C55A;
           font-weight: 700;
           margin-bottom: 10px;
         }
@@ -399,9 +404,9 @@ function Gallery() {
 
         .gly-submit-btn {
           border: none;
-          border-radius: 8px;
-          background: #C0CA33;
-          color: #233100;
+          border-radius: 50px;
+          background: linear-gradient(145deg, #556B2F, #6B8E23);
+          color: #ffffff;
           padding: 10px 16px;
           font-weight: 700;
           cursor: pointer;
@@ -434,11 +439,13 @@ function Gallery() {
         }
 
         .gly-card {
-          background: #ffffff;
-          border-radius: 14px;
+          background: rgba(15, 23, 42, 0.8);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border-radius: 16px;
           overflow: hidden;
-          box-shadow: 0 2px 8px rgba(43, 42, 37, 0.06);
-          border: 1px solid rgba(43, 42, 37, 0.06);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+          border: 1px solid rgba(255, 255, 255, 0.15);
           transition: transform 0.25s ease, box-shadow 0.25s ease;
           display: flex;
           flex-direction: column;
@@ -446,7 +453,7 @@ function Gallery() {
 
         .gly-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 16px 32px rgba(43, 42, 37, 0.12);
+          box-shadow: 0 16px 32px rgba(0,0,0,0.4);
         }
 
         .gly-image-frame {
@@ -454,7 +461,7 @@ function Gallery() {
           width: 100%;
           aspect-ratio: 4 / 3;
           overflow: hidden;
-          background: var(--gly-sage);
+          background: rgba(255,255,255,0.05);
         }
 
         .gly-image {
@@ -473,7 +480,7 @@ function Gallery() {
           position: absolute;
           top: 14px;
           right: 14px;
-          background: var(--gly-clay);
+          background: #556B2F;
           color: #fff;
           font-size: 0.72rem;
           font-weight: 700;
@@ -486,15 +493,15 @@ function Gallery() {
 
         .gly-guest-stamp {
           top: 48px;
-          background: var(--gly-olive);
+          background: #6B8E23;
         }
 
         .gly-location-tag {
           position: absolute;
           bottom: 14px;
           left: 14px;
-          background: rgba(20, 20, 15, 0.62);
-          backdrop-filter: blur(3px);
+          background: rgba(15, 23, 42, 0.75);
+          backdrop-filter: blur(4px);
           color: #fff;
           font-size: 0.8rem;
           font-weight: 500;
@@ -514,30 +521,30 @@ function Gallery() {
           font-weight: 700;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: var(--gly-olive);
+          color: #A8C55A;
           margin: 0 0 8px;
         }
 
         .gly-title {
           font-family: 'Raleway', sans-serif;
           font-size: 1.4rem;
-          font-weight: 600;
+          font-weight: 700;
           line-height: 1.28;
           margin: 0 0 6px;
-          color: var(--gly-ink);
+          color: #ffffff;
         }
 
         .gly-subtitle {
           font-style: italic;
           font-size: 0.92rem;
-          color: #6b6a63;
+          color: #cbd5e1;
           margin: 0;
         }
 
         .gly-divider {
           width: 40px;
           height: 3px;
-          background: var(--gly-olive);
+          background: #A8C55A;
           border-radius: 2px;
           margin: 16px 0;
         }
@@ -545,7 +552,7 @@ function Gallery() {
         .gly-excerpt {
           font-size: 0.94rem;
           line-height: 1.65;
-          color: #4a493f;
+          color: #e2e8f0;
           margin: 0 0 20px;
           flex: 1;
         }
@@ -557,12 +564,12 @@ function Gallery() {
           flex-wrap: wrap;
           gap: 10px;
           padding-top: 16px;
-          border-top: 1px solid rgba(43, 42, 37, 0.08);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .gly-date {
           font-size: 0.78rem;
-          color: #8a8878;
+          color: #94a3b8;
           font-weight: 500;
         }
 
@@ -575,8 +582,9 @@ function Gallery() {
         .gly-tag {
           font-size: 0.72rem;
           font-weight: 600;
-          color: var(--gly-olive-dark);
-          background: var(--gly-sage);
+          color: #A8C55A;
+          background: rgba(85, 107, 47, 0.25);
+          border: 1px solid rgba(168, 197, 90, 0.4);
           padding: 3px 10px;
           border-radius: 999px;
         }

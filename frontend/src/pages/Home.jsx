@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { getFeaturedReviews } from '../features/review/reviewSlice';
 import InteractiveMap from '../components/InteractiveMap';
 import HotelRecommendations from '../components/HotelRecommendations';
 
@@ -55,29 +53,11 @@ const HERO_SLIDES = [
   }
 ];
 
-function StarDisplay({ rating }) {
-  return (
-    <span style={{ fontSize: '1.1rem', color: '#A8C55A' }}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} style={{ color: n <= rating ? '#A8C55A' : 'rgba(255, 255, 255, 0.25)', marginRight: '2px' }}>
-          ★
-        </span>
-      ))}
-    </span>
-  );
-}
-
 function Home() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { featuredReviews } = useSelector((state) => state.review);
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-
-  useEffect(() => {
-    dispatch(getFeaturedReviews());
-  }, [dispatch]);
 
   // Auto-play slide carousel every 5 seconds
   useEffect(() => {
@@ -488,65 +468,6 @@ function Home() {
         <section style={{ margin: '4rem 0' }}>
           <HotelRecommendations />
         </section>
-
-        {/* FEATURED GUEST REVIEWS */}
-        {featuredReviews && featuredReviews.length > 0 && (
-          <section style={{ margin: '4rem 0' }}>
-            <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-              <span style={{ color: '#A8C55A', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
-                Testimonials
-              </span>
-              <h2 style={{ fontSize: '2.4rem', fontWeight: '800', color: '#ffffff', marginTop: '0.5rem' }}>
-                What Our Guests Say
-              </h2>
-            </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '2rem'
-            }}>
-              {featuredReviews.map((review) => (
-                <div
-                  key={review.id}
-                  style={{
-                    background: 'rgba(30, 41, 59, 0.8)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    borderRadius: '20px',
-                    padding: '2rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <div>
-                    <StarDisplay rating={review.rating} />
-                    <p style={{
-                      color: '#e2e8f0',
-                      fontStyle: 'italic',
-                      fontSize: '1rem',
-                      lineHeight: '1.7',
-                      margin: '1rem 0'
-                    }}>
-                      "{review.comment}"
-                    </p>
-                  </div>
-
-                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
-                    <strong style={{ color: '#ffffff', display: 'block', fontSize: '1rem' }}>
-                      {review.user?.name || 'Valued Traveler'}
-                    </strong>
-                    {review.tour?.title && (
-                      <span style={{ color: '#A8C55A', fontSize: '0.85rem', fontWeight: '600' }}>
-                        Tour: {review.tour.title}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
       </div>
     </div>

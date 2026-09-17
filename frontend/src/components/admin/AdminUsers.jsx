@@ -53,6 +53,18 @@ function AdminUsers() {
     }
   };
 
+  const handleToggleRole = async (userId, currentRole, userName) => {
+    const newRole = currentRole?.toString().toUpperCase() === 'ADMIN' ? 'USER' : 'ADMIN';
+    if (!window.confirm(`Change role of "${userName}" to ${newRole}?`)) return;
+    try {
+      await api.put(`/users/${userId}/role`, { role: newRole });
+      await fetchUsers();
+      alert(`Role for "${userName}" updated to ${newRole}!`);
+    } catch (err) {
+      alert('Failed to update user role');
+    }
+  };
+
   return (
     <div className="admin-users-wrapper">
       <div className="stats-grid" style={{ marginBottom: '30px' }}>
@@ -191,6 +203,14 @@ function AdminUsers() {
                     <div className="action-btns">
                       <button className="view-btn" onClick={() => handleView(user)} title="View Details">
                         👁️ Details
+                      </button>
+                      <button
+                        className="admin-btn admin-btn-sm"
+                        style={{ background: '#e0e7ff', color: '#3730a3', border: '1px solid #c7d2fe', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}
+                        onClick={() => handleToggleRole(user.id, user.role, user.name)}
+                        title="Change User Role"
+                      >
+                        👑 Role
                       </button>
                       <button
                         className="admin-btn admin-btn-danger admin-btn-sm admin-btn-icon"

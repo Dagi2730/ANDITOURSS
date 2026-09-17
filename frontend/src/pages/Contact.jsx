@@ -149,7 +149,7 @@ const Contact = () => {
         .contact-info h1 {
           font-size: clamp(1.8rem, 5.5vw, 3.8rem) !important;
           margin-bottom: 20px;
-          color: #C0CA33;
+          color: #ffffff;
           font-weight: 800;
           letter-spacing: -0.5px;
           word-break: break-word;
@@ -173,20 +173,20 @@ const Contact = () => {
 
         .info-item .icon {
           font-size: 1.4rem;
-          background: rgba(255, 255, 255, 0.15);
+          background: rgba(85, 107, 47, 0.25);
           width: 55px;
           height: 55px;
           display: flex;
           justify-content: center;
           align-items: center;
           border-radius: 15px;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(168, 197, 90, 0.4);
         }
 
         .info-item h3 {
           margin: 0;
           font-size: 1.3rem;
-          color: #C0CA33;
+          color: #A8C55A;
           font-weight: 600;
         }
 
@@ -249,18 +249,18 @@ const Contact = () => {
 
         .contact-form-container .input-group input:focus, 
         .contact-form-container .input-group textarea:focus {
-          border-color: #C0CA33;
+          border-color: #A8C55A;
           background: rgba(0, 0, 0, 0.65);
-          box-shadow: 0 0 0 4px rgba(192, 202, 51, 0.22);
+          box-shadow: 0 0 0 4px rgba(168, 197, 90, 0.25);
         }
 
         .contact-form-container .send-btn {
           width: 100%;
           padding: 16px;
-          background: #C0CA33;
-          color: #1a2208;
-          border: none;
-          border-radius: 14px;
+          background: linear-gradient(145deg, #556B2F, #6B8E23);
+          color: #ffffff;
+          border: 1px solid #A8C55A;
+          border-radius: 50px;
           font-size: 1.05rem;
           font-weight: 800;
           letter-spacing: 1.2px;

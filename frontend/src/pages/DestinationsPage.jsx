@@ -50,10 +50,6 @@ const DestinationsPage = () => {
           filteredTours.map((tour) => (
             <TourItem key={tour.id || tour._id} tour={tour} />
           ))
-        ) : searchTerm.trim() !== '' ? (
-          <div className="loading-placeholder">
-            <p>No tours found that match your search.</p>
-          </div>
         ) : null}
       </div>
 
@@ -122,8 +118,8 @@ const DestinationsPage = () => {
 
         .search-bar input:focus {
           background: rgba(255,255,255,0.3);
-          border-color: #C0CA33;
-          box-shadow: 0 0 15px rgba(192, 202, 51, 0.3);
+          border-color: #A8C55A;
+          box-shadow: 0 0 15px rgba(168, 197, 90, 0.4);
         }
 
         .destinations-grid {
