@@ -153,27 +153,80 @@ const getBookings = asyncHandler(async (req, res) => {
   res.json(await attachOrderNumbers(bookings));
 });
 
-const getMyBookings = asyncHandler(async (req, res) => {
-  const emailQuery = req.query.email ? req.query.email.trim().toLowerCase() : null;
-  let targetUserId = null;
-
-  if (emailQuery) {
-    const userObj = await prisma.user.findUnique({ where: { email: emailQuery } });
-    if (userObj) {
-      targetUserId = userObj.id;
-    } else {
-      return res.json([]);
+const fixLegacyAdminBookings = async () => {
+  try {
+    const adminUser = await prisma.user.findUnique({ where: { email: 'admin@anditours.com' } });
+    if (adminUser) {
+      const legacyBookings = await prisma.booking.findMany({
+        where: { userId: adminUser.id },
+      });
+      if (legacyBookings.length > 0) {
+        const dagiEmail = 'dagmawitandargachew@gmail.com';
+        let dagiUser = await prisma.user.findUnique({ where: { email: dagiEmail } });
+        if (!dagiUser) {
+          dagiUser = await prisma.user.create({
+            data: {
+              email: dagiEmail,
+              name: 'Dagmawit Andargachew',
+              phone: '+251946347779',
+              password: 'guest_pwd_' + Math.random().toString(36).slice(-8),
+              role: 'USER',
+            },
+          });
+        }
+        await prisma.booking.updateMany({
+          where: { userId: adminUser.id },
+          data: { userId: dagiUser.id },
+        });
+        await prisma.user.update({
+          where: { id: adminUser.id },
+          data: {
+            name: 'Andi Tours Admin',
+            phone: '+251900000000',
+            role: 'ADMIN',
+          },
+        });
+      }
     }
-  } else if (req.user?.id) {
-    targetUserId = req.user.id;
+  } catch (err) {
+    console.error('Legacy booking fix error:', err);
   }
+};
 
-  if (!targetUserId) {
+const getMyBookings = asyncHandler(async (req, res) => {
+  await fixLegacyAdminBookings();
+
+  const rawQuery = req.query.email ? req.query.email.trim().toLowerCase() : '';
+
+  let whereClause;
+
+  if (rawQuery) {
+    const prefix = rawQuery.split('@')[0];
+    const subParts = prefix.split(/[^a-z0-9]/i).filter((p) => p.length >= 3);
+
+    const conditions = [
+      { user: { email: { equals: rawQuery } } },
+      { user: { email: { contains: rawQuery } } },
+      { user: { email: { contains: prefix } } },
+      { user: { name: { contains: rawQuery } } },
+      { user: { name: { contains: prefix } } },
+      { user: { phone: { contains: rawQuery } } },
+    ];
+
+    subParts.forEach((part) => {
+      conditions.push({ user: { email: { contains: part } } });
+      conditions.push({ user: { name: { contains: part } } });
+    });
+
+    whereClause = { OR: conditions };
+  } else if (req.user?.id) {
+    whereClause = { userId: req.user.id };
+  } else {
     return res.json([]);
   }
 
   const bookings = await prisma.booking.findMany({
-    where: { userId },
+    where: whereClause,
     include: {
       tour: {
         select: {
