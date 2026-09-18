@@ -1,5 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import prisma from '../lib/prisma.js';
+import { uploadFile } from '../utils/storageHelper.js';
+import { sendBookingNotification } from '../utils/emailService.js';
 
 const validateAndParseDate = (dateStr) => {
   if (!dateStr) return null;
@@ -114,7 +116,7 @@ const createBooking = asyncHandler(async (req, res) => {
 
   let passportUrl = null;
   if (req.file) {
-    passportUrl = `/uploads/passports/${req.file.filename}`;
+    passportUrl = await uploadFile(req.file, 'passports');
   }
 
   const booking = await prisma.booking.create({
@@ -136,7 +138,23 @@ const createBooking = asyncHandler(async (req, res) => {
     },
   });
 
-  res.status(201).json(await attachOrderNumbers(booking));
+  const formattedBooking = await attachOrderNumbers(booking);
+
+  // Trigger Email Notifications (Customer Confirmation + Admin Alert)
+  sendBookingNotification({
+    booking: formattedBooking,
+    customerName: targetName,
+    customerEmail: targetEmail || req.user?.email,
+    customerPhone: targetPhone || req.user?.phone,
+    tourTitle: tour.title,
+    guests: parsedGuests,
+    startDate,
+    endDate,
+    comments,
+    orderNumber: formattedBooking.orderNumber,
+  }).catch((err) => console.error('Booking notification background error:', err));
+
+  res.status(201).json(formattedBooking);
 });
 
 const getBookings = asyncHandler(async (req, res) => {

@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import prisma from '../lib/prisma.js';
+import { sendContactNotification } from '../utils/emailService.js';
 
 // Public - anyone can submit the contact form
 const createMessage = asyncHandler(async (req, res) => {
@@ -13,6 +14,11 @@ const createMessage = asyncHandler(async (req, res) => {
   const newMessage = await prisma.contactMessage.create({
     data: { name, email, subject, message },
   });
+
+  // Trigger Admin Email Notification
+  sendContactNotification({ name, email, subject, message }).catch((err) =>
+    console.error('Contact email notification error:', err)
+  );
 
   res.status(201).json(newMessage);
 });

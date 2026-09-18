@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import prisma from '../lib/prisma.js';
+import { uploadFile } from '../utils/storageHelper.js';
 
 // GET /api/public-reviews — fetch all APPROVED reviews (public display on Reviews page)
 const getApprovedReviews = asyncHandler(async (req, res) => {
@@ -46,7 +47,7 @@ const submitReview = asyncHandler(async (req, res) => {
 
   let image_url = null;
   if (req.file) {
-    image_url = `${req.protocol}://${req.get('host')}/uploads/reviews/${req.file.filename}`;
+    image_url = await uploadFile(req.file, 'reviews');
   }
 
   let tour = await prisma.tour.findFirst({
